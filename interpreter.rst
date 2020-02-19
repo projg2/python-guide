@@ -1,0 +1,210 @@
+===================
+Python interpreters
+===================
+
+Versions of Python
+==================
+By a *version of Python* we usually mean the variant of Python language
+and standard library interface as used by a specific version
+of CPython_, the reference implementation of Python.
+
+Python versions are determined from the two first version components.
+The major version is incremented when major incompatible changes are
+introduced in the language, as was the case in Python 3.  Along with
+minor version changes, the new releases introduce new features
+and remove deprecated APIs.  The Python documentation generally
+indicates when a particular API was added or deprecated, and when it
+is planned to be removed.
+
+Practically speaking, this means that a program written purely
+for Python 2 is unlikely to work on Python 3, and requires major changes
+to achieve compatibility.  On the other hand, a program written for
+Python 3.7 is very likely to work with Python 3.8, and reasonably likely
+to support Python 3.6 as well.  If that is not the case, minor changes
+are usually sufficient to fix that.
+
+For example, Python 3.7 introduced a new `importlib.resources`_ module.
+If your program uses it, it will not work on Python 3.6 without
+a backwards compatibility code.
+
+Python 3.8 removed the deprecated `platform.linux_distribution()`_
+function.  If your program used it, it will not work on Python 3.8
+without changes.  However, it was deprecated since Python 3.5, so if you
+were targetting 3.7, you should not have been using it in the first
+place.
+
+Gentoo supports building packages against Python 2.7 and a shifting
+window of 3-4 versions of Python 3.  They are provided as slots
+of ``dev-lang/python``.
+
+
+Alternative Python implementations
+==================================
+CPython is the reference and most commonly used Python implementation.
+However, there are other interpreters that aim to maintain reasonable
+compatibility with it.
+
+PyPy_ is an implementation of Python built using in-house RPython
+language, using a Just-in-Time compiler to achieve better performance
+(generally in long-running programs running a lot of Python code).
+It maintains quite good compatibility with CPython, except when programs
+rely on its implementation details or GC behavior.
+
+PyPy upstream provides PyPy variants compatible with Python 2.7
+and one version of Python 3.  Gentoo supports building packages against
+PyPy3.  PyPy2.7 is provided as ``dev-python/pypy``, while PyPy3 is
+provided as ``dev-python/pypy3``.
+
+Jython_ is an implementation of Python written in Java.  Besides being
+a stand-alone Python interpreter, it supports bidirectional interaction
+between Python and Java libraries.
+
+Jython development is very slow paced, and it is currently bound
+to Python 2.7.  Gentoo does not support building packages for Jython
+anymore.  The interpreter is still provided as ``dev-java/jython``.
+
+IronPython_ is an implementation of Python for the .NET framework.
+Alike Jython, it supports bidirectional interaction between Python
+and .NET Framework.  It is currently bound to Python 2.7.  It is not
+packaged in Gentoo.
+
+Brython_ is an implementation of Python 3 for client-side web
+programming (in JavaScript).  It provides a subset of Python 3 standard
+library combined with access to DOM objects.  It is packaged in Gentoo
+as ``dev-python/brython``.
+
+MicroPython_ is an implementation of Python 3 aimed for microcontrollers
+and embedded environments.  It aims to maintain some compatibility
+with CPython while providing stripped down standard library
+and additional modules to interface with hardware.  It is packaged
+as ``dev-lang/micropython``.
+
+Tauthon_ is a fork of Python 2.7 that aims to backport new language
+features and standard library modules while preserving backwards
+compatibility with existing code.  It is not packaged in Gentoo.
+
+
+Support for multiple implementations
+====================================
+The support for simultaneously using multiple Python implementations
+is implemented primarily through USE flags.  The packages installing
+or using Python files define either ``PYTHON_TARGETS``
+or ``PYTHON_SINGLE_TARGET`` flags that permit user to choose which
+implementations are used.
+
+Modules and extensions are installed separately for each interpreter,
+in its specific site-packages directory.  This means that a package
+can run using a specific target correctly only if all its dependencies
+were also installed for the same implementation.  This is enforced
+via USE dependencies.
+
+Additionally, ``dev-lang/python-exec`` provides a mechanism for
+installing multiple variants of each Python script simultaneously.  This
+is necessary to support scripts that differ between Python versions
+(particularly between Python 2 and Python 3) but it is also used
+to prevent scripts from being called via unsupported interpreter
+(i.e.  one that does not have its accompanying modules or dependencies
+installed).
+
+This also implies that all installed Python scripts must have their
+shebangs adjusted to use a specific Python interpreter (not ``python``
+nor ``python3`` but e.g. ``python3.7``), and all other executables must
+also be modified to call specific version of Python directly.
+
+
+Backports
+=========
+A common method of improving compatibility with older versions of Python
+is to backport new standard library modules or features.  Packages doing
+that are generally called *backports*.
+
+Ideally, backports copy the code from the standard library with minimal
+changes, and provide a matching API.  In some cases, new versions
+of backports are released as the standard library changes, and their
+usability extends from providing a missing module to extending older
+version of the module.  For example, the ``dev-python/funcsigs`` package
+originally backported function signatures from Python 3.3 to older
+versions, and afterwards was updated to backport new features from
+Python 3.6, becoming useful to versions 3.3 through 3.5.
+
+Sometimes, the opposite happens.  ``dev-python/mock`` started
+as a stand-alone package, and was integrated into the standard library
+as unittest.mock_ later on.  Afterwards, the external package became
+a backport of the standard library module.
+
+In some cases backports effectively replace external packages.  Once
+lzma_ module has been added to the standard library, its backport
+``dev-python/backports-lzma`` has effectively replaced the competing
+LZMA packages.
+
+Individual backports differ by the level of compatibility with
+the standard library provided, and therefore on the amount of additional
+code needed in your program.  The exact kind of dependencies used
+depends on that.
+
+``dev-python/ipaddress`` is a drop-in backport of the ipaddress_ module
+from Python 3.3.  It is using the same module name, so a code written
+to use this module will work out-of-the-box on Python 2.7 if the package
+is installed.  As a side note, since Python always prefers built-in
+modules over external packages, there is no point in enabling Python 3
+in this package as the installed module would never be used.
+Appropriately, you should depend on this package only for the Python
+versions needing it.
+
+``dev-python/mock`` is a compatible backport of the unittest.mock_
+module.  It can't use the same name as the standard library module,
+therefore the packages need to use it conditionally, e.g.::
+
+    try:
+        from unittest.mock import Mock
+    except ImportError:  # py<3.3
+        from mock import Mock
+
+or::
+
+    import sys
+    if sys.hexversion >= 0x03030000:
+        from unittest.mock import Mock
+    else:
+        from mock import Mock
+
+However, the actual API remains compatible, so the programs do not need
+more compatibility code than that.  In some cases, upstreams fail (or
+even refuse) to use the external ``mock`` package conditionally —
+in that case, you either need to depend on this package unconditionally,
+or patch it.
+
+``dev-python/trollius`` aimed to provide a backport of asyncio_
+for Python 2.  Since the asyncio framework relies on new Python syntax,
+the backport cannot be API compatible and requires using a different
+syntax than native asyncio code.
+
+
+.. _CPython: https://www.python.org/
+
+.. _importlib.resources:
+   https://docs.python.org/3.7/library/importlib.html#module-importlib.resources
+
+.. _platform.linux_distribution():
+   https://docs.python.org/3.7/library/platform.html#platform.linux_distribution
+
+.. _PyPy: https://www.pypy.org/
+
+.. _Jython: https://www.jython.org/
+
+.. _IronPython: https://ironpython.net/
+
+.. _Brython: https://www.brython.info/
+
+.. _MicroPython: https://micropython.org/
+
+.. _Tauthon: https://github.com/naftaliharris/tauthon
+
+.. _unittest.mock:
+   https://docs.python.org/3.3/library/unittest.mock.html
+
+.. _lzma: https://docs.python.org/3.3/library/lzma.html
+
+.. _ipaddress: https://docs.python.org/3.3/library/ipaddress.html
+
+.. _asyncio: https://docs.python.org/3.4/library/asyncio.html
