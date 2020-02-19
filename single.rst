@@ -51,7 +51,7 @@ like the following:
 
 This ebuild demonstrates the absolute minimum working code.  Only
 the four highlighted lines are specific to Python eclasses, plus
-implicitly exported ``pkg_setup`` phase
+the implicitly exported ``pkg_setup`` phase.
 
 
 Dependencies
@@ -209,7 +209,7 @@ for two independent conditions.  To make it more complex, one of them
 applies to build time (tests) while the other to runtime (bindings).
 
 .. code-block:: bash
-   :emphasize-lines: 16,18,19,23,26,30-32,37,38
+   :emphasize-lines: 16,19,20,24,27,31-33,38,39
 
     # Copyright 1999-2020 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
@@ -227,6 +227,7 @@ applies to build time (tests) while the other to runtime (bindings).
     SLOT="0"
     KEYWORDS="~amd64 ~x86"
     IUSE="python test"
+    RESTRICT="!test? ( test )"
     REQUIRED_USE="
         python? ( ${PYTHON_REQUIRED_USE} )
         test? ( ${PYTHON_REQUIRED_USE} )"
