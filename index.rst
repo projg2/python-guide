@@ -15,6 +15,7 @@ Gentoo Python Guide
    multi
    distutils
    helper
+   depend
 
 
 Indices and tables
