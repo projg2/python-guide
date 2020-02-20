@@ -258,3 +258,39 @@ applies to build time (tests) while the other to runtime (bindings).
 Please note that in general, the condition in ``pkg_setup`` must match
 the one in ``REQUIRED_USE``, and that one is a superset of conditions
 used in dependencies.
+
+
+Manual install
+==============
+Some packages do not include Python files in their build systems,
+or do not install all of them.  In this case, the necessary files
+can be installed via one of the installation helpers.
+
+.. code-block:: bash
+   :emphasize-lines: 23,24
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=6
+
+    PYTHON_COMPAT=( python2_7 )
+    inherit python-single-r1
+
+    DESCRIPTION="Arabic dictionary based on the DICT protocol"
+    HOMEPAGE="https://www.arabeyes.org/Duali"
+    SRC_URI="mirror://sourceforge/arabeyes/${P}.tar.bz2"
+
+    LICENSE="BSD"
+    SLOT="0"
+    KEYWORDS="~alpha amd64 ~hppa ~ia64 ~mips ~ppc ~sparc x86"
+    IUSE=""
+    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
+
+    DEPEND="${PYTHON_DEPS}"
+    RDEPEND="${DEPEND}"
+
+    src_install() {
+        python_domodule pyduali
+        python_doscript duali dict2db trans2arabic arabic2trans
+    }

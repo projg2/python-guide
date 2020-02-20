@@ -12,6 +12,7 @@ Gentoo Python Guide
    basic
    any
    single
+   multi
 
 
 Indices and tables
