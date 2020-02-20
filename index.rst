@@ -13,6 +13,7 @@ Gentoo Python Guide
    any
    single
    multi
+   distutils
 
 
 Indices and tables
