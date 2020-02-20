@@ -14,6 +14,7 @@ Gentoo Python Guide
    single
    multi
    distutils
+   helper
 
 
 Indices and tables
