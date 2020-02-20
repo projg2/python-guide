@@ -408,3 +408,138 @@ of its logic.
 
 Note that ``python_test`` is called by ``distutils-r1_src_test``,
 so you must make sure to call it if you override ``src_test``.
+
+
+Building documentation via Sphinx
+=================================
+``dev-python/sphinx`` is commonly used to document Python packages.
+It comes with a number of plugins and themes that make it convenient
+to write and combine large text documents (such as this Guide!),
+as well as automatically document Python code.
+
+Depending on the exact package, building documentation may range
+from being trivial to very hard.  Packages that do not use autodoc
+(documenting of Python code) do not need to USE-depend on Sphinx at all.
+Packages that do that need to use a supported Python implementation
+for Sphinx, and packages that use plugins need to guarantee the same
+implementation across all plugins.  To cover all those use cases easily,
+the ``distutils_enable_sphinx`` function is provided.
+
+
+Basic documentation with autodoc
+--------------------------------
+The most common case is a package that uses Sphinx along with autodoc.
+It can be recognized by ``conf.py`` listing ``sphinx.ext.autodoc``
+in the extension list.  In order to support building documentation,
+call ``distutils_enable_sphinx`` and pass the path to the directory
+containing Sphinx documentation:
+
+.. code-block:: bash
+   :emphasize-lines: 24
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( python3_{6,7,8} )
+    DISTUTILS_USE_SETUPTOOLS=rdepend
+
+    inherit distutils-r1
+
+    DESCRIPTION="Colored stream handler for the logging module"
+    HOMEPAGE="
+        https://pypi.org/project/coloredlogs/
+        https://github.com/xolox/python-coloredlogs
+        https://coloredlogs.readthedocs.io/en/latest/"
+    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+
+    LICENSE="MIT"
+    SLOT="0"
+    KEYWORDS="~amd64 ~x86 ~amd64-linux ~x86-linux"
+
+    RDEPEND="dev-python/humanfriendly[${PYTHON_USEDEP}]"
+
+    distutils_enable_sphinx docs
+
+This call takes care of it all: it adds ``doc`` USE flag to control
+building documentation, appropriate dependencies via the expert any-r1
+API making it sufficient for Sphinx to be installed with only one
+of the supported implementations, and appropriate ``python_compile_all``
+and ``python_install_all`` implementations to build and install HTML
+documentation.
+
+
+Additional Sphinx extensions
+----------------------------
+It is not uncommon for packages to require additional third-party
+extensions to Sphinx.  Those include themes.  In order to specify
+dependencies on the additional packages, pass them as extra arguments
+to ``distutils_enable_sphinx``.
+
+.. code-block:: bash
+   :emphasize-lines: 17-20
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( pypy3 python3_{6,7,8} )
+    inherit distutils-r1
+
+    DESCRIPTION="Correctly inflect words and numbers"
+    HOMEPAGE="https://github.com/jazzband/inflect"
+    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+
+    LICENSE="MIT"
+    SLOT="0"
+    KEYWORDS="~amd64 ~arm64 ~ia64 ~ppc ~ppc64 ~x86"
+
+    distutils_enable_sphinx docs \
+        '>=dev-python/jaraco-packaging-3.2' \
+        '>=dev-python/rst-linker-1.9' \
+        dev-python/alabaster
+
+In this case, the function uses the any-r1 API to request one
+of the supported implementations to be enabled on *all* of those
+packages.  However, it does not have to be the one in ``PYTHON_TARGETS``
+for this package.
+
+
+Sphinx without autodoc or extensions
+------------------------------------
+Finally, there are packages that use Sphinx purely to build
+documentation from text files, without inspecting Python code.
+For those packages, the any-r1 API can be omitted entirely and plain
+dependency on ``dev-python/sphinx`` is sufficient.  In this case,
+the ``--no-autodoc`` option can be specified instead of additional
+packages.
+
+.. code-block:: bash
+   :emphasize-lines: 17
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( python2_7 python3_{6,7,8} )
+    inherit distutils-r1
+
+    DESCRIPTION="Python Serial Port extension"
+    HOMEPAGE="https://github.com/pyserial/pyserial https://pypi.org/project/pyserial/"
+    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+
+    LICENSE="PSF-2"
+    SLOT="0"
+    KEYWORDS="~alpha amd64 ~arm arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+
+    distutils_enable_sphinx documentation --no-autodoc
+
+Note that this is valid only if no third-party extensions are used.
+If additional packages need to be installed, the previous variant
+must be used instead.
+
+The eclass tries to automatically determine whether ``--no-autodoc``
+should be used, and issue a warning if it's missing or incorrect.
