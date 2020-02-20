@@ -86,6 +86,20 @@ need to be executed:
     }
 
 
+Dependencies
+============
+When depending on other Python packages, USE dependencies need to be
+declared in order to ensure that the dependencies would be built against
+all the Python implementations enabled for the package.  This is easily
+done via appending the USE dependency string from ``${PYTHON_USEDEP}``
+to the dependencies::
+
+    RDEPEND="${PYTHON_DEPS}
+        sys-apps/portage[${PYTHON_USEDEP}]
+    "
+    DEPEND="${RDEPEND}"
+
+
 Pure Python autotools package
 =============================
 Another typical case for this eclass is to handle a pure Python package
@@ -219,3 +233,133 @@ to do that:
 
 Note that besides adding ``python_copy_sources`` call, ``ECONF_SOURCE``
 has been removed in order to disable out-of-source builds.
+
+
+Conditional Python use
+======================
+When the package installs Python components conditionally to a USE flag,
+the respective USE conditional needs to be consistently used in metadata
+variables and in ``python_foreach_impl`` calls.
+
+.. code-block:: bash
+   :emphasize-lines: 15,16,20-22,42-48
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=6
+    PYTHON_COMPAT=( python2_7 )
+
+    inherit gnome2 python-r1
+
+    DESCRIPTION="Canvas widget for GTK+ using the cairo 2D library for drawing"
+    HOMEPAGE="https://wiki.gnome.org/GooCanvas"
+
+    LICENSE="LGPL-2"
+    SLOT="2.0"
+    KEYWORDS="~alpha amd64 ia64 ppc ppc64 sparc x86"
+    IUSE="python"
+    REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
+
+    # python only enables python specific binding override
+    RDEPEND="
+        python? (
+            ${PYTHON_DEPS}
+            >=dev-python/pygobject-2.90.4:3[${PYTHON_USEDEP}] )
+    "
+    DEPEND="${RDEPEND}"
+
+    src_prepare() {
+        # Python bindings are built/installed manually.
+        sed -e "/SUBDIRS = python/d" -i bindings/Makefile.am \
+            bindings/Makefile.in || die
+
+        gnome2_src_prepare
+    }
+
+    src_configure() {
+        gnome2_src_configure \
+            --disable-python
+    }
+
+    src_install() {
+        gnome2_src_install
+
+        if use python; then
+            sub_install() {
+                python_moduleinto $(python -c "import gi;print gi._overridesdir")
+                python_domodule bindings/python/GooCanvas.py
+            }
+            python_foreach_impl sub_install
+        fi
+    }
+
+Note that in many cases, you will end up having to disable upstream
+rules for installing Python files as they are suitable only for
+single-impl installs.
+
+
+Additional build-time Python use
+================================
+Some packages additionally require Python at build time, independently
+of Python components installed (i.e. outside ``python_foreach_impl``).
+The eclass provides extensive API for this purpose but for now we'll
+focus on the simplest case where the global code does not have any
+dependencies or they are a subset of dependencies declared already.
+
+In this case, it is sufficient to call ``python_setup`` before
+the routine requiring Python.  It will choose the most preferred
+of enabled implementations, and set the global environment for it.  Note
+that it is entirely normal that the same environment will be set inside
+``python_foreach_impl`` afterwards.
+
+.. code-block:: bash
+   :linenos:
+   :emphasize-lines: 17,18,20,21,24,28-34,38-40
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI="7"
+
+    PYTHON_COMPAT=( python{3_6,3_7} )
+    PYTHON_REQ_USE="ncurses,readline"
+    inherit python-r1
+
+    DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
+    HOMEPAGE="http://www.qemu.org http://www.linux-kvm.org"
+    SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.xz"
+
+    LICENSE="GPL-2 LGPL-2 BSD-2"
+    SLOT="0"
+    KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 x86"
+    IUSE="python"
+    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
+
+    BDEPEND="${PYTHON_DEPS}"
+    RDEPEND="python? ( ${PYTHON_DEPS} )"
+
+    src_configure() {
+        python_setup
+        ./configure || die
+    }
+
+    qemu_python_install() {
+        python_domodule "${S}/python/qemu"
+
+        python_doscript "${S}/scripts/kvm/vmxcap"
+        python_doscript "${S}/scripts/qmp/qmp-shell"
+        python_doscript "${S}/scripts/qmp/qemu-ga-client"
+    }
+
+    src_install() {
+        default
+        if use python; then
+            python_foreach_impl qemu_python_install
+        fi
+    }
+
+Note that the parts affecting installation of runtime components
+(``RDEPEND``, ``python_foreach_impl``) are made conditional to the USE
+flag, while parts affecting build time (``REQUIRED_USE``, ``BDEPEND``,
+``python_setup``) are unconditional.
