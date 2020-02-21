@@ -12,7 +12,7 @@ possible.
 
 At the same time, the available documentation is limited and not always
 up-to-date.  Both the `built-in eclass documentation`_ and `Python
-project wiki page`_ provide bits of documentation but it is mostly
+project wiki page`_ provide bits of documentation but they are mostly
 in reference form and not very suitable for beginners nor people who
 do not actively follow the developments within the ecosystem.  This
 results in suboptimal ebuilds, improper dependencies, missing tests.
@@ -23,9 +23,15 @@ in Gentoo and the relevant eclasses.  Combined with examples, it should
 help you write good ebuilds and solve common problems as simply
 as possible.
 
+`Gentoo Python Guide sources`_ are available on GitHub.  Suggestions
+and improvements are welcome.
+
 
 .. _built-in eclass documentation:
    https://devmanual.gentoo.org/eclass-reference/index.html
 
 .. _Python project wiki page:
    https://wiki.gentoo.org/wiki/Project:Python
+
+.. _Gentoo Python Guide sources:
+   https://github.com/mgorny/python-guide/
