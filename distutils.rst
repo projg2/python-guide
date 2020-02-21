@@ -182,6 +182,246 @@ via setuptools.  For this purpose, a build-time dependency
 on ``dev-python/pyproject2setuppy`` is added.
 
 
+In-source vs out-of-source builds
+=================================
+In the general definition, an *out-of-source build* is a build where
+output files are placed in a directory separate from source files.
+By default, distutils and its derivatives always do out-of-source builds
+and place output files in subdirectories of ``build`` directory.
+
+Conversely, an *in-source build* happens when the output files are
+interspersed with source files.  The closest distutils equivalent
+of an in-source build is the ``--inplace`` option of ``build_ext``
+that places compiled C extensions alongside Python module sources.
+
+``distutils-r1`` shifts this concept a little.  When performing
+an out-of-source build (the default), it creates a dedicated output
+directory for every Python interpreter enabled, and then uses it
+throughout all build and install steps.
+
+It should be noted that unlike build systems such as autotools or CMake,
+out-of-source builds in distutils are not executed from the build
+directory.  Instead, the setup script is executed from source directory
+and passed path to build directory.
+
+Sometimes out-of-source builds are incompatible with custom hacks used
+upstream.  This could be a case if the setup script is writing
+implementation-specific changes to the source files (e.g. using ``2to3``
+to convert them to Python 3) or relying on specific build paths.
+For better compatibility with those cases, the eclass provides
+an in-source build mode enabled via ``DISTUTILS_IN_SOURCE_BUILD``.
+
+In this mode, the eclass creates a separate copy of the source directory
+for each Python implementation, and then runs the build and install
+steps inside that copy.  As a result, any changes done to the source
+files are contained within the copy used for the current interpreter.
+
+.. code-block:: bash
+   :emphasize-lines: 20
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+    DISTUTILS_USE_SETUPTOOLS=no
+    PYTHON_COMPAT=( python3_{6,7,8} pypy3 )
+    PYTHON_REQ_USE="xml(+)"
+
+    inherit distutils-r1
+
+    DESCRIPTION="Collection of extensions to Distutils"
+    HOMEPAGE="https://github.com/pypa/setuptools https://pypi.org/project/setuptools/"
+    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.zip"
+
+    LICENSE="MIT"
+    SLOT="0"
+    KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sh ~sparc ~x86 ~x64-cygwin ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
+
+    # Force in-source build because build system modifies sources.
+    DISTUTILS_IN_SOURCE_BUILD=1
+
+
+
+Sub-phase functions
+===================
+Ebuilds define phase functions in order to conveniently override parts
+of the build process.  ``distutils-r1`` extends this concept
+by introducing *sub-phases*.  All ``src_*`` phases in ebuild are split
+into two sub-phases: ``python_*`` sub-phases that are run in a loop
+for all enabled interpreters, and ``python_*_all`` sub-phases that
+comprise the common code to be run only once.
+
+Sub-phase functions behave similarly to phase functions.  They are run
+if defined by the ebuild.  If they're not, the default implementation
+is run (if any).  The ebuild overrides can call the default
+as ``distutils-r1_<sub-phase>``, the same way it can call eclass' phase
+function defaults.
+
+There are 10 sub-phases corresponding to 5 phase functions.  They are
+run in the following order:
+
+1. ``python_prepare_all`` (for ``src_prepare``, has default)
+2. ``python_prepare`` (for each impl.)
+3. ``python_configure`` (for ``src_configure``, foreach impl.)
+4. ``python_configure_all``
+5. ``python_compile`` (for ``src_compile``, for each impl., has default)
+6. ``python_compile_all``
+7. ``python_test`` (for ``src_test``, for each impl.)
+8. ``python_test_all``
+9. ``python_install`` (for ``src_install``, for each impl., has default)
+10. ``python_install_all`` (has default)
+
+Note that normally all phases are run in the source directory, while
+defining ``${BUILD_DIR}`` to a dedicated build directory for each
+implementation.  However, if in-source builds are enabled, all phases
+are run in these build directories.
+
+
+python_prepare
+--------------
+
+``python_prepare_all`` is responsible for applying changes
+to the package sources that are common to all Python implementations.
+The default implementation performs the tasks of ``default_src_prepare``
+(applying patches), as well as eclass-specific tasks: removing
+``ez_setup`` (method of bootstrapping setuptools used in old packages)
+and handling ``pyproject.toml``.  In the end, the function copies
+sources to build dirs if in-source build is requested.
+
+If additional changes need to be done to the package, either this
+sub-phase or ``src_prepare`` in general can be replaced.  However,
+you should always call the original implementation from your override.
+For example, you could use it to strip extraneous dependencies or broken
+tests::
+
+    python_prepare_all() {
+        # FIXME
+        rm tests/test_pytest_plugin.py || die
+        sed -i -e 's:test_testcase_no_app:_&:' tests/test_test_utils.py || die
+
+        # remove pointless dep on pytest-cov
+        sed -i -e '/addopts/s/--cov=aiohttp//' pytest.ini || die
+
+        distutils-r1_python_prepare_all
+    }
+
+``python_prepare`` is responsible for applying changes specific to one
+interpreter.  It has no default implementation.  When defined, in-source
+builds are enabled implicitly as sources need to be duplicated to apply
+implementation-specific changes.
+
+In the following example, it is used to automatically convert sources
+to Python 3.  Naturally, this requires the eclass to keep a separate
+copy of the sources that remains compatible with Python 2 and this is
+precisely why ``python_prepare`` automatically enables in-source builds.
+
+::
+
+    python_prepare() {
+        if python_is_python3; then
+            2to3 -n -w --no-diffs *.py || die
+        fi
+    }
+
+
+python_configure
+----------------
+
+``python_configure`` and ``python_configure_all`` have no default
+functionality.  The former is convenient for running additional
+configuration steps if needed by the package, the latter for defining
+global environment variables.
+
+::
+
+    python_configure() {
+        esetup.py configure $(usex mpi --mpi '')
+    }
+
+::
+
+    python_configure_all() {
+        mydistutilsargs=(
+            --resourcepath=/usr/share
+            --no-compress-manpages
+        )
+    }
+
+
+python_compile
+--------------
+
+``python_compile`` normally builds the package.  It is sometimes used
+to pass additional arguments to the build step.  For example, it can
+be used to disable parallel extension builds in packages that are broken
+with it::
+
+    python_compile() {
+        distutils-r1_python_compile -j1
+    }
+
+
+``python_compile_all``
+has no default implementation.  It is convenient for performing
+additional common build steps, in particular for building
+the documentation (see ``distutils_enable_sphinx``).
+
+::
+
+    python_compile_all() {
+        use doc && emake -C docs html
+    }
+
+
+python_test
+-----------
+
+``python_test`` is responsible for running tests.  It has no default
+implementation but you are strongly encouraged to provide one (either
+directly or via ``distutils_enable_tests``).  ``python_test_all``
+can be used to run additional testing code that is not specific
+to Python.
+
+::
+
+    python_test() {
+        "${EPYTHON}" TestBitVector/Test.py || die "Tests fail with ${EPYTHON}"
+    }
+
+
+python_install
+--------------
+
+``python_install`` installs the package's Python part.  It is usually
+redefined in order to pass additional ``setup.py`` arguments
+or to install additional Python modules.
+
+::
+
+    python_install() {
+        distutils-r1_python_install
+
+        # ensure data files for tests are getting installed too
+        python_moduleinto collada/tests/
+        python_domodule collada/tests/data
+    }
+
+``python_install_all`` installs documentation via ``einstalldocs``.
+It is usually defined by ebuilds to install additional common files
+such as bash completions or examples.
+
+::
+
+    python_install_all() {
+        if use examples; then
+            docinto examples
+            dodoc -r Sample_Code/.
+            docompress -x /usr/share/doc/${PF}/examples
+        fi
+        distutils-r1_python_install_all
+    }
+
+
 Enabling tests
 ==============
 Since Python performs only minimal build-time (or more precisely,
@@ -466,8 +706,7 @@ This call takes care of it all: it adds ``doc`` USE flag to control
 building documentation, appropriate dependencies via the expert any-r1
 API making it sufficient for Sphinx to be installed with only one
 of the supported implementations, and appropriate ``python_compile_all``
-and ``python_install_all`` implementations to build and install HTML
-documentation.
+implementation to build and install HTML documentation.
 
 
 Additional Sphinx extensions
