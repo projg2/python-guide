@@ -2,6 +2,15 @@
 Common helper functions
 =======================
 
+.. index:: python_doexe
+.. index:: python_newexe
+.. index:: python_doscript
+.. index:: python_newscript
+.. index:: python_domodule
+.. index:: python_doheaders
+.. index:: python_scriptinto
+.. index:: python_moduleinto
+
 Install helpers
 ===============
 The install helpers are provided commonly for ``python-single-r1``
@@ -75,6 +84,8 @@ extensions::
     python_doheader src/libImaging/*.h
 
 
+.. index:: python_fix_shebang
+
 Fixing shebangs on installed scripts
 ====================================
 If upstream build system installs Python scripts, it should also update
@@ -123,6 +134,8 @@ to install a script with ``python2`` shebang for Python 3.  ``-f``
         python_fix_shebang -f "${PN}.py"
     }
 
+
+.. index:: python_optimize
 
 Byte-compiling Python modules
 =============================

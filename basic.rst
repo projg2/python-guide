@@ -10,6 +10,8 @@ explain the common bits used by all of them, as well as the non-obvious
 differences between them.
 
 
+.. index:: PYTHON_COMPAT
+
 PYTHON_COMPAT
 =============
 The ``PYTHON_COMPAT`` variable is used by all Python eclasses, and must
@@ -26,6 +28,9 @@ Typical use::
     PYTHON_COMPAT=( python3_{6,7,8} pypy3 )
     inherit python-single-r1
 
+
+.. index:: PYTHON_DEPS
+.. index:: PYTHON_REQUIRED_USE
 
 PYTHON_DEPS and PYTHON_REQUIRED_USE
 ===================================
@@ -50,6 +55,9 @@ For ``python-any-r1``, only build-time dependencies are used::
 This does not apply to ``distutils-r1`` as it does the above assignment
 by default.
 
+
+.. index:: EPYTHON
+.. index:: PYTHON
 
 Python environment
 ==================

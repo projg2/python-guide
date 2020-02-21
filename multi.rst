@@ -11,6 +11,8 @@ or a similar Python build system, ``distutils-r1`` eclass should be used
 instead.
 
 
+.. index:: python_foreach_impl
+
 Manual install
 ==============
 The simplest case of multi-impl package is a package without a specific
@@ -86,6 +88,8 @@ need to be executed:
     }
 
 
+.. index:: PYTHON_USEDEP
+
 Dependencies
 ============
 When depending on other Python packages, USE dependencies need to be
@@ -99,6 +103,8 @@ to the dependencies::
     "
     DEPEND="${RDEPEND}"
 
+
+.. index:: run_in_build_dir
 
 Pure Python autotools package
 =============================
@@ -298,6 +304,8 @@ Note that in many cases, you will end up having to disable upstream
 rules for installing Python files as they are suitable only for
 single-impl installs.
 
+
+.. index:: python_setup; for python-r1
 
 Additional build-time Python use
 ================================

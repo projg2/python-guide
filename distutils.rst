@@ -78,6 +78,8 @@ the widest test coverage, and avoid unpredictable test failures on users
 who have more dependencies installed).
 
 
+.. index:: DISTUTILS_SINGLE_IMPL
+
 python-single-r1 variant
 ========================
 Normally, ``distutils-r1`` uses ``python-r1`` to build multi-impl
@@ -126,6 +128,8 @@ to be rewritten.
     DEPEND="
         sci-physics/root[${PYTHON_SINGLE_USEDEP}]"
 
+
+.. index:: DISTUTILS_USE_SETUPTOOLS
 
 Different build system variations
 =================================
@@ -181,6 +185,8 @@ used, a value of ``pyproject.toml`` can be used to enable installing it
 via setuptools.  For this purpose, a build-time dependency
 on ``dev-python/pyproject2setuppy`` is added.
 
+
+.. index:: DISTUTILS_IN_SOURCE_BUILD
 
 In-source vs out-of-source builds
 =================================
@@ -241,7 +247,6 @@ files are contained within the copy used for the current interpreter.
     DISTUTILS_IN_SOURCE_BUILD=1
 
 
-
 Sub-phase functions
 ===================
 Ebuilds define phase functions in order to conveniently override parts
@@ -276,6 +281,9 @@ defining ``${BUILD_DIR}`` to a dedicated build directory for each
 implementation.  However, if in-source builds are enabled, all phases
 are run in these build directories.
 
+
+.. index:: python_prepare
+.. index:: python_prepare_all
 
 python_prepare
 --------------
@@ -324,6 +332,9 @@ precisely why ``python_prepare`` automatically enables in-source builds.
     }
 
 
+.. index:: python_configure
+.. index:: python_configure_all
+
 python_configure
 ----------------
 
@@ -347,6 +358,9 @@ global environment variables.
         )
     }
 
+
+.. index:: python_compile
+.. index:: python_compile_all
 
 python_compile
 --------------
@@ -373,6 +387,9 @@ the documentation (see ``distutils_enable_sphinx``).
     }
 
 
+.. index:: python_test
+.. index:: python_test_all
+
 python_test
 -----------
 
@@ -388,6 +405,9 @@ to Python.
         "${EPYTHON}" TestBitVector/Test.py || die "Tests fail with ${EPYTHON}"
     }
 
+
+.. index:: python_install
+.. index:: python_install_all
 
 python_install
 --------------
@@ -422,6 +442,8 @@ such as bash completions or examples.
     }
 
 
+.. index:: distutils_enable_tests
+
 Enabling tests
 ==============
 Since Python performs only minimal build-time (or more precisely,
@@ -436,6 +458,7 @@ specify a test runner that's not strictly necessary — e.g. specify
 ``dev-python/pytest`` as a dependency while the tests do not use it
 anywhere and work just fine with built-in modules.  The best way
 to determine the test runner to use is to grep the test sources.
+
 
 Using distutils_enable_tests
 ----------------------------
@@ -649,6 +672,8 @@ of its logic.
 Note that ``python_test`` is called by ``distutils-r1_src_test``,
 so you must make sure to call it if you override ``src_test``.
 
+
+.. index:: distutils_enable_sphinx
 
 Building documentation via Sphinx
 =================================

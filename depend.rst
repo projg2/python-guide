@@ -4,6 +4,9 @@ Advanced dependencies
 
 .. highlight:: bash
 
+.. index:: PYTHON_REQ_USE
+.. index:: python_gen_impl_dep
+
 Requesting USE flags on the Python interpreter
 ==============================================
 While the majority of Python standard library modules are available
@@ -104,6 +107,8 @@ SQLite support when running tests:
 
     distutils_enable_tests pytest
 
+
+.. index:: python_gen_cond_dep; for conditional deps
 
 Dependencies conditional to Python version
 ==========================================

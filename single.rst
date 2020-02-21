@@ -54,6 +54,10 @@ the four highlighted lines are specific to Python eclasses, plus
 the implicitly exported ``pkg_setup`` phase.
 
 
+.. index:: PYTHON_SINGLE_USEDEP
+.. index:: PYTHON_MULTI_USEDEP
+.. index:: python_gen_cond_dep; for python-single-r1
+
 Dependencies
 ============
 When depending on other Python packages, USE dependencies need to be

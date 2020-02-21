@@ -51,6 +51,9 @@ the three highlighted lines are specific to Python eclasses, plus
 the implicitly exported ``pkg_setup`` phase.
 
 
+.. index:: python_gen_any_dep; python-any-r1
+.. index:: python_check_deps; python-any-r1
+
 Dependencies
 ============
 When depending on other Python packages, USE dependencies need to be
