@@ -17,6 +17,7 @@ Gentoo Python Guide
    helper
    depend
    concept
+   expert-multi
 
 
 Indices and tables
