@@ -589,7 +589,6 @@ as for pure ``python-single-r1`` use.  Again, waf requires only plain
 build-time ``${PYTHON_DEPS}`` and ``PYTHON_REQ_USE``.
 
 .. code-block:: bash
-   :linenos:
    :emphasize-lines: 5,6,8,31,42
 
     # Copyright 1999-2020 Gentoo Authors
