@@ -18,6 +18,7 @@ Gentoo Python Guide
    depend
    concept
    expert-multi
+   buildsys
 
 
 Indices and tables
