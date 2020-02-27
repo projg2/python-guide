@@ -50,6 +50,11 @@ The ``install_requires`` key specifies runtime dependencies,
 optional dependencies.  Test dependencies are sometimes specified
 as one of the 'extras', and sometimes as ``tests_require``.
 
+Setuptools strictly enforces ``setup_requires`` at build time,
+and ``tests_require`` when running ``setup.py test``.  Runtime
+dependencies are enforced only when starting installed programs
+via entry points.
+
 In other cases, dependencies are listed in additional files named
 e.g. ``requirements.txt``.  They could be also found in test runner
 setup (``tox.ini``) or CI setup files (``.travis.yml``).  Finally, you
