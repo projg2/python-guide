@@ -176,3 +176,84 @@ to them can be passed to the function::
         emake DESTDIR="${D}" LIBDIR="usr/lib" install
         python_optimize "${D}/usr/lib/entropy/client"
     }
+
+
+.. index:: python_get_sitedir
+.. index:: python_get_includedir
+.. index:: python_get_scriptdir
+.. index:: python_get_library_path
+.. index:: python_get_CFLAGS
+.. index:: python_get_LIBS
+.. index:: python_get_PYTHON_CONFIG
+.. index:: python_is_python3
+
+Querying the implementation information
+=======================================
+Most of the time, various build systems manage to detect and query
+the Python implementation correctly for necessary build details.
+Ocassionally, you need to provide those values or override bad detection
+results.  For this purpose, the eclasses provide a series of *getters*.
+
+The following generic getters are provided:
+
+- ``python_get_sitedir`` that outputs the absolute path to the target's
+  site-packages directory (where Python modules are installed).
+
+- ``python_get_includedir`` that outputs the absolute path
+  to the target-specific header directory.
+
+- ``python_get_scriptdir`` that outputs the absolute path
+  to the python-exec script directory for the implementation.
+
+The following getters are provided only for CPython targets:
+
+- ``python_get_library_path`` that outputs the absolute path
+  to the ``python`` library.
+
+- ``python_get_CFLAGS`` that outputs the C preprocessor flags
+  for linking against the Python library (equivalent to ``pkg-config
+  --cflags ...``).
+
+- ``python_get_LIBS`` that outputs the linker flags for linking
+  against the Python library (equivalent to ``pkg-config --libs ...``).
+
+- ``python_get_PYTHON_CONFIG`` that outputs the absolute path
+  to the ``python-config`` executable.
+
+Additionally, the following boolean helper is provided:
+
+- ``python_is_python3`` that returns true (0) if the current interpreter
+  implements a variant of Python 3, false (1) if Python 2.
+
+Note that all paths provided by getters include the offset-prefix
+(``${EPREFIX}``) already and they are not suitable to passing
+to ``*into`` helpers.  If you need to install something, use `install
+helpers`_ instead.
+
+.. code-block:: bash
+
+   src_configure() {
+       local mycmakeargs=(
+           ...
+       )
+       use python && mycmakeargs+=(
+           -DPYTHON_DEST="$(python_get_sitedir)"
+           -DPYTHON_EXECUTABLE="${PYTHON}"
+           -DPYTHON_INCLUDE_DIR="$(python_get_includedir)"
+           -DPYTHON_LIBRARY="$(python_get_library_path)"
+       )
+
+       cmake_src_configure
+   }
+
+
+.. code-block:: bash
+
+   python_test() {
+       # prepare embedded executable
+       emake \
+           CC="$(tc-getCC)" \
+           PYINC="$(python_get_CFLAGS)" \
+           PYLIB="$(python_get_LIBS)" \
+           check
+   }
