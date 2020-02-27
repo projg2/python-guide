@@ -448,3 +448,120 @@ therefore ``python_check_deps()`` needs to account for that.
 
 Normally you won't have to use this API for Sphinx though —
 ``distutils_enable_sphinx`` does precisely that for you.
+
+
+Combining any-r1 API with implementation restrictions
+=====================================================
+Both APIs described above can be combined.  This can be used when
+build-time scripts support a subset of implementations supported
+by the package itself, and by its build-time dependencies.  For example,
+if the package uses ``dev-util/scons`` build system with ``SConstruct``
+files using Python 2 construct.
+
+There are two approaches to achieve that: either the build-time
+implementation list needs to be passed to ``python_setup``,
+or ``python_check_deps`` needs to explicitly reject unsupported targets.
+In both cases, a matching implementation list needs to be passed
+to ``python_gen_any_dep``.
+
+.. code-block:: bash
+   :emphasize-lines: 25,28-30,46
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( python2_7 python3_6 )
+    inherit python-r1 toolchain-funcs
+
+    DESCRIPTION="GPS daemon and library for USB/serial GPS devices and GPS/mapping clients"
+    HOMEPAGE="https://gpsd.gitlab.io/gpsd/"
+    SRC_URI="mirror://nongnu/${PN}/${P}.tar.gz"
+
+    LICENSE="BSD"
+    SLOT="0/24"
+    KEYWORDS="~amd64 ~arm ~ppc ~ppc64 ~sparc ~x86"
+
+    IUSE="python"
+    REQUIRED_USE="
+        python? ( ${PYTHON_REQUIRED_USE} )"
+
+    RDEPEND="
+        >=net-misc/pps-tools-0.0.20120407
+        python? ( ${PYTHON_DEPS} )"
+    DEPEND="${RDEPEND}
+        $(python_gen_any_dep '>=dev-util/scons-2.3.0[${PYTHON_USEDEP}]' -2)
+        virtual/pkgconfig"
+
+    python_check_deps() {
+        has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
+    }
+
+    src_configure() {
+        myesconsargs=(
+            prefix="${EPREFIX}/usr"
+            libdir="\$prefix/$(get_libdir)"
+            udevdir="$(get_udevdir)"
+            chrpath=False
+            gpsd_user=gpsd
+            gpsd_group=uucp
+            nostrip=True
+            manbuild=False
+            $(use_scons python)
+        )
+
+        # SConstruct uses py2 constructs
+        python_setup -2
+    }
+
+.. code-block:: bash
+   :emphasize-lines: 25,28-31,46
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( python2_7 python3_6 )
+    inherit python-r1 toolchain-funcs
+
+    DESCRIPTION="GPS daemon and library for USB/serial GPS devices and GPS/mapping clients"
+    HOMEPAGE="https://gpsd.gitlab.io/gpsd/"
+    SRC_URI="mirror://nongnu/${PN}/${P}.tar.gz"
+
+    LICENSE="BSD"
+    SLOT="0/24"
+    KEYWORDS="~amd64 ~arm ~ppc ~ppc64 ~sparc ~x86"
+
+    IUSE="python"
+    REQUIRED_USE="
+        python? ( ${PYTHON_REQUIRED_USE} )"
+
+    RDEPEND="
+        >=net-misc/pps-tools-0.0.20120407
+        python? ( ${PYTHON_DEPS} )"
+    DEPEND="${RDEPEND}
+        $(python_gen_any_dep '>=dev-util/scons-2.3.0[${PYTHON_USEDEP}]' -2)
+        virtual/pkgconfig"
+
+    python_check_deps() {
+        python_is_python3 && return 1
+        has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
+    }
+
+    src_configure() {
+        myesconsargs=(
+            prefix="${EPREFIX}/usr"
+            libdir="\$prefix/$(get_libdir)"
+            udevdir="$(get_udevdir)"
+            chrpath=False
+            gpsd_user=gpsd
+            gpsd_group=uucp
+            nostrip=True
+            manbuild=False
+            $(use_scons python)
+        )
+
+        python_setup
+    }
