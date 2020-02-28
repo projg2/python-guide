@@ -697,6 +697,40 @@ Note that ``python_test`` is called by ``distutils-r1_src_test``,
 so you must make sure to call it if you override ``src_test``.
 
 
+.. index:: distutils_install_for_testing
+
+Installing the package before testing
+-------------------------------------
+The tests are executed in ``src_test`` phase, after ``src_compile``
+installed package files into the build directory.  The eclass
+automatically adds appropriate ``PYTHONPATH`` so that the installed
+Python modules and extensions are used during testing.  This works
+for the majority of packages.
+
+However, some test suites will not work correctly unless the package
+has been properly installed via ``setup.py install``.  This may apply
+specifically to some plugin systems or packages using
+the ``pkg_resources`` framework.
+
+The ``distutils_install_for_testing`` function runs ``setup.py install``
+into a temporary directory, and adds the appropriate paths to ``PATH``
+and ``PYTHONPATH``.  It uses the *home directory* install layout that
+should satisfy most of the remaining test suites.
+
+.. code-block:: bash
+
+    python_test() {
+        distutils_install_for_testing
+        pytest -vv --no-network || die "Testsuite failed under ${EPYTHON}"
+    }
+
+Note that ``distutils_install_for_testing`` is quite a heavy hammer.
+It is useful for solving hard cases and initially determining the cause
+of failing tests.  However, many packages will be entirely satisfied
+with simpler solutions, such as changing the working directory
+to ``${BUILD_DIR}/lib``.
+
+
 .. index:: distutils_enable_sphinx
 
 Building documentation via Sphinx
