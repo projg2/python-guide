@@ -447,6 +447,25 @@ such as bash completions or examples.
     }
 
 
+.. index:: esetup.py
+
+Calling custom setup.py commands
+================================
+When working on packages using setuptools or modified distutils, you
+sometimes need to manually invoke ``setup.py``.  The eclass provides
+a ``esetup.py`` helper that wraps it with additional checks, error
+handling and ensures that the override configuration file is created
+beforehand (much like ``econf`` or ``emake``).
+
+``esetup.py`` passes all its paremeters to ``./setup.py``.
+
+::
+
+    python_test() {
+        esetup.py check
+    }
+
+
 .. index:: distutils_enable_tests
 
 Enabling tests
