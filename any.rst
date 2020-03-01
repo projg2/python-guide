@@ -53,6 +53,7 @@ the implicitly exported ``pkg_setup`` phase.
 
 .. index:: python_gen_any_dep; python-any-r1
 .. index:: python_check_deps; python-any-r1
+.. index:: PYTHON_USEDEP; python-any-r1
 
 Dependencies
 ============

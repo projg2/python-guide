@@ -88,7 +88,7 @@ need to be executed:
     }
 
 
-.. index:: PYTHON_USEDEP
+.. index:: PYTHON_USEDEP; python-r1
 
 Dependencies
 ============

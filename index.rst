@@ -20,6 +20,7 @@ Gentoo Python Guide
    concept
    expert-multi
    buildsys
+   migration
 
 
 Indices and tables
