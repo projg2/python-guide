@@ -109,3 +109,18 @@ the eclass to use:
    at runtime, use ``python-single-r1``.
 
 4. If the package uses Python at build time only, use ``python-any-r1``.
+
+
+python-utils-r1
+===============
+Besides the aforementioned eclasses, the suite includes a common utility
+eclass ``python-utils-r1``.  This eclass is inherited by all other
+eclasses, and it is considered to be a part of their API.  Therefore,
+it must not be inherited directly if any other of the eclasses
+is inherited.
+
+The only case for direct inherit of ``python-utils-r1`` is when you
+are only using some of its utility functions without inheriting
+any of the remaining eclasses.  However, note that the majority of those
+utility functions actually rely on mechanics provided by these eclasses
+and are not suitable for being used otherwise.
