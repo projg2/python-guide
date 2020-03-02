@@ -2,6 +2,15 @@
 Common helper functions
 =======================
 
+The functions described in this chapter are common to all three basic
+eclasses.  To facilitate code reuse, they are declared
+in ``python-utils-r1.eclass``.  However, you should not inherit this
+eclass directly and instead assume the functions are provided as part
+of the API of other eclasses.
+
+Eclass reference: `python-utils-r1.eclass(5)`_
+
+
 .. index:: python_doexe
 .. index:: python_newexe
 .. index:: python_doscript
@@ -257,3 +266,7 @@ helpers`_ instead.
            PYLIB="$(python_get_LIBS)" \
            check
    }
+
+
+.. _python-utils-r1.eclass(5):
+   https://devmanual.gentoo.org/eclass-reference/python-utils-r1.eclass/index.html

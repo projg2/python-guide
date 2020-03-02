@@ -7,6 +7,8 @@ python-any-r1 — build-time dependency
 The ``python-any-r1`` eclass is used to enable Python support
 in packages needing it purely at build time.
 
+Eclass reference: `python-any-r1.eclass(5)`_
+
 
 Basic use for unconditional Python
 ==================================
@@ -266,3 +268,7 @@ USE conditional blocks inside ``python_gen_any_dep``:
     pkg_setup() {
         use test && python-any-r1_pkg_setup
     }
+
+
+.. _python-any-r1.eclass(5):
+   https://devmanual.gentoo.org/eclass-reference/python-any-r1.eclass/index.html

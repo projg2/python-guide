@@ -10,6 +10,8 @@ or ``pyproject.toml`` (flit, poetry).  It is built on top
 of ``python-r1`` and ``python-single-r1``, and therefore supports
 efficiently building multi-impl and single-impl packages.
 
+Eclass reference: `distutils-r1.eclass(5)`_
+
 
 Basic use
 =========
@@ -865,3 +867,7 @@ must be used instead.
 
 The eclass tries to automatically determine whether ``--no-autodoc``
 should be used, and issue a warning if it's missing or incorrect.
+
+
+.. _distutils-r1.eclass(5):
+   https://devmanual.gentoo.org/eclass-reference/distutils-r1.eclass/index.html

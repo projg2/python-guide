@@ -10,6 +10,8 @@ using ``python-single-r1`` instead.  For packages using distutils
 or a similar Python build system, ``distutils-r1`` eclass should be used
 instead.
 
+Eclass reference: `python-r1.eclass(5)`_
+
 
 .. index:: python_foreach_impl
 
@@ -371,3 +373,7 @@ Note that the parts affecting installation of runtime components
 (``RDEPEND``, ``python_foreach_impl``) are made conditional to the USE
 flag, while parts affecting build time (``REQUIRED_USE``, ``BDEPEND``,
 ``python_setup``) are unconditional.
+
+
+.. _python-r1.eclass(5):
+   https://devmanual.gentoo.org/eclass-reference/python-r1.eclass/index.html

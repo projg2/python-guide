@@ -10,6 +10,8 @@ It is probably the easiest eclass to use, and it is recommended over
 complexity.  However, for packages using distutils or a similar Python
 build system, ``distutils-r1`` eclass should be used instead.
 
+Eclass reference: `python-single-r1.eclass(5)`_
+
 
 Basic use for unconditional Python
 ==================================
@@ -298,3 +300,7 @@ can be installed via one of the installation helpers.
         python_domodule pyduali
         python_doscript duali dict2db trans2arabic arabic2trans
     }
+
+
+.. _python-single-r1.eclass(5):
+   https://devmanual.gentoo.org/eclass-reference/python-single-r1.eclass/index.html
