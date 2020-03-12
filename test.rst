@@ -105,5 +105,65 @@ so that an interested user can remove the restriction and run them
 if necessary.
 
 
+pytest-specific recipes
+=======================
+
+Avoiding the dependency on pytest-runner
+----------------------------------------
+pytest-runner_ is a package providing ``pytest`` command to setuptools.
+While it might be convenient upstream, there is no real reason to use
+it in Gentoo packages.  It has no real advantage over calling pytest
+directly.
+
+Some packages declare the dependency on ``pytest-runner``
+in ``setup_requires``.  As a result, the dependency is enforced whenever
+``setup.py`` is being run, even if the user has no intention of running
+tests.  If this is the case, the dependency must be stripped.
+
+The recommended method of stripping it is to use sed::
+
+    python_prepare_all() {
+        sed -i -e '/pytest-runner/d' setup.py || die
+        distutils-r1_python_prepare_all
+    }
+
+
+Avoiding dependencies on other pytest plugins
+---------------------------------------------
+There is a number of pytest plugins that have little value to Gentoo
+users.  They include plugins for test coverage
+(``dev-python/pytest-cov``), coding style (``dev-python/pytest-flake8``)
+and more.  Generally, packages should avoid using those plugins.
+
+In some cases, upstream packages only list them as dependencies
+but do not use them automatically.  In other cases, you will need
+to strip options enabling them from ``pytest.ini`` or ``setup.cfg``.
+
+::
+
+    src_prepare() {
+        sed -i -e 's:--cov=wheel::' setup.cfg || die
+        distutils-r1_src_prepare
+    }
+
+
+Explicitly disabling automatic pytest plugins
+---------------------------------------------
+Besides plugins explicitly used by the package, there are a few pytest
+plugins that enable themselves automatically for all test suites
+when installed.  In some cases, their presence causes tests of packages
+that do not expect them, to fail.
+
+An example of such package used to be ``dev-python/pytest-relaxed``.
+To resolve problems due to the plugin, it was necessary to disable
+it explicitly::
+
+    python_test() {
+        # pytest-relaxed plugin makes our tests fail
+        pytest -vv -p no:relaxed || die "Tests fail with ${EPYTHON}"
+    }
+
+
 .. _why tests must not use Internet:
    https://devmanual.gentoo.org/ebuild-writing/functions/src_test/#tests-that-require-network-or-service-access
+.. _pytest-runner: https://pypi.org/project/pytest-runner/
