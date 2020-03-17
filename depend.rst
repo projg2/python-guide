@@ -188,4 +188,22 @@ implementation names.
             dev-python/pysha3[${PYTHON_USEDEP}]' -2 python3_5) )"
 
 
+.. index:: cffi, greenlet
+
+Dependencies on CFFI and greenlet
+=================================
+The PyPy distribution includes special versions of the cffi_
+and greenlet_ packages.  For this reason, packages using CFFI
+and/or greenlet and supporting PyPy3 need to make the explicit
+dependencies conditional to CPython::
+
+    RDEPEND="
+        $(python_gen_cond_dep '
+            >=dev-python/cffi-1.1.0:=[${PYTHON_USEDEP}]
+        ' 'python*')
+    "
+
+
 .. _sqlite3: https://docs.python.org/3.8/library/sqlite3.html
+.. _cffi: https://pypi.org/project/cffi/
+.. _greenlet: https://pypi.org/project/greenlet/
