@@ -1,6 +1,8 @@
 ===================
 Gentoo Python Guide
 ===================
+:Author: Michał Górny
+:License: `Creative Commons Attribution 4.0 International`_
 
 .. toctree::
    :maxdepth: 2
@@ -28,3 +30,6 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`search`
+
+.. _Creative Commons Attribution 4.0 International:
+   https://creativecommons.org/licenses/by/4.0/

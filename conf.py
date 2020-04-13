@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Gentoo Python Guide'
-copyright = '2020, Michał Górny'
+copyright = '2020, Michał Górny, license: CC BY 4.0'
 author = 'Michał Górny'
 
 
