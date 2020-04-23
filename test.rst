@@ -4,6 +4,51 @@ Resolving test suite problems
 
 .. highlight: bash
 
+Choosing the correct test runner
+================================
+There are a few modules used to run tests in Python packages.  The most
+common include the built-in unittest_ module, pytest_ and nose_.  There
+are also some rarely used test tools and domain-specific solutions,
+e.g. django_ has its own test runner.  This section will help you
+determining which test runner to use and depend on.
+
+Firstly, it is a good idea to look at test sources.  Explicit imports
+clearly indicate that a particular test runner needs to be installed,
+and most likely used.  For example, if at least one test file has
+``import pytest``, pytest is the obvious choice.  If it has ``import
+nose``, same goes for nosetests.
+
+In some rare cases the tests may use multiple test packages
+simultaneously.  In this case, you need to choose one of the test
+runners (see other suggestions) but depend on all of them.
+
+Secondly, some test suites are relying on *implicit* features of a test
+runner.  For example, pytest and nose have less strict naming
+and structural requirements for test cases.  In some cases, unittest
+runner will simply be unable to find all tests.
+
+Thirdly, there are cases when a particular feature of a test runner
+is desired even if it is not strictly necessary to run tests.  This
+is particularly the case with pytest's output capture that can make
+test output much more readable with particularly verbose packages.
+
+Upstream documentation, tox configuration, CI pipelines can provide tips
+on the test runner to be used.  However, you should establish whether
+this information is wholly correct and up-to-date, and whether
+the particular test tool is really desirable.
+
+If the test suite requires no particular runner (i.e. works with
+built-in unittest module), using it is preferable to avoid unnecessary
+dependencies.  However, you need to make sure that it finds all tests
+correctly (i.e. runs no less tests than the alternative) and that it
+does not spew too much irrelevant output.
+
+If both pytest and nose seem equally good, the former is recommended
+as the latter has ceased development and requires downstream patching.
+If you have some free time, convincing upstream to switch from nose
+to pytest is a worthwhile goal.
+
+
 Missing test files in PyPI packages
 ===================================
 One of the more common test-related problems is that PyPI packages
@@ -164,6 +209,10 @@ it explicitly::
     }
 
 
+.. _unittest: https://docs.python.org/3/library/unittest.html
+.. _pytest: https://docs.pytest.org/en/latest/
+.. _nose: https://github.com/nose-devs/nose
+.. _django: https://www.djangoproject.com/
 .. _why tests must not use Internet:
    https://devmanual.gentoo.org/ebuild-writing/functions/src_test/#tests-that-require-network-or-service-access
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
