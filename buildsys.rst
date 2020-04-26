@@ -230,22 +230,22 @@ package.
     RDEPEND="
         ${PYTHON_DEPS}
         $(python_gen_cond_dep "
-            dev-python/Numdifftools[\${PYTHON_MULTI_USEDEP}]
+            dev-python/Numdifftools[\${PYTHON_USEDEP}]
             || (
-                dev-python/matplotlib-python2[\${PYTHON_MULTI_USEDEP}]
-                dev-python/matplotlib[\${PYTHON_MULTI_USEDEP}]
+                dev-python/matplotlib-python2[\${PYTHON_USEDEP}]
+                dev-python/matplotlib[\${PYTHON_USEDEP}]
             )
             || (
-                dev-python/numpy-python2[\${PYTHON_MULTI_USEDEP}]
-                dev-python/numpy[\${PYTHON_MULTI_USEDEP}]
+                dev-python/numpy-python2[\${PYTHON_USEDEP}]
+                dev-python/numpy[\${PYTHON_USEDEP}]
             )
-            dev-python/wxpython:${WX_GTK_VER}[\${PYTHON_MULTI_USEDEP}]
-            sci-chemistry/pymol[\${PYTHON_MULTI_USEDEP}]
-            >=sci-libs/bmrblib-1.0.3[\${PYTHON_MULTI_USEDEP}]
-            >=sci-libs/minfx-1.0.11[\${PYTHON_MULTI_USEDEP}]
+            dev-python/wxpython:${WX_GTK_VER}[\${PYTHON_USEDEP}]
+            sci-chemistry/pymol[\${PYTHON_USEDEP}]
+            >=sci-libs/bmrblib-1.0.3[\${PYTHON_USEDEP}]
+            >=sci-libs/minfx-1.0.11[\${PYTHON_USEDEP}]
             || (
-                sci-libs/scipy-python2[\${PYTHON_MULTI_USEDEP}]
-                sci-libs/scipy[\${PYTHON_MULTI_USEDEP}]
+                sci-libs/scipy-python2[\${PYTHON_USEDEP}]
+                sci-libs/scipy[\${PYTHON_USEDEP}]
             )
         ")
         sci-chemistry/molmol
@@ -310,7 +310,7 @@ unconditionally.
         python? (
             ${PYTHON_DEPS}
             $(python_gen_cond_dep '
-                dev-python/numpy[${PYTHON_MULTI_USEDEP}]
+                dev-python/numpy[${PYTHON_USEDEP}]
             ')
         )
         <sci-libs/sundials-5.1.0:0=
@@ -323,7 +323,7 @@ unconditionally.
         dev-libs/libfmt
         python? (
             $(python_gen_cond_dep '
-                dev-python/cython[${PYTHON_MULTI_USEDEP}]
+                dev-python/cython[${PYTHON_USEDEP}]
             ')
         )
     "

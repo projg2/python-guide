@@ -3,29 +3,33 @@ Migration guides
 ================
 
 
-.. index:: PYTHON_USEDEP; python-single-r1
+.. index:: PYTHON_MULTI_USEDEP
 
-Migrating from PYTHON_USEDEP in python-single-r1
-================================================
-Prior to February 2020, ``python-single-r1`` used to provide
+Migrating from old PYTHON_USEDEP syntax in python-single-r1
+===========================================================
+Prior to February 2020, ``python-single-r1`` used to provide a single
 ``PYTHON_USEDEP`` variable alike the two other eclasses.  However,
 getting it to work correctly both on single-impl and multi-impl packages
 required a gross hack.
 
-The current eclass API requires using ``python_gen_cond_dep`` with
-``PYTHON_MULTI_USEDEP`` placeholder for multi-impl deps.  Single-impl
-deps can be expressed with ``PYTHON_SINGLE_USEDEP`` that can be used
-either as placeholder, or directly as a variable.
+The current eclass API requires using ``python_gen_cond_dep`` function
+to generate multi-impl deps instead, with ``PYTHON_USEDEP`` serving
+as a placeholder.  Single-impl deps can be expressed with
+``PYTHON_SINGLE_USEDEP`` that can be used either as placeholder,
+or directly as a variable.
+
+During a transitional period, ``PYTHON_USEDEP`` was banned entirely
+and ``PYTHON_MULTI_USEDEP`` was used instead.  Today both are permitted
+and the former is recommended.
 
 The recommended rule of thumb for migrating old ebuilds is to:
 
-1. Replace all instances of ``${PYTHON_USEDEP}`` with
-   ``${PYTHON_MULTI_USEDEP}`` for multi-impl deps
-   or ``${PYTHON_SINGLE_USEDEP}`` for single-impl deps.  If you don't
-   know the type of given dep, you can choose arbitrarily and deptree
-   check will tell you if you chose wrong.
+1. Replace all instances of ``${PYTHON_USEDEP}`` for simple-impl deps
+   with ``${PYTHON_SINGLE_USEDEP}``.  If you don't know the type
+   of given dep, dependency check (repoman, pkgcheck) will tell you
+   if you chose wrong.
 
-2. Wrap the dependencies using ``${PYTHON_MULTI_USEDEP}`` in a single
+2. Wrap the dependencies using ``${PYTHON_USEDEP}`` in a single
    ``python_gen_cond_dep`` block (reordering may be desirable).
 
 3. Run ``pkgcheck scan`` or ``repoman full``.  If you get syntax errors,

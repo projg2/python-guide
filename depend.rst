@@ -137,11 +137,10 @@ it only with older versions of Python::
 Please note that the first argument is a template containing literal
 (escaped through use of single quotes) ``${PYTHON_USEDEP}`` that will
 be substituted with partial USE dependency by the eclass function
-(when using ``python-single-r1``, this will be either
-``${PYTHON_SINGLE_USEDEP}`` or ``${PYTHON_MULTI_USEDEP}``).  It is
-followed by a list of implementations that are *not* quoted.
-The example is using bash brace expansion to express ``python3_6
-python3_7`` shorter.
+(``${PYTHON_SINGLE_USEDEP}`` is also permitted when using
+``python-single-r1``).  It is followed by a list of implementations that
+are *not* quoted.  The example is using bash brace expansion to express
+``python3_6 python3_7`` shorter.
 
 Since ``pypy3`` can refer to any version of PyPy3, the dependency will
 eventually become outdated as PyPy3 upgrades to Python 3.8

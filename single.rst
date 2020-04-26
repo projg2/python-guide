@@ -57,7 +57,7 @@ the implicitly exported ``pkg_setup`` phase.
 
 
 .. index:: PYTHON_SINGLE_USEDEP
-.. index:: PYTHON_MULTI_USEDEP
+.. index:: PYTHON_USEDEP; python-single-r1
 .. index:: python_gen_cond_dep; for python-single-r1
 
 Dependencies
@@ -80,13 +80,13 @@ USE dependency::
 When depending on multi-impl packages, a more complex construct must
 be used.  The ``python_gen_cond_dep`` generator function is used
 to copy the specified dependency template for all supported
-implementations, and substitute ``${PYTHON_MULTI_USEDEP}`` template
-inside it::
+implementations, and substitute ``${PYTHON_USEDEP}`` template inside
+it::
 
     RDEPEND="
         ...
         $(python_gen_cond_dep '
-            dev-python/matplotlib-python2[gtk2,${PYTHON_MULTI_USEDEP}]
+            dev-python/matplotlib-python2[gtk2,${PYTHON_USEDEP}]
         ')
     "
 
@@ -99,13 +99,13 @@ with explicit escapes have to be used::
     RDEPEND="
         ...
         $(python_gen_cond_dep "
-            dev-python/wxpython:${WX_GTK_VER}[\${PYTHON_MULTI_USEDEP}]
+            dev-python/wxpython:${WX_GTK_VER}[\${PYTHON_USEDEP}]
         ")"
 
 As demonstrated above, the USE dependency string can be combined with
 other USE dependencies.  ``PYTHON_SINGLE_USEDEP`` can be used both
-inside and outside ``python_gen_cond_dep``, while
-``PYTHON_MULTI_USEDEP`` only inside it.
+inside and outside ``python_gen_cond_dep``, while ``PYTHON_USEDEP`` only
+inside it.
 
 
 Conditional Python use
@@ -142,7 +142,7 @@ needs to be rewritten to call the default implementation conditionally:
     DEPEND="${RDEPEND}
         python? (
             $(python_gen_cond_dep '
-                dev-python/cython[${PYTHON_MULTI_USEDEP}]
+                dev-python/cython[${PYTHON_USEDEP}]
             ')
         )"
 

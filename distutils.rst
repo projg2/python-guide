@@ -127,9 +127,9 @@ to be rewritten.
         sci-physics/root:=[${PYTHON_SINGLE_USEDEP}]
         dev-python/root_numpy[${PYTHON_SINGLE_USEDEP}]
         $(python_gen_cond_dep '
-            dev-python/matplotlib[${PYTHON_MULTI_USEDEP}]
-            dev-python/pytables[${PYTHON_MULTI_USEDEP}]
-            dev-python/termcolor[${PYTHON_MULTI_USEDEP}]
+            dev-python/matplotlib[${PYTHON_USEDEP}]
+            dev-python/pytables[${PYTHON_USEDEP}]
+            dev-python/termcolor[${PYTHON_USEDEP}]
         ')"
 
     DEPEND="
