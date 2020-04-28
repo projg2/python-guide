@@ -23,6 +23,7 @@ Gentoo Python Guide
    expert-multi
    buildsys
    migration
+   package-maintenance
    interpreter-maintenance
 
 
