@@ -69,7 +69,7 @@ since they need to explicitly repeat build and install steps for each
 enabled implementation.  Using this model is recommended for packages
 providing Python modules or extensions only, or having multi-impl
 reverse dependencies.  In some cases supporting multi-impl build
-requieres applying hacks, e.g. ``dev-libs/boost[python]`` uses
+requires applying hacks, e.g. ``dev-libs/boost[python]`` uses
 non-standard names to install ``libboost_python`` for multiple Python
 versions.
 
