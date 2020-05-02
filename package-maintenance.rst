@@ -41,3 +41,24 @@ This usually applies to stable packages as well as new Python targets
 are generally ``use.stable.mask``-ed.  This means that stable users
 will not be able to enable newly added flags and therefore the risk
 of the change breaking stable systems is minimal.
+
+
+Which packages can be (co-)maintained by the Python project?
+============================================================
+A large part of the Python ecosystem is fairly consistent, making it
+feasible for (co-)maintenance by the Gentoo Python team.
+
+As a rule of thumb, Python team is ready to maintain packages specific
+to the Python ecosystem and useful for the general population of Python
+programmers.  This includes Python interpreters and tooling, packages
+purely providing Python modules and extensions and utilities specific
+to the Python language.
+
+However, the Python team has limited manpower, therefore it may reject
+packages that have high maintenance requirements.  As a rule, Python
+team does not accept packages without working tests.
+
+If your package matches the above profile, feel free to ask a member
+of the Python project whether they would like to (co-)maintain
+the package.  However, if you are not a member of the project, please
+do not add us without asking first.
