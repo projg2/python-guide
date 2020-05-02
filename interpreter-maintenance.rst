@@ -41,6 +41,37 @@ follows roughly the following life cycle:
 9. Finally, the interpreter is moved to `python repository`_ where it
    lives for as long as it builds.
 
+For example, Python 3.9 is at stage 1 at the time of writing.  It is
+still in alpha stage, and upstream has not finalized its feature set,
+therefore it is too early to declare package support for Python 3.9
+and there are no target flags.
+
+Python 3.8 is moving from stage 2 to stage 3 — it is being stabilized
+by arch teams at this very moment.  When that's done, we will work
+on unmasking the flag on stable systems and it will become our next
+default target.
+
+Python 3.7 is moving from stage 5 to stage 6.  The vast majority
+of packages have been ported to it, and we have already announced
+the switch date.
+
+When the switch happens, Python 3.6 will move from stage 6 to stage 7.
+We are going to support it for quite some time still but as things
+regress, we will eventually decide to remove it.
+
+Python 3.5 and 3.4 are at stage 9.  They live in the Python repository
+but have no targets.  You can still use them e.g. inside a virtualenv
+to test your own software.
+
+Python 2.7 is currently somewhere between stages 6 and 7.  It is still
+enabled by default for backwards compatibility but we are aggressively
+removing it.
+
+PyPy3 has recently reached stage 3.  It is not clear if we are going
+to pursue enabling the target on stable system though.  PyPy2.7 is
+at stage 8, as the targets were removed already and it is kept
+as a dependency and testing target.
+
 
 Notes specific to Python interpreters
 =====================================
