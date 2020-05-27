@@ -154,6 +154,89 @@ in ``~/binpkg/${arch}/pypy``.  Upload them and use them to bump
 ``pypy-exe-bin``.
 
 
+Adding a new Python implementation
+==================================
+Eclass and profile changes
+--------------------------
+When adding a new Python target, please remember to perform all
+the following tasks:
+
+- add the new target flags to ``profiles/desc/python_targets.desc``
+  and ``python_single_target.desc``.
+
+- force the new implementation on ``dev-lang/python-exec``
+  via ``profiles/base/package.use.force``.
+
+- mask the new target flags on stable profiles
+  via ``profiles/base/use.stable.mask``.
+
+- add the new target to ``_PYTHON_ALL_IMPLS`` and update the patterns
+  in ``_python_impl_supported()`` in ``python-utils-r1.eclass``.
+
+
+Porting initial packages
+------------------------
+The initial porting is quite hard due to a number of circular
+dependencies.  To ease the process, some of the high profile packages
+are ported first with tests and their dependencies disabled for the new
+implementation, e.g.:
+
+.. code-block:: bash
+   :emphasize-lines: 4-11,19-22
+
+    BDEPEND="
+        app-arch/unzip
+        test? (
+            $(python_gen_cond_dep '
+                dev-python/mock[${PYTHON_USEDEP}]
+                dev-python/pip[${PYTHON_USEDEP}]
+                >=dev-python/pytest-3.7.0[${PYTHON_USEDEP}]
+                dev-python/pytest-fixture-config[${PYTHON_USEDEP}]
+                dev-python/pytest-virtualenv[${PYTHON_USEDEP}]
+                dev-python/wheel[${PYTHON_USEDEP}]
+            ' python2_7 python3_{6,7,8} pypy3)
+            $(python_gen_cond_dep '
+                dev-python/futures[${PYTHON_USEDEP}]
+            ' -2)
+        )
+    "
+
+    python_test() {
+        if [[ ${EPYTHON} == python3.9 ]]; then
+            einfo "Tests are skipped on py3.9 due to unported deps"
+            return
+        fi
+
+        distutils_install_for_testing
+        # test_easy_install raises a SandboxViolation due to ${HOME}/.pydistutils.cfg
+        # It tries to sandbox the test in a tempdir
+        HOME="${PWD}" pytest -vv ${PN} || die "Tests failed under ${EPYTHON}"
+    }
+
+
+The recommended process is to, in order:
+
+1. Port ``dev-python/setuptools`` and ``dev-python/certifi`` with tests
+   disabled.  Test it via ``tox`` in a git checkout.
+
+2. Port ``dev-python/nose`` with additional dependencies disabled
+   (tests skip missing dependencies gracefully).
+
+3. Port ``dev-python/pytest`` and its runtime dependencies with pytest's
+   tests disabled (but tests of the dependencies enabled).  This should
+   yield around 20 packages.  Test it via ``tox`` in a git checkout.
+
+4. Port ``dev-python/urllib3`` and its runtime dependencies with
+   urllib3's tests disabled (but tests of the dependencies enabled).
+   This should yield another 20 packages.  Test it from a git checkout
+   (it uses nox, so you may want to write ``tox.ini`` yourself).
+
+Once these packages are done, you should be able to work towards
+reenabling tests in them via porting their (deep) dependencies in groups
+of around 10 packages without cyclic dependencies extending out
+of the group.
+
+
 .. _python repository: https://gitweb.gentoo.org/proj/python.git/
 .. _Gentoo fork of CPython repository:
    https://gitweb.gentoo.org/fork/cpython.git/
