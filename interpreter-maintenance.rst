@@ -57,7 +57,7 @@ the switch date.
 
 When the switch happens, Python 3.6 will move from stage 6 to stage 7.
 We are going to support it for quite some time still but as things
-regress, we will eventually decide to remove it.
+progress, we will eventually decide to remove it.
 
 Python 3.5 and 3.4 are at stage 9.  They live in the Python repository
 but have no targets.  You can still use them e.g. inside a virtualenv
