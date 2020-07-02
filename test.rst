@@ -153,6 +153,17 @@ if necessary.
 pytest-specific recipes
 =======================
 
+Skipping tests based on markers
+-------------------------------
+A few packages use `custom pytest markers`_ to indicate e.g. tests
+requiring Internet access.  These markers can be used to conveniently
+disable whole test groups, e.g.::
+
+    python_test() {
+        pytest -vv -m 'not network' dask || die "Tests failed with ${EPYTHON}"
+    }
+
+
 Avoiding the dependency on pytest-runner
 ----------------------------------------
 pytest-runner_ is a package providing ``pytest`` command to setuptools.
@@ -215,4 +226,6 @@ it explicitly::
 .. _django: https://www.djangoproject.com/
 .. _why tests must not use Internet:
    https://devmanual.gentoo.org/ebuild-writing/functions/src_test/#tests-that-require-network-or-service-access
+.. _custom pytest markers:
+   https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
