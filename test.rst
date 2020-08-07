@@ -150,6 +150,70 @@ so that an interested user can remove the restriction and run them
 if necessary.
 
 
+Tests aborting (due to assertions)
+==================================
+There are cases of package's tests terminating with an unclear error
+message and backtrace similar to the following::
+
+    ============================= test session starts ==============================
+    platform linux -- Python 3.7.8, pytest-6.0.1, py-1.9.0, pluggy-0.13.1 -- /usr/bin/python3.7
+    cachedir: .pytest_cache
+    rootdir: /var/tmp/portage/dev-python/sabyenc-4.0.2/work/sabyenc-4.0.2, configfile: pytest.ini
+    collecting ... collected 24 items
+
+    [...]
+    tests/test_decoder.py::test_crc_pickles PASSED                           [ 54%]
+    tests/test_decoder.py::test_empty_size_pickles Fatal Python error: Aborted
+
+    Current thread 0x00007f748bc47740 (most recent call first):
+      File "/var/tmp/portage/dev-python/sabyenc-4.0.2/work/sabyenc-4.0.2/tests/testsupport.py", line 74 in sabyenc3_wrapper
+      File "/var/tmp/portage/dev-python/sabyenc-4.0.2/work/sabyenc-4.0.2/tests/test_decoder.py", line 119 in test_empty_size_pickles
+      File "/usr/lib/python3.7/site-packages/_pytest/python.py", line 180 in pytest_pyfunc_call
+      File "/usr/lib/python3.7/site-packages/pluggy/callers.py", line 187 in _multicall
+      [...]
+      File "/usr/lib/python-exec/python3.7/pytest", line 11 in <module>
+    /var/tmp/portage/dev-python/sabyenc-4.0.2/temp/environment: line 2934:    66 Aborted                 (core dumped) pytest -vv
+
+This usually indicates that the C code of some Python extension failed
+an assertion.  Since pytest does not print captured output when exiting
+due to a signal, you need to disable output capture (using ``-s``)
+to get a more useful error, e.g.::
+
+    $ python3.7 -m pytest -s
+    =============================================================== test session starts ===============================================================
+    platform linux -- Python 3.7.8, pytest-6.0.1, py-1.9.0, pluggy-0.13.1
+    rootdir: /tmp/sabyenc, configfile: pytest.ini
+    plugins: asyncio-0.14.0, forked-1.3.0, xdist-1.34.0, hypothesis-5.23.9, mock-3.2.0, flaky-3.7.0, timeout-1.4.2, freezegun-0.4.2
+    collected 25 items                                                                                                                                
+
+    tests/test_decoder.py .............python3.7: src/sabyenc3.c:596: decode_usenet_chunks: Assertion `PyByteArray_Check(PyList_GetItem(Py_input_list, lp))' failed.
+    Fatal Python error: Aborted
+
+    Current thread 0x00007fb5db746740 (most recent call first):
+      File "/tmp/sabyenc/tests/testsupport.py", line 73 in sabyenc3_wrapper
+      File "/tmp/sabyenc/tests/test_decoder.py", line 117 in test_empty_size_pickles
+      File "/usr/lib/python3.7/site-packages/_pytest/python.py", line 180 in pytest_pyfunc_call
+      File "/usr/lib/python3.7/site-packages/pluggy/callers.py", line 187 in _multicall
+      File "/usr/lib/python3.7/site-packages/pluggy/manager.py", line 87 in <lambda>
+      [...]
+      File "/usr/lib/python3.7/site-packages/pytest/__main__.py", line 7 in <module>
+      File "/usr/lib/python3.7/runpy.py", line 85 in _run_code
+      File "/usr/lib/python3.7/runpy.py", line 193 in _run_module_as_main
+    Aborted (core dumped)
+
+Now the message clearly indicates the failed assertion.
+
+It is also common that upstream is initially unable to reproduce
+the bug.  This is because Ubuntu and many other common distributions
+build Python with ``-DNDEBUG`` and the flag leaks to extension builds.
+As a result, all assertions are stripped at build time.  Upstream
+can work around that by explicitly setting ``CFLAGS`` for the build,
+e.g.::
+
+    $ CFLAGS='-O0 -g' python setup.py build build_ext -i
+    $ pytest -s
+
+
 pytest-specific recipes
 =======================
 
