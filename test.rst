@@ -64,6 +64,51 @@ tarball::
     SRC_URI="https://github.com/${PN}/${PN}/archive/${PV}.tar.gz -> ${P}.gh.tar.gz"
 
 
+Checklist for dealing with test failures
+========================================
+If you see some test failures but do not have a guess as to why they
+would be happening, try the following for a start:
+
+1. Check upstream CI (if any).  That's a quick way of verifying that
+   there is no known breakage at the relevant tag.
+
+2. Try running tests as your regular user, the way upstream suggests
+   (e.g. via ``tox``).  Try using a git checkout at the specific tag.
+   This is the basic way of determining whether the package is actually
+   broken or if it is something on our end.
+
+3. If the tests fail at the specified tag, try upstream master branch.
+   Maybe there was a fix committed.
+
+If it seems that the issue is on our end, try the following and see
+if it causes the subset of failing tests to change:
+
+1. Add ``distutils_install_for_testing`` to the test sub-phase.  This
+   resolves majority of problems with test suite assuming the package
+   must already be installed.
+
+2. Actually install the package to the system (with tests disabled).
+   This can confirm cases of package for whom the above function
+   does not work.  In the worst case, you can set a test self-dependency
+   to force users to install the package before testing::
+
+       test? ( ~dev-python/myself-${PV} )
+
+3. Try testing a different Python implementation.  If a subset of tests
+   is failing with Python 3.6, see if it still happens with 3.7 or 3.8.
+   If 3.8 is passing but 3.9 is not, it's most likely some
+   incompatibility upstream did not account for.
+
+4. Run tests with ``FEATURES=-network-sandbox``.  Sometimes lack
+   of Internet access causes non-obvious failures.
+
+5. Try a different test runner.  Sometimes the subtle differences
+   in how tests are executed can lead to test failures.  But beware:
+   some test runners may not run the full set of tests, so verify
+   that you have actually fixed them and not just caused them to
+   be skipped.
+
+
 Skipping problematic tests
 ==========================
 While generally it is preferable to fix tests, sometimes you will face
