@@ -293,6 +293,33 @@ The recommended method of stripping it is to use sed::
     }
 
 
+Using pytest-xdist to run tests in parallel
+-------------------------------------------
+pytest-xdist_ is a plugin that makes it possible to run multiple tests
+in parallel.  This is especially useful for programs with large test
+suites that take significant time to run single-threaded.
+
+Not all test suites support pytest-xdist.  Particularly, it requires
+that the tests are written not to collide one with another.
+
+Using pytest-xdist is recommended if the package in question supports it
+(i.e. it does not cause semi-random test failures) and its test suite
+takes significant time.  When using pytest-xdist, please respect user's
+make options for the job number, e.g.::
+
+    inherit multiprocessing
+
+    python_test() {
+       pytest -vv \
+           -n "$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")" ||
+           die "Tests failed with ${EPYTHON}"
+    }
+
+Please note that some upstream use pytest-xdist even if there is no real
+gain from doing so.  If the package's tests take a short time to finish,
+please avoid the dependency and strip it if necessary.
+
+
 Avoiding dependencies on other pytest plugins
 ---------------------------------------------
 There is a number of pytest plugins that have little value to Gentoo
@@ -338,3 +365,4 @@ it explicitly::
 .. _custom pytest markers:
    https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
+.. _pytest-xdist: https://pypi.org/project/pytest-xdist/
