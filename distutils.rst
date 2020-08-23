@@ -193,6 +193,40 @@ via setuptools.  For this purpose, a build-time dependency
 on ``dev-python/pyproject2setuppy`` is added.
 
 
+Conditional distutils/setuptools use in packages
+================================================
+Some upstreams find it convenient to alternatively support both
+``setuptools`` and ``distutils`` in their packages.  A commonly used
+snippet is:
+
+.. code-block:: python
+
+    try:
+        from setuptools import setup
+    except ImportError:
+        from distutils import setup
+
+However, this is very problematic to Gentoo packages.  This is because
+pure distutils installs egg-info data as a single file, while setuptools
+install the same data as a directory (using the same path).  Therefore,
+egg-info will either be a file or a directory depending on the currently
+installed dependencies.  Now, rebuilding the same version with
+setuptools installed/uninstalled results in file-directory replacement
+that is not permitted by the PMS and not handled cleanly by package
+managers in Gentoo.
+
+To avoid this problem, you should force using one of the options
+unconditionally.  Today, this is already done automatically
+by depending on setuptools via the default ``DISTUTILS_USE_SETUPTOOLS``
+value.  However, if it is preferable to use distutils (e.g. for
+bootstrap needs), you need to patch ``setup.py`` not to use setuptools
+(and set ``DISTUTILS_USE_SETUPTOOLS=no``).
+
+A few packages use more complex conditions, e.g. using setuptools
+depending on the invoked command.  These need individually verifying
+whether any action needs to be done.
+
+
 .. index:: DISTUTILS_IN_SOURCE_BUILD
 
 In-source vs out-of-source builds
