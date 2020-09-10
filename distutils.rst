@@ -193,6 +193,50 @@ via setuptools.  For this purpose, a build-time dependency
 on ``dev-python/pyproject2setuppy`` is added.
 
 
+.. index:: SETUPTOOLS_SCM_PRETEND_VERSION
+
+setuptools_scm and snapshots
+============================
+setuptools_scm_ is a package providing additional features for running
+inside a VCS checkout, in particular the ability to determine version
+from VCS tags.  However, this works correctly only when the package
+is built from VCS checkout or an ``sdist`` archive containing
+pregenerated metadata.  It does not work when building from a GitHub
+snapshot::
+
+    Traceback (most recent call last):
+      File "/tmp/executing-0.5.2/setup.py", line 4, in <module>
+        setup()
+      File "/usr/lib/python3.9/site-packages/setuptools/__init__.py", line 143, in setup
+        _install_setup_requires(attrs)
+      File "/usr/lib/python3.9/site-packages/setuptools/__init__.py", line 131, in _install_setup_requires
+        dist = distutils.core.Distribution(dict(
+      File "/usr/lib/python3.9/site-packages/setuptools/dist.py", line 425, in __init__
+        _Distribution.__init__(self, {
+      File "/usr/lib/python3.9/distutils/dist.py", line 292, in __init__
+        self.finalize_options()
+      File "/usr/lib/python3.9/site-packages/setuptools/dist.py", line 717, in finalize_options
+        ep(self)
+      File "/usr/lib/python3.9/site-packages/setuptools_scm/integration.py", line 48, in infer_version
+        dist.metadata.version = _get_version(config)
+      File "/usr/lib/python3.9/site-packages/setuptools_scm/__init__.py", line 148, in _get_version
+        parsed_version = _do_parse(config)
+      File "/usr/lib/python3.9/site-packages/setuptools_scm/__init__.py", line 110, in _do_parse
+        raise LookupError(
+    LookupError: setuptools-scm was unable to detect version for '/tmp/executing-0.5.2'.
+
+    Make sure you're either building from a fully intact git repository or PyPI tarballs. Most other sources (such as GitHub's tarballs, a git checkout without the .git folder) don't contain the necessary metadata and will not work.
+
+    For example, if you're using pip, instead of https://github.com/user/proj/archive/master.zip use git+https://github.com/user/proj.git#egg=proj
+
+This problem can be resolved by providing the correct version externally
+via ``SETUPTOOLS_SCM_PRETEND_VERSION``::
+
+    export SETUPTOOLS_SCM_PRETEND_VERSION=${PV}
+
+.. _setuptools_scm: https://pypi.org/project/setuptools-scm/
+
+
 Conditional distutils/setuptools use in packages
 ================================================
 Some upstreams find it convenient to alternatively support both
