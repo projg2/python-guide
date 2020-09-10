@@ -273,6 +273,45 @@ disable whole test groups, e.g.::
     }
 
 
+Skipping tests based on paths/names
+-----------------------------------
+There are two primary methods of skipping tests based on path (and name)
+in pytest: using ``--ignore`` and ``--deselect``.
+
+``--ignore`` causes pytest to entirely ignore a file or a directory
+when collecting tests.  This works only for skipping whole files but it
+ignores missing dependencies and other failures occurring while
+importing the test file.
+
+``--deselect`` causes pytest to skip the specific test or tests.  It can
+be also used to select individual tests or even parametrized variants
+of tests.
+
+Both options can be combined to get tests to pass without having
+to alter the test files.  They are preferable over suggestions from
+`skipping problematic tests`_ when tests are installed as part
+of the package.  They can also be easily applied conditionally to Python
+interpreter.
+
+::
+
+    local deselect=(
+        # ignore whole file with missing dep
+        --ignore tests/test_client.py
+        # deselect a single test
+        --deselect 'tests/utils/test_general.py::test_filename'
+        # deselect a parametrized test based on first param
+        --deselect
+        'tests/test_transport.py::test_transport_works[eventlet'
+    )
+    [[ ${EPYTHON} == python3.6 ]] && deselect+=(
+        # deselect a test for py3.6 only
+        --deselect
+        'tests/utils/test_contextvars.py::test_leaks[greenlet]'
+    )
+    pytest -vv "${deselect[@]}" || die "Tests failed with ${EPYTHON}"
+
+
 Avoiding the dependency on pytest-runner
 ----------------------------------------
 pytest-runner_ is a package providing ``pytest`` command to setuptools.
