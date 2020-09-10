@@ -19,6 +19,7 @@ Gentoo Python Guide
    helper
    depend
    test
+   pytest
    concept
    expert-multi
    buildsys
