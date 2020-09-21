@@ -141,7 +141,7 @@ to be rewritten.
 Different build system variations
 =================================
 The most basic example presented above assumes that the package is using
-``dev-python/setuptools`` build system and not installing entry points.
+``dev-python/setuptools`` as a build system but not at runtime.
 The eclass automatically tries to detect whenever the default might be
 incorrect, and reports it::
 
@@ -172,20 +172,26 @@ The value needs to be set before inheriting the eclass:
     KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~x64-solaris"
     SLOT="0"
 
-This example package installs *entry points* (grep for ``entry_points``
-in ``setup.py`` or ``setup.cfg``), that is wrapper scripts that use
-setuptools to import the installed package files and execute subroutines
-within them.  This means that ``dev-python/setuptools`` must remain
-installed at runtime and the variable is set to ``rdepend``.
+This example package needs setuptools at runtime, i.e. its installed
+files import modules from ``pkg_resources`` or ``setuptools`` packages.
+A common case for it are *console script entry points* (grep for
+``entry_points`` in ``setup.py`` or ``setup.cfg``), that is wrapper
+scripts that use ``pkg_resources`` to call subroutines from
+the installed package.
+
+In this case, the variable is set to ``rdepend``.  The eclass detects
+this either if the package installs console script entry points,
+or lists setuptools as runtime dependency in its metadata.  If it uses
+aforementioned packages but misses the dependency, please submit a fix
+upstream adding it to ``install_requires``.
 
 Some packages do not use setuptools at all, and instead use plain
 distutils.  In this case, the correct value is simply ``no``.
 
 There are a few cases where the automatic check does not yield correct
-values, e.g. when ``dev-python/setuptools`` is used at runtime in other
-way than through entry points.  In that case, a value of ``manual``
-can be used to disable the logic completely and specify the dependencies
-manually.
+values  In that case, a value of ``manual`` can be used to disable
+the logic completely.  In this case, you need to specify the setuptools
+dependency manually.
 
 When a ``pyproject.toml``-based build system (flit, poetry) is being
 used, a value of ``pyproject.toml`` can be used to enable installing it
