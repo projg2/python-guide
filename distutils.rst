@@ -140,13 +140,53 @@ to be rewritten.
 
 Different build system variations
 =================================
-The most basic example presented above assumes that the package is using
-``dev-python/setuptools`` as a build system but not at runtime.
-The eclass automatically tries to detect whenever the default might be
-incorrect, and reports it::
+The commonly used build systems specific to Python packages can be
+classified for eclass support into following groups:
+
+1. Plain distutils (built-in in Python).
+2. Setuptools and its direct derivatives (e.g. pbr).
+3. ``pyproject.toml``-based build systems (Flit, Poetry).
+
+The eclass supports the first two directly.  Support for Flit and Poetry
+is provided through the ``dev-python/pyproject2setuppy`` package that
+converts the package's metadata to setuptools call.
+
+In addition to being a build system, setuptools provides runtime
+facilities via the ``pkg_resources`` module.  If these facilities
+are used, the package needs to have a runtime dependency
+on ``dev-python/setuptools``.  Otherwise, a build-time dependency
+is sufficient.
+
+
+DISTUTILS_USE_SETUPTOOLS
+------------------------
+The most common case right now is a package using setuptools as a build
+system, and therefore needing a build-time dependency only.  This
+is the eclass' default.  If your package does not fit this profile,
+you can set ``DISTUTILS_USE_SETUPTOOLS`` variable to one
+of the supported values:
+
+- ``no`` — pure distutils use (no extra dependencies).
+- ``bdepend`` — build-time use of setuptools (``BDEPEND``
+  on ``dev-python/setuptools``).
+- ``rdepend`` — build- and runtime use of setuptools (``BDEPEND``
+  and ``RDEPEND`` on ``dev-python/setuptools``).
+- ``pyproject.toml`` — use of Flit or Poetry (``BDEPEND``
+  on ``dev-python/pyproject2toml`` and ``dev-python/setuptools``).
+- ``manual`` — special value indicating that the eclass logic misbehaves
+  and the dependency needs to be specified manually.  Strongly
+  discouraged, please report a bug and/or fix the package instead.
+
+The cases for particular values are explained in subsequent sections.
+
+The Gentoo repository includes a post-install QA check that verifies
+whether the value of ``DISTUTILS_USE_SETUPTOOLS`` is correct,
+and reports if it is most likely incorrect.  This is why it is important
+to use the variable rather than specifying the dependency directly.
+An example report is::
 
      * DISTUTILS_USE_SETUPTOOLS value is probably incorrect
-     *   value:    DISTUTILS_USE_SETUPTOOLS=bdepend (default?)
+     *   have:     DISTUTILS_USE_SETUPTOOLS=bdepend (or unset)
      *   expected: DISTUTILS_USE_SETUPTOOLS=rdepend
 
 The value needs to be set before inheriting the eclass:
@@ -172,31 +212,142 @@ The value needs to be set before inheriting the eclass:
     KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~x64-solaris"
     SLOT="0"
 
-This example package needs setuptools at runtime, i.e. its installed
-files import modules from ``pkg_resources`` or ``setuptools`` packages.
-A common case for it are *console script entry points* (grep for
-``entry_points`` in ``setup.py`` or ``setup.cfg``), that is wrapper
-scripts that use ``pkg_resources`` to call subroutines from
-the installed package.
 
-In this case, the variable is set to ``rdepend``.  The eclass detects
-this either if the package installs console script entry points,
-or lists setuptools as runtime dependency in its metadata.  If it uses
-aforementioned packages but misses the dependency, please submit a fix
-upstream adding it to ``install_requires``.
+distutils and setuptools build systems
+--------------------------------------
+Distutils and setuptools are the two most common build systems
+for Python packages right now.  Their common feature is that they use
+a ``setup.py`` script that interfaces with the build system.  Generally,
+you can determine which of the two build systems are being used
+by looking at the imports in ``setup.py``, in particular from which
+module the ``setup`` function is imported.
 
-Some packages do not use setuptools at all, and instead use plain
-distutils.  In this case, the correct value is simply ``no``.
+Distutils-based packages (``DISTUTILS_USE_SETUPTOOLS=no``) use e.g.:
 
-There are a few cases where the automatic check does not yield correct
-values  In that case, a value of ``manual`` can be used to disable
-the logic completely.  In this case, you need to specify the setuptools
-dependency manually.
+.. code-block:: python
 
-When a ``pyproject.toml``-based build system (flit, poetry) is being
-used, a value of ``pyproject.toml`` can be used to enable installing it
-via setuptools.  For this purpose, a build-time dependency
-on ``dev-python/pyproject2setuppy`` is added.
+    from distutils import setup
+
+Setuptools-based package (``DISTUTILS_USE_SETUPTOOLS=bdepend``, unset
+or possibly ``rdepend`` as indicated by the subsequent sections) use:
+
+.. code-block:: python
+
+    from setuptools import setup
+
+In some cases, upstreams find it convenient to alternatively support
+both setuptools and distutils.  A commonly used snippet is:
+
+.. code-block:: python
+
+    try:
+        from setuptools import setup
+    except ImportError:
+        from distutils import setup
+
+However, non-fixed build system choice can be problematic to Gentoo
+users.  This is because pure distutils installs egg-info data as a
+single file, while setuptools install the same data as a directory
+(using the same path).  Therefore, if you rebuild the same version
+of the package with a different build system than before, you end up
+trying to replace a file with a directory or the other way around.
+This is not permitted by the PMS and not handled cleanly by the package
+managers.
+
+You must always ensure that a single build system will be used
+unconditionally.  In the case of the condition presented above, it is
+sufficient to leave ``DISTUTILS_USE_SETUPTOOLS`` at its default value
+as that will ensure that setuptools is installed and therefore
+the fallback will never take place.  However, patching ``setup.py`` may
+be necessary if you want to force distutils (e.g. to enable clean
+bootstrap) or the upstream condition requiers that.
+
+
+Setuptools' entry points
+------------------------
+*Entry points* provide the ability to expose some of the package's
+Python functions to other packages.  They are commonly used to implement
+plugin systems and by setuptools themselves to implement wrapper scripts
+for starting programs.
+
+Entry points are defined as ``entry_points`` argument to the ``setup()``
+function, or ``entry_points`` section in ``setup.cfg``.  They are
+installed in the package's egg-info as ``entry_points.txt``.  In both
+cases, they are grouped by entry point type, and defined as a dictionary
+mapping entry points names to the relevant functions.
+
+For our purposes, we are only interested in entry points used to define
+wrapper scripts, the ``console_scripts`` group, as they are installed
+with the package itself.  As for plugin systems, it is reasonable
+to assume that the installed plugins are only meaningful to the package
+using them, and therefore that the package using them will depend
+on the appropriate metadata provider.
+
+Old versions of setuptools used to implement the script wrappers using
+``pkg_resources`` package.  Modern versions of setuptools use
+the following logic:
+
+1. If ``importlib.metadata`` module is available (Python 3.8+), use it.
+   In this case, no external dependencies are necessary.
+
+2. If ``importlib_metadata`` backport is available, use it.  It is
+   provided by ``dev-python/importlib_metadata``.
+
+3. Otherwise, fall back to ``pkg_resources``.  It is provided
+   by ``dev-python/setuptools``.
+
+The eclass currently does not implement the explicit support for the new
+logic.  At this moment, we do not consider updating all the packages
+to support it correctly to be worth our developers' effort.  After all,
+setuptools is a common package dependency and being able to uninstall
+it long-term is not likely to be possible.
+
+Therefore, if your package uses ``console_scripts`` entry points, it
+needs to depend on setuptools at runtime, i.e. use the ``rdepend``
+value.
+
+Once Python 3.7 is no longer supported, we will start migrating packages
+not to require a runtime dependency on setuptools anymore.
+
+
+Other runtime uses of setuptools
+--------------------------------
+Besides the generated wrapper scripts, the package code itself may use
+the ``setuptools`` or ``pkg_resources`` packages.  The common cases
+for this include getting package metadata and resource files.  This
+could also be a case for plugin managers and derived build systems.
+
+As a rule of thumb, if any installed Python file imports ``setuptools``
+or ``pkg_resources``, the package needs to use the value of ``rdepend``.
+
+The QA check determines that this is the case by looking at the upstream
+dependencies (``install_requires``) installed by the package.  It is
+quite common for packages to miss the dependency, or have a leftover
+dependency.  If ``install_requires`` does not match actual imports
+in the installed modules, please submit a patch upstream.
+
+
+pyproject.toml-based projects
+-----------------------------
+The newer build systems used for Python packages avoid supplying
+``setup.py`` and instead declare package's metadata and build system
+information in ``pyproject.toml``.  Examples of these build systems
+are Flit and Poetry.
+
+These build systems are generally very heavy and do not support plain
+installation to a directory.  For this reason, Gentoo is using
+``dev-python/pyproject2setuppy`` to provide a thin wrapper for
+installing these packages using setuptools.
+
+To enable the necessary eclass logic and add appropriate build-time
+dependencies, specify the value of ``pyproject.toml``
+to ``DISTUTILS_USE_SETUPTOOLS``.
+
+Strictly speaking, both Flit and Poetry do support entry points,
+and therefore some packages actually need a runtime dependency
+on setuptools.  This is a known limitation, and it will probably
+not be addressed for the same reason as the logic for setuptools' entry
+points is not updated.
 
 
 .. index:: SETUPTOOLS_SCM_PRETEND_VERSION
@@ -241,40 +392,6 @@ via ``SETUPTOOLS_SCM_PRETEND_VERSION``::
     export SETUPTOOLS_SCM_PRETEND_VERSION=${PV}
 
 .. _setuptools_scm: https://pypi.org/project/setuptools-scm/
-
-
-Conditional distutils/setuptools use in packages
-================================================
-Some upstreams find it convenient to alternatively support both
-``setuptools`` and ``distutils`` in their packages.  A commonly used
-snippet is:
-
-.. code-block:: python
-
-    try:
-        from setuptools import setup
-    except ImportError:
-        from distutils import setup
-
-However, this is very problematic to Gentoo packages.  This is because
-pure distutils installs egg-info data as a single file, while setuptools
-install the same data as a directory (using the same path).  Therefore,
-egg-info will either be a file or a directory depending on the currently
-installed dependencies.  Now, rebuilding the same version with
-setuptools installed/uninstalled results in file-directory replacement
-that is not permitted by the PMS and not handled cleanly by package
-managers in Gentoo.
-
-To avoid this problem, you should force using one of the options
-unconditionally.  Today, this is already done automatically
-by depending on setuptools via the default ``DISTUTILS_USE_SETUPTOOLS``
-value.  However, if it is preferable to use distutils (e.g. for
-bootstrap needs), you need to patch ``setup.py`` not to use setuptools
-(and set ``DISTUTILS_USE_SETUPTOOLS=no``).
-
-A few packages use more complex conditions, e.g. using setuptools
-depending on the invoked command.  These need individually verifying
-whether any action needs to be done.
 
 
 .. index:: DISTUTILS_IN_SOURCE_BUILD
