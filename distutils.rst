@@ -774,6 +774,13 @@ can be rewritten as:
         test? ( dev-python/hypothesis[${PYTHON_USEDEP}] )
     "
 
+Installing the package before running tests
+-------------------------------------------
+``distutils_enable_tests`` can also install the package to a temporary
+directory before running tests.  To do that, pass ``--install``
+as the first option.  Fore more information, see `installing the package
+before testing`_.
+
 
 Undesirable test dependencies
 -----------------------------
@@ -912,18 +919,39 @@ for the majority of packages.
 
 However, some test suites will not work correctly unless the package
 has been properly installed via ``setup.py install``.  This may apply
-specifically to some plugin systems or packages using
-the ``pkg_resources`` framework.
+specifically to packages calling their executables that are created
+via entry points, various plugin systems or the use of package metadata.
 
 The ``distutils_install_for_testing`` function runs ``setup.py install``
 into a temporary directory, and adds the appropriate paths to ``PATH``
-and ``PYTHONPATH``.  It uses the *home directory* install layout that
-should satisfy most of the remaining test suites.
+and ``PYTHONPATH``.
+
+This function currently supports two install layouts:
+
+- the legacy *home directory* layout that is enabled via ``--via-home``
+  parameter,
+
+- the standard *root directory* layout that is enabled
+  via ``--via-root``.
+
+The home directory layout historically used to be necessary to fix
+problems with some packages.  However, the underlying issues probably
+went away along with old versions of Python, and the `removal of site.py
+hack`_ has broken it for most of the consumers.
+
+The root directory layout is consistent with the one used for the actual
+install.
+
+The eclass still defaults to the legacy layout but the default is going
+to be changed in the near future.  You are encouraged to explicitly test
+``--via-root`` option.  If your package fails with ``--via-root``
+but (miraculously) work with ``--via-home``, please pass that option
+explicitly.
 
 .. code-block:: bash
 
     python_test() {
-        distutils_install_for_testing
+        distutils_install_for_testing --via-root
         pytest -vv --no-network || die "Testsuite failed under ${EPYTHON}"
     }
 
@@ -1072,3 +1100,5 @@ should be used, and issue a warning if it's missing or incorrect.
 
 .. _distutils-r1.eclass(5):
    https://devmanual.gentoo.org/eclass-reference/distutils-r1.eclass/index.html
+.. _removal of site.py hack:
+   https://github.com/pypa/setuptools/commit/91213fb2e7eecde9f5d7582de485398f546e7aa8
