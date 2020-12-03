@@ -7,6 +7,15 @@ Advanced concepts
 Namespace packages
 ==================
 
+Obsoletion note
+---------------
+Since Python 2 support has been removed from the relevant packages
+in Gentoo, there is no need to provide explicit support for namespaces.
+However, it is still necessary to *remove* the namespace support
+installed upstream to prevent potential problems, notably file
+collisions.
+
+
 Hierarchical package structure
 ------------------------------
 Traditionally, Python packages were organized into a hierarchical
@@ -116,111 +125,27 @@ Packaging pkgutil-style namespaces in Gentoo
 --------------------------------------------
 Normally all packages using the same pkgutil-style namespace install
 its ``__init__.py`` file causing package collisions.  In order
-to resolve them, you need to move this file into a dedicated common
-package.
-
-Sometimes upstream already provides such a package (e.g.
-``dev-python/backports``), or has a single common package
-that can be used to install the namespace.  If this is not the case,
-you should create a new package named ``dev-python/namespace-<name>``.
-The commonly copied code to install namespace follows:
-
-.. code-block:: bash
-   :emphasize-lines: 26-29,33
-
-    # Copyright 1999-2020 Gentoo Authors
-    # Distributed under the terms of the GNU General Public License v2
-
-    EAPI=7
-
-    PYTHON_COMPAT=( pypy3 python{2_7,3_{6,7,8}} )
-    inherit python-r1
-
-    DESCRIPTION="Namespace package declaration for jaraco"
-    HOMEPAGE="https://wiki.gentoo.org/wiki/Project:Python/Namespace_packages"
-    SRC_URI=""
-
-    LICENSE="public-domain"
-    SLOT="0"
-    KEYWORDS="~alpha amd64 ~arm arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc x86"
-    IUSE=""
-    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
-
-    RDEPEND="
-        !<dev-python/jaraco-packaging-5.1
-        ${PYTHON_DEPS}
-    "
-    DEPEND="${PYTHON_DEPS}"
-
-    src_unpack() {
-        mkdir -p "${S}"/jaraco || die
-        cat > "${S}"/jaraco/__init__.py <<-EOF || die
-            __path__ = __import__('pkgutil').extend_path(__path__, __name__)
-        EOF
-    }
-
-    src_install() {
-        python_foreach_impl python_domodule jaraco
-    }
-
-Usually, you will also have to strip the colliding ``__init__.py``
-from packages installing into this namespace:
+to avoid them, you need to strip these files when installing
+the package.
 
 .. code-block:: bash
 
     python_install() {
         rm "${BUILD_DIR}"/lib/jaraco/__init__.py || die
-        distutils-r1_python_install --skip-build
+        distutils-r1_python_install
     }
+
+Sometimes upstream provides an explicit common package responsible
+for installing the namespace's ``__init__.py``.  This is no longer
+necessary with Python 3.  If necessary, please strip the dependency
+on this package and ask upstream to make it conditional to Python 2.
 
 
 Packaging setuptools-style namespaces in Gentoo
 -----------------------------------------------
 Similar approach is used for setuptools-style namespace packages.
-The only differences are in ``__init__.py`` code and removal method.
-
-The ``dev-python/namespace-<name>`` package for setuptools-style
-namespace should use the following code:
-
-.. code-block:: bash
-   :emphasize-lines: 24-27,31
-
-    # Copyright 1999-2020 Gentoo Authors
-    # Distributed under the terms of the GNU General Public License v2
-
-    EAPI=6
-
-    PYTHON_COMPAT=( pypy3 python{2_7,3_{6,7,8}} )
-    inherit python-r1
-
-    DESCRIPTION="Namespace package declaration for zope"
-    HOMEPAGE="https://wiki.gentoo.org/wiki/Project:Python/Namespace_packages"
-    SRC_URI=""
-
-    LICENSE="public-domain"
-    SLOT="0"
-    KEYWORDS="~alpha amd64 arm arm64 hppa ia64 ~m68k ~mips ppc ppc64 s390 ~sh sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
-    IUSE=""
-    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
-
-    RDEPEND="dev-python/setuptools[${PYTHON_USEDEP}]
-        ${PYTHON_DEPS}"
-    DEPEND="${PYTHON_DEPS}"
-
-    src_unpack() {
-        mkdir -p "${S}"/zope || die
-        cat > "${S}"/zope/__init__.py <<-EOF || die
-            __import__('pkg_resources').declare_namespace(__name__)
-        EOF
-    }
-
-    src_install() {
-        python_foreach_impl python_domodule zope
-    }
-
-Setuptools normally do not install ``__init__.py`` files but ``*.pth``
-files that do not collide.  It is therefore easy to miss them but they
-can cause quite a mayhem.  Therefore, remember to strip them:
+The only differences is that a ``.pth`` file is installed by the package
+and needs to be removed.
 
 .. code-block:: bash
 
