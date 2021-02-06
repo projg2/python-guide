@@ -928,30 +928,28 @@ and ``PYTHONPATH``.
 
 This function currently supports two install layouts:
 
-- the legacy *home directory* layout that is enabled via ``--via-home``
-  parameter,
-
 - the standard *root directory* layout that is enabled
-  via ``--via-root``.
+  via ``--via-root``,
+
+- the legacy *home directory* layout that is enabled via ``--via-home``
+  parameter.
+
+
+The eclass defaults to the root directory layout that is consistent
+with the layout used for the actual install.  If your package fails,
+you may try forcing the legacy layout via ``--via-home``.  However,
+if you need to do that, please report a bug for the eclass, so that
+we can look for a better solution looking forward.
 
 The home directory layout historically used to be necessary to fix
 problems with some packages.  However, the underlying issues probably
 went away along with old versions of Python, and the `removal of site.py
 hack`_ has broken it for most of the consumers.
 
-The root directory layout is consistent with the one used for the actual
-install.
-
-The eclass still defaults to the legacy layout but the default is going
-to be changed in the near future.  You are encouraged to explicitly test
-``--via-root`` option.  If your package fails with ``--via-root``
-but (miraculously) work with ``--via-home``, please pass that option
-explicitly.
-
 .. code-block:: bash
 
     python_test() {
-        distutils_install_for_testing --via-root
+        distutils_install_for_testing
         pytest -vv --no-network || die "Testsuite failed under ${EPYTHON}"
     }
 
