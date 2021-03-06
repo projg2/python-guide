@@ -161,6 +161,35 @@ sure to depend on ``dev-python/pytest-rerunfailures``::
     }
 
 
+ImportPathMismatchError
+=======================
+An ``ImportPathMismatchError`` generally indicates that the same Python
+module (or one that supposedly looks the same) has been loaded twice
+using different paths, e.g.::
+
+    E   _pytest.pathlib.ImportPathMismatchError: ('path', '/usr/lib/pypy3.7/site-packages/path', PosixPath('/tmp/portage/dev-python/jaraco-path-3.3.1/work/jaraco.path-3.3.1/jaraco/path.py'))
+
+These problems are usually caused by pytest test discovery getting
+confused by namespace packages.  In this case, the ``jaraco`` directory
+is a Python 3-style namespace but pytest is treating it as a potential
+test directory.  Therefore, instead of loading it as ``jaraco.path``
+relatively to the top directory, it loads it as ``path`` relatively
+to the ``jaraco`` directory.
+
+The simplest way to resolve this problem is to restrict the test
+discovery to the actual test directories, e.g.::
+
+    python_test() {
+        pytest -vv test || die "Tests failed with ${EPYTHON}"
+    }
+
+or::
+
+    python_test() {
+        pytest -vv --ignore jaraco || die "Tests failed with ${EPYTHON}"
+    }
+
+
 .. _custom pytest markers:
    https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
