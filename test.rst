@@ -2,7 +2,7 @@
 Resolving test suite problems
 =============================
 
-.. highlight: bash
+.. highlight:: bash
 
 Choosing the correct test runner
 ================================

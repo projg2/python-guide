@@ -2,7 +2,7 @@
 pytest recipes
 ==============
 
-.. highlight: bash
+.. highlight:: bash
 
 Skipping tests based on markers
 ===============================
