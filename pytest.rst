@@ -137,7 +137,34 @@ it explicitly::
     }
 
 
+TypeError: _make_test_flaky() got an unexpected keyword argument 'reruns'
+=========================================================================
+If you see a test error resembling the following::
+
+    TypeError: _make_test_flaky() got an unexpected keyword argument 'reruns'
+
+This means that the tests are being run via flaky_ plugin while
+the package in question expects pytest-rerunfailures_.  This is
+because both plugins utilize the same ``@pytest.mark.flaky`` marker
+but support different set of arguments.
+
+To resolve the problem, explicitly disable the ``flaky`` plugin and make
+sure to depend on ``dev-python/pytest-rerunfailures``::
+
+    BDEPEND="
+        test? (
+             dev-python/dev-python/pytest-rerunfailures[${PYTHON_USEDEP}]
+        )"
+
+    python_test() {
+        pytest -vv -p no:flaky || die "Tests failed with ${EPYTHON}"
+    }
+
+
 .. _custom pytest markers:
    https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
 .. _pytest-xdist: https://pypi.org/project/pytest-xdist/
+.. _flaky: https://github.com/box/flaky/
+.. _pytest-rerunfailures:
+   https://github.com/pytest-dev/pytest-rerunfailures/
