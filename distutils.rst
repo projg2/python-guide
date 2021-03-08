@@ -394,6 +394,41 @@ via ``SETUPTOOLS_SCM_PRETEND_VERSION``::
 .. _setuptools_scm: https://pypi.org/project/setuptools-scm/
 
 
+Parallel build race conditions
+==============================
+The distutils build system has a major unresolved bug regarding race
+conditions.  If the same source file is used to build multiple Python
+extensions, the build can start multiple simultaneous compiler processes
+using the same output file.  As a result, there is a race between
+the compilers writing output file and link editors reading it.  This
+generally does not cause immediate build failures but results in broken
+extensions causing cryptic issues in reverse dependencies.
+
+For example, a miscompilation of ``dev-python/pandas`` have recently
+caused breakage in ``dev-python/dask``::
+
+    /usr/lib/python3.8/site-packages/pandas/__init__.py:29: in <module>
+        from pandas._libs import hashtable as _hashtable, lib as _lib, tslib as _tslib
+    /usr/lib/python3.8/site-packages/pandas/_libs/__init__.py:13: in <module>
+        from pandas._libs.interval import Interval
+    pandas/_libs/interval.pyx:1: in init pandas._libs.interval
+        ???
+    pandas/_libs/hashtable.pyx:1: in init pandas._libs.hashtable
+        ???
+    pandas/_libs/missing.pyx:1: in init pandas._libs.missing
+        ???
+    /usr/lib/python3.8/site-packages/pandas/_libs/tslibs/__init__.py:30: in <module>
+        from .conversion import OutOfBoundsTimedelta, localize_pydatetime
+    E   ImportError: /usr/lib/python3.8/site-packages/pandas/_libs/tslibs/conversion.cpython-38-x86_64-linux-gnu.so: undefined symbol: pandas_datetime_to_datetimestruct
+
+The easiest way to workaround the problem in ebuild is to append ``-j1``
+in python_compile_ sub-phase.
+
+The common way of working around the problem upstream is to create
+additional .c files that ``#include`` the original file, and use unique
+source files for every extension.
+
+
 .. index:: DISTUTILS_IN_SOURCE_BUILD
 
 In-source vs out-of-source builds
