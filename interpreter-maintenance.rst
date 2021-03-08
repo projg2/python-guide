@@ -213,7 +213,7 @@ implementation, e.g.:
         distutils_install_for_testing
         # test_easy_install raises a SandboxViolation due to ${HOME}/.pydistutils.cfg
         # It tries to sandbox the test in a tempdir
-        HOME="${PWD}" pytest -vv ${PN} || die "Tests failed under ${EPYTHON}"
+        HOME="${PWD}" epytest ${PN}
     }
 
 

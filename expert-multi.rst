@@ -84,7 +84,7 @@ targets.
         # tests hang with pypy & pypy3
         [[ ${EPYTHON} == pypy* ]] && continue
 
-        pytest -vv || die "Tests failed with ${EPYTHON}"
+        epytest
     }
 
 Enforcing implementations is done via putting ``||`` block with all

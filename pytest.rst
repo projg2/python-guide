@@ -11,7 +11,7 @@ requiring Internet access.  These markers can be used to conveniently
 disable whole test groups, e.g.::
 
     python_test() {
-        pytest -vv -m 'not network' dask || die "Tests failed with ${EPYTHON}"
+        epytest -m 'not network' dask
     }
 
 
@@ -51,7 +51,7 @@ interpreter.
         --deselect
         'tests/utils/test_contextvars.py::test_leaks[greenlet]'
     )
-    pytest -vv "${deselect[@]}" || die "Tests failed with ${EPYTHON}"
+    epytest "${deselect[@]}"
 
 
 Avoiding the dependency on pytest-runner
@@ -91,9 +91,7 @@ make options for the job number, e.g.::
     inherit multiprocessing
 
     python_test() {
-       pytest -vv \
-           -n "$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")" ||
-           die "Tests failed with ${EPYTHON}"
+       epytest -n "$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")"
     }
 
 Please note that some upstream use pytest-xdist even if there is no real
@@ -133,7 +131,7 @@ it explicitly::
 
     python_test() {
         # pytest-relaxed plugin makes our tests fail
-        pytest -vv -p no:relaxed || die "Tests fail with ${EPYTHON}"
+        epytest -p no:relaxed
     }
 
 
@@ -157,7 +155,7 @@ sure to depend on ``dev-python/pytest-rerunfailures``::
         )"
 
     python_test() {
-        pytest -vv -p no:flaky || die "Tests failed with ${EPYTHON}"
+        epytest -p no:flaky
     }
 
 
@@ -180,13 +178,13 @@ The simplest way to resolve this problem is to restrict the test
 discovery to the actual test directories, e.g.::
 
     python_test() {
-        pytest -vv test || die "Tests failed with ${EPYTHON}"
+        epytest test
     }
 
 or::
 
     python_test() {
-        pytest -vv --ignore jaraco || die "Tests failed with ${EPYTHON}"
+        epytest --ignore jaraco
     }
 
 

@@ -942,6 +942,26 @@ Note that ``python_test`` is called by ``distutils-r1_src_test``,
 so you must make sure to call it if you override ``src_test``.
 
 
+.. index:: epytest
+
+Customizing the test phase for pytest
+-------------------------------------
+For the relatively frequent case of pytest-based packages needing
+additional customization, a ``epytest`` helper is provided.  The helper
+runs ``pytest`` with a standard set of options and automatic handling
+of test failures.
+
+For example, if upstream uses ``network`` marker to disable
+network-based tests, you can override the test phase in the following
+way::
+
+    distutils_enable_tests pytest
+
+    python_test() {
+        epytest -m 'not network'
+    }
+
+
 .. index:: distutils_install_for_testing
 
 Installing the package before testing
@@ -985,7 +1005,7 @@ hack`_ has broken it for most of the consumers.
 
     python_test() {
         distutils_install_for_testing
-        pytest -vv --no-network || die "Testsuite failed under ${EPYTHON}"
+        epytest --no-network
     }
 
 Note that ``distutils_install_for_testing`` is quite a heavy hammer.

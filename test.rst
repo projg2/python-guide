@@ -175,7 +175,7 @@ For example, ``dev-python/tox`` provides a switch for that::
 
     python_test() {
         distutils_install_for_testing
-        pytest -vv --no-network || die "Testsuite failed under ${EPYTHON}"
+        epytest --no-network
     }
 
 There are packages that skip tests if they fail specifically due to
