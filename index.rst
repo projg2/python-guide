@@ -23,7 +23,7 @@ Gentoo Python Guide
    concept
    expert-multi
    buildsys
-   porting-py38
+   porting
    migration
    package-maintenance
    interpreter-maintenance

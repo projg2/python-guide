@@ -1,24 +1,29 @@
-=======================
-Python 3.8 porting tips
-=======================
+============
+Porting tips
+============
 
-This section highlights known incompatible changes made in Python 3.8
-that could break Python scripts and modules that used to work
-in Python 3.7.
+This section highlights some of the known incompatible changes made
+in Python that could break Python scripts and modules that used to work
+in prior versions.  The sections are split into retroactive changes made
+to all Python releases, and information specific to every Python branch
+(compared to the previous one).
 
 This guide is by no means considered complete.  If you can think
 of other problems you've hit while porting your packages, please let me
 know and I will update it.
 
-See also: `what's new in Python 3.8`_
 
+Python 3.8
+==========
+
+See also: `what's new in Python 3.8`_
 
 .. _what's new in Python 3.8:
    https://docs.python.org/3/whatsnew/3.8.html
 
 
-python-config and pkg-config no longer lists Python library by default
-======================================================================
+python-config and pkg-config no longer list Python library by default
+---------------------------------------------------------------------
 Until Python 3.7, the ``python-X.Y`` pkg-config file and python-config
 tool listed the Python library.  Starting with 3.8, this is no longer
 the case.  If you are building Python extensions, this is fine (they
