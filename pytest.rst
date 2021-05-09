@@ -188,6 +188,26 @@ or::
     }
 
 
+fixture '...' not found
+=======================
+Most of the time, a missing fixture indicates that some pytest plugin
+is not installed.  In rare cases, it can signify an incompatible pytest
+version or package issue.
+
+The following table maps common fixture names to their respective
+plugins.
+
+=================================== ====================================
+Fixture name                        Package
+=================================== ====================================
+event_loop                          dev-python/pytest-asyncio
+freezer                             dev-python/pytest-freezegun
+httpbin                             dev-python/pytest-httpbin
+loop                                dev-python/pytest-aiohttp
+mocker                              dev-python/pytest-mock
+=================================== ====================================
+
+
 .. _custom pytest markers:
    https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
