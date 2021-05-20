@@ -208,6 +208,59 @@ mocker                              dev-python/pytest-mock
 =================================== ====================================
 
 
+Warnings
+========
+pytest captures all warnings from the test suite by default, and prints
+a summary of them at the end of the test suite run::
+
+    =============================== warnings summary ===============================
+    asgiref/sync.py:135: 1 warning
+    tests/test_local.py: 5 warnings
+    tests/test_sync.py: 12 warnings
+    tests/test_sync_contextvars.py: 1 warning
+      /tmp/asgiref/asgiref/sync.py:135: DeprecationWarning: There is no current event loop
+        self.main_event_loop = asyncio.get_event_loop()
+    [...]
+
+However, some projects go further and use ``filterwarnings`` option
+to make (some) warnings fatal::
+
+    ==================================== ERRORS ====================================
+    _____________________ ERROR collecting tests/test_sync.py ______________________
+    tests/test_sync.py:577: in <module>
+        class ASGITest(TestCase):
+    tests/test_sync.py:583: in ASGITest
+        async def test_wrapped_case_is_collected(self):
+    asgiref/sync.py:135: in __init__
+        self.main_event_loop = asyncio.get_event_loop()
+    E   DeprecationWarning: There is no current event loop
+    =========================== short test summary info ============================
+    ERROR tests/test_sync.py - DeprecationWarning: There is no current event loop
+    !!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+    =============================== 1 error in 0.13s ===============================
+
+Unfortunately, this frequently means that warnings coming from
+a dependency trigger test failures in other packages.  Since making
+warnings fatal is relatively common in the Python world, it is
+recommended to:
+
+1. Fix warnings in Python packages whenever possible, even if they
+   are not fatal to the package itself.
+
+2. Do not enable new Python implementations if they trigger any new
+   warnings in the package.
+
+If the warnings come from issues in the package's test suite rather than
+the installed code, it is acceptable to make them non-fatal.  This can
+be done either through removing the ``filterwarnings`` key from
+``setup.cfg``, or adding an ignore entry.  For example, the following
+setting ignores ``DeprecationWarning`` in ``test`` directory::
+
+    filterwarnings =
+        error
+        ignore::DeprecationWarning:test
+
+
 .. _custom pytest markers:
    https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
