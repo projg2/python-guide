@@ -189,10 +189,18 @@ unconditionally.  For example, ``dev-python/pygit2`` ebuild does this::
 
 In other cases, you will have to explicitly disable these tests.
 In some cases, it will be reasonable to remove whole test files or even
-restrict tests entirely.  However, even if the package's test suite
-relies on Internet access entirely, please implement running tests,
-so that an interested user can remove the restriction and run them
-if necessary.
+restrict tests entirely.
+
+If the package's test suite relies on Internet access entirely and there
+is no point in running even a subset of tests, please implement running
+tests and combine test restriction with ``PROPERTIES=test_network``
+to allow interested users to run tests when possible::
+
+    # users can use ALLOW_TEST=network to override this
+    PROPERTIES="test_network"
+    RESTRICT="test"
+
+    distutils_enable_tests pytest
 
 
 Tests aborting (due to assertions)
