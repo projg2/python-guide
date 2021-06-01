@@ -53,6 +53,54 @@ Behavior after::
 .. _django PR#14349: https://github.com/django/django/pull/14349
 
 
+Python 3.10
+===========
+
+See also: `what's new in Python 3.10`_
+
+.. _what's new in Python 3.10:
+   https://docs.python.org/3/whatsnew/3.10.html
+
+
+configure: No package 'python-3.1' found
+----------------------------------------
+automake prior to 1.16.3 wrongly recognized Python 3.10 as 3.1.
+As a result, build with Python 3.10 fails:
+
+.. code-block:: console
+
+    checking for python version... 3.1
+    checking for python platform... linux
+    checking for python script directory... ${prefix}/lib/python3.10/site-packages
+    checking for python extension module directory... ${exec_prefix}/lib/python3.10/site-packages
+    checking for PYTHON... no
+    configure: error: Package requirements (python-3.1) were not met:
+
+    No package 'python-3.1' found
+
+    Consider adjusting the PKG_CONFIG_PATH environment variable if you
+    installed software in a non-standard prefix.
+
+    Alternatively, you may set the environment variables PYTHON_CFLAGS
+    and PYTHON_LIBS to avoid the need to call pkg-config.
+    See the pkg-config man page for more details.
+    Error: Process completed with exit code 1.
+
+To resolve this in ebuild, you need to autoreconf with the Gentoo
+distribution of automake::
+
+    inherit autotools
+
+    # ...
+
+    src_prepare() {
+        default
+        eautoreconf
+    }
+
+The upstream fix is to create new distfiles using automake-1.16.3+.
+
+
 Python 3.8
 ==========
 
