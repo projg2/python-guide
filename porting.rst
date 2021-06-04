@@ -124,6 +124,47 @@ For both functions, omitted parameters default to ``False``.  There is
 no trivial replacement for the variants with ``prefix`` argument.
 
 
+Python 3.9
+==========
+
+See also: `what's new in Python 3.9`_
+
+.. _what's new in Python 3.9:
+   https://docs.python.org/3/whatsnew/3.9.html
+
+
+base64.encodestring / base64.decodestring removal
+-------------------------------------------------
+Python 3.9 removes the deprecated ``base64.encodestring()``
+and ``base64.decodestring()`` functions.  While they were deprecated
+since Python 3.1, many packages still use them today.
+
+The drop-in Python 3.1+ replacements are ``base64.encodebytes()``
+and ``base64.decodebytes()``.  Note that contrary to the names, the old
+functions were simply aliases to the byte variants in Python 3
+and *required* the arguments to be ``bytes`` anyway.
+
+If compatibility with Python 2 is still desired, then the byte variants
+ought to be called on 3.1+ and string variants before that.  The old
+variants accept both byte and unicode strings on Python 2.
+
+Example compatibility import::
+
+    import sys
+
+    if sys.version_info >= (3, 1):
+        from base64 import encodebytes as b64_encodebytes
+    else:
+        from base64 import encodestring as b64_encodebytes
+
+Note that the ``base64`` module also provides ``b64encode()``
+and ``b64decode()`` functions that were not renamed.  ``b64decode()``
+can be used as a drop-in replacement for ``decodebytes()``.  However,
+``b64encode()`` does not insert newlines to split the output
+like ``encodebytes()`` does, and instead returns a single line
+of base64-encoded data for any length of output.
+
+
 Python 3.8
 ==========
 
