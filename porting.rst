@@ -101,6 +101,29 @@ distribution of automake::
 The upstream fix is to create new distfiles using automake-1.16.3+.
 
 
+distutils.sysconfig deprecation
+-------------------------------
+Upstream intends to remove distutils by Python 3.12.  Python 3.10 starts
+throwing deprecation warnings for various distutils modules.
+The distutils.sysconfig is usually easy to port.
+
+The following table summarizes replacements for common path getters.
+
+  =================================== ==================================
+  distutils.sysconfig call            sysconfig replacement
+  =================================== ==================================
+  ``get_python_inc(False)``           ``get_path("include")``
+  ``get_python_inc(True)``            ``get_path("platinclude")``
+  ``get_python_lib(False, False)``    ``get_path("purelib")``
+  ``get_python_lib(True, False)``     ``get_path("platlib")``
+  ``get_python_lib(False, True)``     ``get_path("stdlib")``
+  ``get_python_lib(True, True)``      ``get_path("platstdlib")``
+  =================================== ==================================
+
+For both functions, omitted parameters default to ``False``.  There is
+no trivial replacement for the variants with ``prefix`` argument.
+
+
 Python 3.8
 ==========
 
