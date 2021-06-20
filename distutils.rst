@@ -265,6 +265,11 @@ bootstrap) or the upstream condition requiers that.
 
 Setuptools' entry points
 ------------------------
+.. Important::
+
+   With removal of Python 3.7, the correct ``DISTUTILS_USE_SETUPTOOLS``
+   value for packages using entry points changed to ``bdepend``.
+
 *Entry points* provide the ability to expose some of the package's
 Python functions to other packages.  They are commonly used to implement
 plugin systems and by setuptools themselves to implement wrapper scripts
@@ -277,11 +282,11 @@ cases, they are grouped by entry point type, and defined as a dictionary
 mapping entry points names to the relevant functions.
 
 For our purposes, we are only interested in entry points used to define
-wrapper scripts, the ``console_scripts`` group, as they are installed
-with the package itself.  As for plugin systems, it is reasonable
-to assume that the installed plugins are only meaningful to the package
-using them, and therefore that the package using them will depend
-on the appropriate metadata provider.
+wrapper scripts, the ``console_scripts`` and ``gui_scripts`` groups,
+as they are installed with the package itself.  As for plugin systems,
+it is reasonable to assume that the installed plugins are only
+meaningful to the package using them, and therefore that the package
+using them will depend on the appropriate metadata provider.
 
 Old versions of setuptools used to implement the script wrappers using
 ``pkg_resources`` package.  Modern versions of setuptools use
@@ -296,18 +301,22 @@ the following logic:
 3. Otherwise, fall back to ``pkg_resources``.  It is provided
    by ``dev-python/setuptools``.
 
-The eclass currently does not implement the explicit support for the new
-logic.  At this moment, we do not consider updating all the packages
-to support it correctly to be worth our developers' effort.  After all,
-setuptools is a common package dependency and being able to uninstall
-it long-term is not likely to be possible.
+Since Python 3.7 is no longer present in Gentoo (we are not considering
+PyPy3.7 correctness important for the time being), new ebuilds do not
+need any additional dependencies for entry points and should use
+the default value (i.e. remove ``DISTUTILS_USE_SETUPTOOLS``).
 
-Therefore, if your package uses ``console_scripts`` entry points, it
-needs to depend on setuptools at runtime, i.e. use the ``rdepend``
-value.
+For the time being, the QA check for incorrect values is accepting
+both the new value and the old ``rdepend`` value.  If you wish to be
+reminded about the update, you can add the following variable to your
+``make.conf``::
 
-Once Python 3.7 is no longer supported, we will start migrating packages
-not to require a runtime dependency on setuptools anymore.
+    DISTUTILS_STRICT_ENTRY_POINTS=1
+
+Please note that in some cases ``rdepend`` can still be the correct
+value, if there are `other runtime uses of setuptools`_.  In some cases
+the QA check will also trigger the wrong value because of leftover
+explicit dependencies on setuptools.
 
 
 Other runtime uses of setuptools
