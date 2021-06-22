@@ -1029,20 +1029,34 @@ The ``distutils_install_for_testing`` function runs ``setup.py install``
 into a temporary directory, and adds the appropriate paths to ``PATH``
 and ``PYTHONPATH``.
 
-This function currently supports two install layouts:
+This function currently supports three install layouts:
 
 - the standard *root directory* layout that is enabled
   via ``--via-root``,
+
+- a virtualenv-alike *venv* layout that is enabled via ``--via-venv``,
 
 - the legacy *home directory* layout that is enabled via ``--via-home``
   parameter.
 
 
 The eclass defaults to the root directory layout that is consistent
-with the layout used for the actual install.  If your package fails,
-you may try forcing the legacy layout via ``--via-home``.  However,
-if you need to do that, please report a bug for the eclass, so that
-we can look for a better solution looking forward.
+with the layout used for the actual install.  This ensures that
+the package's scripts are found on ``PATH``, and the package metadata
+is found via ``importlib.metadata`` / ``pkg_resources``.  It should
+be sufficient to resolve the most common test problems.
+
+In some cases, particularly packages that do not preserve ``PYTHONPATH``
+correctly, the virtualenv-alike layout (``--via-venv``) is better.
+Through wrapping the Python interpreter itself, it guarantees that
+the packages installed in the test environment are found independently
+of ``PYTHONPATH`` (just like a true venv).  It should cover the few
+extreme cases.
+
+If neither of the two works, you may try forcing the legacy layout
+via ``--via-home``.  However, if you need to do that, please report
+a bug for the eclass, so that we can look for a better solution looking
+forward.  This layout is planned on being removed in EAPI 8.
 
 The home directory layout historically used to be necessary to fix
 problems with some packages.  However, the underlying issues probably
@@ -1055,12 +1069,6 @@ hack`_ has broken it for most of the consumers.
         distutils_install_for_testing
         epytest --no-network
     }
-
-Note that ``distutils_install_for_testing`` is quite a heavy hammer.
-It is useful for solving hard cases and initially determining the cause
-of failing tests.  However, many packages will be entirely satisfied
-with simpler solutions, such as changing the working directory
-to ``${BUILD_DIR}/lib``.
 
 
 .. index:: distutils_enable_sphinx
