@@ -267,6 +267,53 @@ e.g.::
     $ pytest -s
 
 
+Installing extra dependencies in test environment (e.g. example plugins)
+========================================================================
+Rarely, the test suite expects some package being installed that
+does not fit being packaged and installed system-wide.  For example,
+isort's tests use a few example plugins that are not useful to end
+users, or pip's test suite still requires old virtualenv that collides
+with the modern versions.  These problems can be resolved by installing
+the packages locally within the ebuild.
+
+To do this, just use ``distutils_install_for_testing`` in every package
+that you need to install.  For example::
+
+    python_test() {
+        # the main package
+        distutils_install_for_testing
+        # additional plugins
+        local p
+        for p in example*/; do
+            pushd "${p}" >/dev/null || die
+            distutils_install_for_testing
+            popd >/dev/null || die
+        done
+
+        epytest
+    }
+
+If the extra packages are not included in the main distribution tarball,
+you will also need to fetch them, e.g.::
+
+    VENV_PV=16.7.10
+    SRC_URI+="
+        test? (
+            https://github.com/pypa/virtualenv/archive/${VENV_PV}.tar.gz
+                -> virtualenv-${VENV_PV}.tar.gz
+        )
+    "
+
+    python_test() {
+        distutils_install_for_testing
+        pushd "${WORKDIR}/virtualenv-${VENV_PV}" >/dev/null || die
+        distutils_install_for_testing
+        popd >/dev/null || die
+
+        epytest
+    }
+
+
 .. _unittest: https://docs.python.org/3/library/unittest.html
 .. _pytest: https://docs.pytest.org/en/latest/
 .. _nose: https://github.com/nose-devs/nose
