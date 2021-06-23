@@ -169,10 +169,10 @@ by Python 2.7 and Python 3 versions that are no longer supported.
         sha3? ( $(python_gen_cond_dep '
             dev-python/pysha3[${PYTHON_USEDEP}]' python{2_7,3_5} pypy) )"
 
-This can be simplified by using ``-2`` that is shorthand for all
-implementations compatible with Python 2.  ``-3`` is shorthand for all
-variants of Python 3.  Both of them can be combined with verbatim
-implementation names.
+In EAPIs prior to 8, the above could be simplified using ``-2`` that
+is shorthand for all implementations compatible with Python 2,
+and ``-3`` being a shorthand for all variants of Python 3.
+As of EAPI 8, both are banned since only Python 3 is supported.
 
 .. code-block::
 
