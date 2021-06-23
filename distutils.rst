@@ -604,7 +604,7 @@ global environment variables.
 ::
 
     python_configure_all() {
-        mydistutilsargs=(
+        DISTUTILS_ARGS=(
             --resourcepath=/usr/share
             --no-compress-manpages
         )
