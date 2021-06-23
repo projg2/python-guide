@@ -229,10 +229,11 @@ The following getters are provided only for CPython targets:
 - ``python_get_PYTHON_CONFIG`` that outputs the absolute path
   to the ``python-config`` executable.
 
-Additionally, the following boolean helper is provided:
+EAPIs prior to 8 provided the following boolean helper that must not
+be used in EAPI 8 or newer:
 
 - ``python_is_python3`` that returns true (0) if the current interpreter
-  implements a variant of Python 3, false (1) if Python 2.
+  implements a variant of Python 3 (i.e. always).
 
 Note that all paths provided by getters include the offset-prefix
 (``${EPREFIX}``) already and they are not suitable to passing
