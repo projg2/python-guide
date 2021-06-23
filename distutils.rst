@@ -1029,15 +1029,12 @@ The ``distutils_install_for_testing`` function runs ``setup.py install``
 into a temporary directory, and adds the appropriate paths to ``PATH``
 and ``PYTHONPATH``.
 
-This function currently supports three install layouts:
+This function currently supports two install layouts:
 
 - the standard *root directory* layout that is enabled
   via ``--via-root``,
 
-- a virtualenv-alike *venv* layout that is enabled via ``--via-venv``,
-
-- the legacy *home directory* layout that is enabled via ``--via-home``
-  parameter.
+- a virtualenv-alike *venv* layout that is enabled via ``--via-venv``.
 
 
 The eclass defaults to the root directory layout that is consistent
@@ -1053,15 +1050,11 @@ the packages installed in the test environment are found independently
 of ``PYTHONPATH`` (just like a true venv).  It should cover the few
 extreme cases.
 
-If neither of the two works, you may try forcing the legacy layout
-via ``--via-home``.  However, if you need to do that, please report
-a bug for the eclass, so that we can look for a better solution looking
-forward.  This layout is planned on being removed in EAPI 8.
-
-The home directory layout historically used to be necessary to fix
-problems with some packages.  However, the underlying issues probably
-went away along with old versions of Python, and the `removal of site.py
-hack`_ has broken it for most of the consumers.
+In EAPIs prior to 8, an additional legacy ``--via-home`` layout used
+to be supported.  It historically used to be necessary to fix problems
+with some packages.  However, the underlying issues probably went away
+along with old versions of Python, and the `removal of site.py hack`_
+has broken it for most of the consumers.
 
 .. code-block:: bash
 
