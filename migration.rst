@@ -19,8 +19,9 @@ as a placeholder.  Single-impl deps can be expressed with
 or directly as a variable.
 
 During a transitional period, ``PYTHON_USEDEP`` was banned entirely
-and ``PYTHON_MULTI_USEDEP`` was used instead.  Today both are permitted
-and the former is recommended.
+and ``PYTHON_MULTI_USEDEP`` was used instead.  As of EAPI 8,
+the opposite is true — ``PYTHON_USEDEP`` is to be used,
+and ``PYTHON_MULTI_USEDEP`` was removed.
 
 The recommended rule of thumb for migrating old ebuilds is to:
 
