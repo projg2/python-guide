@@ -570,16 +570,18 @@ interpreter.  It has no default implementation.  When defined, in-source
 builds are enabled implicitly as sources need to be duplicated to apply
 implementation-specific changes.
 
-In the following example, it is used to automatically convert sources
-to Python 3.  Naturally, this requires the eclass to keep a separate
-copy of the sources that remains compatible with Python 2 and this is
-precisely why ``python_prepare`` automatically enables in-source builds.
+In the following example, it is used to remove a CLI script whose
+dependencies only support Python 3.8 and 3.9 at the moment.  Naturally,
+since this modification needs to be done on a subset of all Python
+interpreters, the eclass needs to keep a separate copy of the sources
+for every one of them.  This is why ``python_prepare`` automatically
+enables in-source builds.
 
 ::
 
     python_prepare() {
-        if python_is_python3; then
-            2to3 -n -w --no-diffs *.py || die
+        if ! use cli || ! has "${EPYTHON}" python3.{7..9}; then
+            sed -i -e '/console_scripts/d' setup.py || die
         fi
     }
 
