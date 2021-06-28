@@ -154,37 +154,15 @@ implementations is no longer supported, it silently ignores it.  This
 makes it possible to remove old implementations without having to update
 all dependency strings immediately.
 
-The majority of backports currently in Gentoo are required only
-by Python 2.7 and Python 3 versions that are no longer supported.
+For example, in the example below the dependency became empty when
+Python 3.7 was removed.
 
 .. code-block::
 
-    MODULE_RDEPEND="
-        blake2? ( $(python_gen_cond_dep '
-            dev-python/pyblake2[${PYTHON_USEDEP}]' python{2_7,3_5} pypy) )
-        bzip2? ( $(python_gen_cond_dep '
-            dev-python/bz2file[${PYTHON_USEDEP}]' python2_7 pypy) )
-        lzma? ( $(python_gen_cond_dep '
-            dev-python/backports-lzma[${PYTHON_USEDEP}]' python2_7 pypy) )
-        sha3? ( $(python_gen_cond_dep '
-            dev-python/pysha3[${PYTHON_USEDEP}]' python{2_7,3_5} pypy) )"
-
-In EAPIs prior to 8, the above could be simplified using ``-2`` that
-is shorthand for all implementations compatible with Python 2,
-and ``-3`` being a shorthand for all variants of Python 3.
-As of EAPI 8, both are banned since only Python 3 is supported.
-
-.. code-block::
-
-    MODULE_RDEPEND="
-        blake2? ( $(python_gen_cond_dep '
-            dev-python/pyblake2[${PYTHON_USEDEP}]' -2 python3_5) )
-        bzip2? ( $(python_gen_cond_dep '
-            dev-python/bz2file[${PYTHON_USEDEP}]' -2) )
-        lzma? ( $(python_gen_cond_dep '
-            dev-python/backports-lzma[${PYTHON_USEDEP}]' -2) )
-        sha3? ( $(python_gen_cond_dep '
-            dev-python/pysha3[${PYTHON_USEDEP}]' -2 python3_5) )"
+    RDEPEND="
+        $(python_gen_cond_dep '
+            dev-python/importlib_metadata[${PYTHON_USEDEP}]
+        ' python3_7)"
 
 
 .. index:: cffi, greenlet
