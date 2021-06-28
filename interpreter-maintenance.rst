@@ -185,35 +185,32 @@ are ported first with tests and their dependencies disabled for the new
 implementation, e.g.:
 
 .. code-block:: bash
-   :emphasize-lines: 4-11,19-22
+   :emphasize-lines: 3,15,20-21
 
     BDEPEND="
-        app-arch/unzip
         test? (
             $(python_gen_cond_dep '
+                dev-python/jaraco-envs[${PYTHON_USEDEP}]
+                >=dev-python/jaraco-path-3.2.0[${PYTHON_USEDEP}]
                 dev-python/mock[${PYTHON_USEDEP}]
                 dev-python/pip[${PYTHON_USEDEP}]
-                >=dev-python/pytest-3.7.0[${PYTHON_USEDEP}]
+                dev-python/sphinx[${PYTHON_USEDEP}]
+                dev-python/pytest[${PYTHON_USEDEP}]
                 dev-python/pytest-fixture-config[${PYTHON_USEDEP}]
                 dev-python/pytest-virtualenv[${PYTHON_USEDEP}]
+                dev-python/pytest-xdist[${PYTHON_USEDEP}]
+                >=dev-python/virtualenv-20[${PYTHON_USEDEP}]
                 dev-python/wheel[${PYTHON_USEDEP}]
-            ' python2_7 python3_{6,7,8} pypy3)
-            $(python_gen_cond_dep '
-                dev-python/futures[${PYTHON_USEDEP}]
-            ' -2)
+            ' python3_{7..10} pypy3)
         )
     "
 
     python_test() {
-        if [[ ${EPYTHON} == python3.9 ]]; then
-            einfo "Tests are skipped on py3.9 due to unported deps"
-            return
-        fi
+        # keep in sync with python_gen_cond_dep above!
+        has "${EPYTHON}" python3.{7..10} pypy3 || continue
 
         distutils_install_for_testing
-        # test_easy_install raises a SandboxViolation due to ${HOME}/.pydistutils.cfg
-        # It tries to sandbox the test in a tempdir
-        HOME="${PWD}" epytest ${PN}
+        HOME="${PWD}" epytest setuptools
     }
 
 
