@@ -25,11 +25,9 @@ or you can use ``REQUIRED_USE`` to enforce at least one interpreter
 having the requested feature.
 
 Skipping specific tasks can be done via investigating ``${EPYTHON}``.
-As a shorthand, ``python_is_python3`` can be used to determine whether
-it references to an implementation of Python 3 or not.  If USE flags
-are involved, you will probably also need to use ``python_gen_cond_dep``
-with additional parameters restricting dependencies to available
-targets.
+If USE flags are involved, you will probably also need to use
+``python_gen_cond_dep`` with additional parameters restricting
+dependencies to available targets.
 
 .. code-block:: bash
    :emphasize-lines: 37-43,49
@@ -188,10 +186,6 @@ targets.
 
     src_configure() {
         configuration() {
-            if ! python_is_python3; then
-                local CFLAGS="${CFLAGS} -fno-strict-aliasing"
-            fi
-
             local myconf=(
                 "${EPYTHON}"
                 "${S}"/configure.py
