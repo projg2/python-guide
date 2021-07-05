@@ -938,7 +938,7 @@ it call ``distutils-r1_src_test``:
     src_test() {
         # tests rely on very specific text wrapping...
         local -x COLUMNS=80
-        virtx distutils-r1_src_test
+        distutils-r1_src_test
     }
 
 If the actual test command needs to be customized, or a non-standard
