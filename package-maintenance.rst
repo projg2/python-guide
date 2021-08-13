@@ -62,3 +62,20 @@ If your package matches the above profile, feel free to ask a member
 of the Python project whether they would like to (co-)maintain
 the package.  However, if you are not a member of the project, please
 do not add us without asking first.
+
+
+Porting packages to a new EAPI
+==============================
+When porting packages to a new EAPI, please take care not to port
+the dependencies of Portage prematurely.  This generally includes
+``app-portage/gemato``, ``dev-python/setuptools`` and their recursive
+dependencies.
+
+Ideally, these ebuilds carry an appropriate note above their EAPI line,
+e.g.::
+
+    # please keep this ebuild at EAPI 7 -- sys-apps/portage dep
+    EAPI=7
+
+This does not apply to test dependecies — they are not strictly
+necessary to install a new Portage version.
