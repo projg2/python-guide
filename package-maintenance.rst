@@ -77,5 +77,5 @@ e.g.::
     # please keep this ebuild at EAPI 7 -- sys-apps/portage dep
     EAPI=7
 
-This does not apply to test dependecies — they are not strictly
+This does not apply to test dependencies — they are not strictly
 necessary to install a new Portage version.
