@@ -35,23 +35,32 @@ skipping problematic tests when tests are installed as part
 of the package.  They can also be easily applied conditionally to Python
 interpreter.
 
+The modern versions of eclasses provide two control variables,
+``EPYTEST_IGNORE`` and ``EPYTEST_DESELECT`` that can be used to list
+test files or tests to be ignored or deselected respectively.  These
+variables can be used in global scope to avoid redefining
+``python_test()``.  However, combining them with additional conditions
+requires using the local scope.
+
 ::
 
-    local deselect=(
-        # ignore whole file with missing dep
-        --ignore tests/test_client.py
-        # deselect a single test
-        --deselect 'tests/utils/test_general.py::test_filename'
-        # deselect a parametrized test based on first param
-        --deselect
-        'tests/test_transport.py::test_transport_works[eventlet'
-    )
-    [[ ${EPYTHON} == python3.6 ]] && deselect+=(
-        # deselect a test for py3.6 only
-        --deselect
-        'tests/utils/test_contextvars.py::test_leaks[greenlet]'
-    )
-    epytest "${deselect[@]}"
+    python_test() {
+        local EPYTEST_IGNORE=(
+            # ignore whole file with missing dep
+            --ignore tests/test_client.py
+        )
+        local EPYTEST_DESELECT=(
+            # deselect a single test
+            'tests/utils/test_general.py::test_filename'
+            # deselect a parametrized test based on first param
+            'tests/test_transport.py::test_transport_works[eventlet'
+        )
+        [[ ${EPYTHON} == python3.6 ]] && EPYTEST_DESELECT+=(
+            # deselect a test for py3.6 only
+            'tests/utils/test_contextvars.py::test_leaks[greenlet]'
+        )
+        epytest
+    }
 
 
 Avoiding the dependency on pytest-runner
