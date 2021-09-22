@@ -144,6 +144,36 @@ it explicitly::
     }
 
 
+Expert: disabling plugin autoloading entirely
+=============================================
+If a test suite invokes pytest recursively (this is particularly
+the case when packaging other pytest plugins), the ``-p`` option
+can be insufficient to disable problematic plugins, as it does not
+get passed to the nested pytest invocations.  For these packages,
+the next best thing is to use environment variables.
+
+Unfortunately, environment variables can only be used to disable
+autoloading entirely.  When doing that, you need to explicitly force
+loading plugins that the test suite really needs.
+
+This is done using two envvars: ``PYTEST_DISABLE_PLUGIN_AUTOLOAD``
+to disable autoloading plugins, and ``PYTEST_PLUGINS`` to specify
+plugins to load.  The latter takes a comma-separated list of entry point
+modules.  To find the correct module names, look into
+the ``entry_points.txt`` inside the package's ``.egg-info`` directory.
+
+::
+
+    python_test() {
+        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+        local -x PYTEST_PLUGINS=xdist.plugin,xdist.looponfail,pytest_forked
+
+        distutils_install_for_testing
+        epytest
+    }
+
+
+
 TypeError: _make_test_flaky() got an unexpected keyword argument 'reruns'
 =========================================================================
 If you see a test error resembling the following::
