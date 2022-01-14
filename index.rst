@@ -16,6 +16,7 @@ Gentoo Python Guide
    single
    multi
    distutils
+   distutils-legacy
    helper
    depend
    test
