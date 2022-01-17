@@ -502,6 +502,34 @@ such as bash completions or examples.
     }
 
 
+Passing arguments to setup.py commands
+======================================
+The PEP 517 mode does not support passing additional commands arguments
+via ``DISTUTILS_ARGS`` anymore.  Instead, the additional parameters
+can be passed using the ``setup.cfg`` file.
+
+For example, Pillow provides for configuring available backends via
+additional ``build_ext`` command flags::
+
+    setup.py build_ext --enable-tiff --disable-webp ...
+
+The respective options can be setup via the configuration file, where
+sections represent the commands and individual keys — options.  Note
+that dashes need to be replaced by underscores, and flag-style options
+take boolean arguments.  In this case, the ebuild can use::
+
+    src_configure() {
+        cat >> setup.cfg <<-EOF
+            [build_ext]
+            disable_tiff = $(usex !tiff True False)
+            enable_tiff = $(usex tiff True False)
+            disable_webp = $(usex !webp True False)
+            enable_webp = $(usex webp True False)
+            #...
+        EOF
+    }
+
+
 .. index:: esetup.py
 
 Calling custom setup.py commands
