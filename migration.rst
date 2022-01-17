@@ -161,3 +161,46 @@ ebuilds.  It comes in three parts:
    of Python 2 support, it always evaluated to true.
 
 All the aforementioned replacements are available in all EAPIs.
+
+
+Migrating to PEP 517 builds
+===========================
+As of January 2022, the ``distutils-r1`` can use PEP 517 build backends
+instead of calling setuptools directly.  The new mode is particularly
+useful for:
+
+- packages using flit and poetry, as a better replacement for
+  the deprecated ``dev-python/pyproject2setuppy`` hack
+
+- packages using other PEP 517 build systems (such as pdm) that are not
+  supported in legacy mode at all
+
+- packages using setuptools without ``setup.py``
+
+- packages using plain distutils, as the mode handles the switch from
+  deprecated stdlib distutils to the version vendored in setuptools
+  safely
+
+The PEP 517 mode provides the test phase with venv-style installed
+package tree (alike ``distutils_install_for_testing --via-venv``)
+that should make testing more streamlined.
+
+Unfortunately, the new mode can cause issues with customized distutils
+and setuptools build systems.  It is important to verify the installed
+file list after the migration.  Packages that require custom configure
+phases or passing arguments are not supported at the moment.
+
+For simple packages, the migration consists of:
+
+1. Adding ``DISTUTILS_USE_PEP517`` above the inherit line.  The value
+   indicates the build system used, e.g. ``flit``, ``poetry``,
+   ``setuptools`` (used also for distutils).
+
+2. Removing ``DISTUTILS_USE_SETUPTOOLS``.  If the previous value was
+   ``rdepend`` (and indeed a runtime dependency is required), then
+   ``dev-python/setuptools`` needs to be explicitly added to
+   ``RDEPEND``.
+
+3. Removing ``distutils_install_for_testing`` and/or ``--install``
+   option to ``distutils_enable_tests``.  This should no longer be
+   necessary and tests should work out of the box.
