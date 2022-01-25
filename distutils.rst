@@ -529,6 +529,12 @@ take boolean arguments.  In this case, the ebuild can use::
         EOF
     }
 
+Note that this method works only for arguments to specific commands.
+Some packages use hacks to support global options, e.g. via manipulating
+``sys.argv`` directly.  This is no longer possible with PEP 517 builds
+and the packages need to be fixed not to rely on it.  The possible
+alternatives include using environment variables or custom commands.
+
 
 .. index:: esetup.py
 
