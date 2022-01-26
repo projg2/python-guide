@@ -237,8 +237,50 @@ of around 10 packages without cyclic dependencies extending out
 of the group.
 
 
+Python build system bootstrap
+=============================
+Python build systems are often facing the bootstrap problem — that is,
+the build system itself has some dependencies, while these dependencies
+require the same build system to build.  The common upstream way
+(actually recommended in `PEP 517 build requirements`_ section) is
+to bundle the necessary dependencies as part of the build system.
+However, this goes against best Gentoo practices.
+
+The current Gentoo practice for bootstrap with dependency unbundling
+is to:
+
+1. Install the dependencies of flit_core and the eclass PEP 517 logic
+   (installer, tomli) manually using ``python_domodule``.
+
+2. Install flit_core using the standalone PEP 517 backend.
+
+3. Install the dependencies of setuptools using flit (writing trivial
+   ``pyproject.toml`` within the ebuild if necessary).
+
+4. Install setuptools using the standalone PEP 517 backend.
+
+5. The dependencies of other build systems can be installed using
+   flit, setuptools or other previously unbundled build systems.
+
+Note that for the purpose of bootstrap only obligatory baseline
+dependencies are considered significant.  Non-obligatory dependencies
+(i.e. ones that can be missing during the bootstrap process) can be
+placed in ``PDEPEND``.  Test suite dependencies can include cycles
+with the package itself — running tests is not considered obligatory
+during the bootstrap process.
+
+flit_core has been chosen as the base build system for unbundling since
+it has the fewest external dependencies (i.e. only depends on tomli).
+Its author indicates in the `flit_core vendoring README`_ that no other
+dependencies will be added or vendored into flit_core.
+
+
 .. _python repository: https://gitweb.gentoo.org/proj/python.git/
 .. _Gentoo fork of CPython repository:
    https://gitweb.gentoo.org/fork/cpython.git/
 .. _Docker: https://www.docker.com/
 .. _binpkg-docker: https://github.com/mgorny/binpkg-docker
+.. _PEP 517 build requirements:
+   https://www.python.org/dev/peps/pep-0517/#build-requirements
+.. _flit_core vendoring README:
+   https://github.com/pypa/flit/blob/main/flit_core/flit_core/vendor/README
