@@ -226,6 +226,60 @@ as well).  The eclass automatically uses the legacy setuptools backend
 for them.
 
 
+Deprecated PEP 517 backends
+===========================
+
+flit.buildapi
+-------------
+Some packages are still found using the historical flit build backend.
+Their ``pyproject.toml`` files contain a section similar
+to the following:
+
+.. code-block:: toml
+
+    [build-system]
+    requires = ["flit"]
+    build-backend = "flit.buildapi"
+
+This backend requires installing the complete flit package manager.
+Instead, the package should be fixed upstream to use flit_core
+per `flit build system section documentation`_ instead:
+
+.. code-block:: toml
+
+    [build-system]
+    requires = ["flit_core"]
+    build-backend = "flit_core.buildapi"
+
+flit_core produces identical artifacts to flit.  At the same time, it
+reduces the build-time dependency footprint and therefore makes isolated
+PEP 517 builds faster.
+
+
+poetry.masonry.api
+------------------
+A similar problem applies to the packages using poetry.  The respective
+``pyproject.toml`` files contain:
+
+.. code-block:: toml
+
+    [build-system]
+    requires = ["poetry>=0.12"]
+    build-backend = "poetry.masonry.api"
+
+Instead, the lightweight poetry-core module should be used per `poetry
+PEP-517 documentation`_:
+
+.. code-block:: toml
+
+    [build-system]
+    requires = ["poetry_core>=1.0.0"]
+    build-backend = "poetry.core.masonry.api"
+
+poetry-core produces identical artifacts to poetry.  It has smaller
+dependency footprint and makes isolated builds much faster.
+
+
 .. index:: SETUPTOOLS_SCM_PRETEND_VERSION
 
 setuptools_scm and snapshots
@@ -995,3 +1049,7 @@ should be used, and issue a warning if it's missing or incorrect.
    https://devmanual.gentoo.org/eclass-reference/distutils-r1.eclass/index.html
 .. _PEP 517:
    https://www.python.org/dev/peps/pep-0517/
+.. _flit build system section documentation:
+   https://flit.readthedocs.io/en/latest/pyproject_toml.html#build-system-section
+.. _poetry PEP-517 documentation:
+   https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
