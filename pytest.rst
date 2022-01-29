@@ -115,6 +115,16 @@ users.  They include plugins for test coverage
 (``dev-python/pytest-cov``), coding style (``dev-python/pytest-flake8``)
 and more.  Generally, packages should avoid using those plugins.
 
+.. Warning::
+
+   As of 2022-01-24, ``epytest`` disables a few undesirable plugins
+   by default.  As a result, developers have a good chance
+   of experiencing failures due to hardcoded pytest options first,
+   even if they have the relevant plugins installed.
+
+   If your package *really* needs to use the specific plugin, you need
+   to pass ``-p <plugin>`` explicitly to reenable it.
+
 In some cases, upstream packages only list them as dependencies
 but do not use them automatically.  In other cases, you will need
 to strip options enabling them from ``pytest.ini`` or ``setup.cfg``.
