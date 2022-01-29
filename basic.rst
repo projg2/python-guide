@@ -64,14 +64,29 @@ Python environment
 The eclasses commonly use the concept of *Python environment*.  This
 means a state of environment enforcing a particular Python
 implementation.  Whenever the ebuild code is run inside this
-environment, ``EPYTHON`` variable indicates which implementation
-is being used (by its executable name, e.g. ``python3.8``).
+environment, two variables referring to the specific Python interpreter
+are being exported:
 
-Additionally, ``PYTHON`` provides the absolute path to the interpreter
-(however, using ``EPYTHON`` is preferable whenever possible).  Wrappers
-for ``python``, ``pythonN`` and some common tools are provided in PATH,
-and ``/usr/bin/python`` etc. also enforce the specific implementation
-via python-exec (for programs that hardcode full path).
+- ``EPYTHON`` containing the interpreter's basename (also used
+  as the implementation identifier), e.g. ``python3.10``
+- ``PYTHON`` containing the absolute final path to the interpreter,
+  e.g. ``/usr/bin/python3.10``
+
+The full path should only be used to provide the value that should
+be embedded in the installed programs, e.g. in the shebangs.
+For spawning Python during the build, ``EPYTHON`` is preferable.
+
+.. Warning::
+
+   Using full path rather than the basename will bypass the virtualenv
+   created by ``distutils-r1.eclass`` in PEP 517 mode.  This may cause
+   failures to import Python modules, or use of the previous installed
+   version rather than the just-built one.  Using ``${EPYTHON}``
+   resolves these problems.
+
+Wrappers for ``python``, ``pythonN`` and some common tools are provided
+in PATH, and ``/usr/bin/python`` etc. also enforce the specific
+implementation via python-exec (for programs that hardcode full path).
 
 The environment can be either established in local scope, or globally.
 The local scope generally applies to multi-impl packages, and is created
