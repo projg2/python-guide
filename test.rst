@@ -83,26 +83,39 @@ would be happening, try the following for a start:
 If it seems that the issue is on our end, try the following and see
 if it causes the subset of failing tests to change:
 
-1. Add ``distutils_install_for_testing`` to the test sub-phase.  This
-   resolves majority of problems with test suite assuming the package
-   must already be installed.
+1. Make sure that the test runner is started via ``${EPYTHON}``
+   (the eclass-provided ``epytest`` and ``eunittest`` wrappers do that).
+   Calling system executables directly (either Python via absolute path
+   or system-installed tools that use absolute path in their shebangs)
+   may cause just-built modules not to be imported correctly.
 
-2. Actually install the package to the system (with tests disabled).
+2. Try running the test suite from another directory.  If you're seeing
+   failures to load compiled extensions, Python may be wrongly importing
+   modules from the current directory instead of the build/install tree.
+   Some test suite also depend on paths relative to where upstream run
+   tests.
+
+3. Switch to PEP 517 mode, add ``distutils_install_for_testing``
+   to the test sub-phase or ``--install`` to ``distutils_enable_tests``
+   call.  This resolves majority of problems with the test suite
+   requiring the package to be installed prior to testing.
+
+4. Actually install the package to the system (with tests disabled).
    This can confirm cases of package for whom the above function
    does not work.  In the worst case, you can set a test self-dependency
    to force users to install the package before testing::
 
        test? ( ~dev-python/myself-${PV} )
 
-3. Try testing a different Python implementation.  If a subset of tests
+5. Try testing a different Python implementation.  If a subset of tests
    is failing with Python 3.6, see if it still happens with 3.7 or 3.8.
    If 3.8 is passing but 3.9 is not, it's most likely some
    incompatibility upstream did not account for.
 
-4. Run tests with ``FEATURES=-network-sandbox``.  Sometimes lack
+6. Run tests with ``FEATURES=-network-sandbox``.  Sometimes lack
    of Internet access causes non-obvious failures.
 
-5. Try a different test runner.  Sometimes the subtle differences
+7. Try a different test runner.  Sometimes the subtle differences
    in how tests are executed can lead to test failures.  But beware:
    some test runners may not run the full set of tests, so verify
    that you have actually fixed them and not just caused them to
@@ -116,6 +129,12 @@ failures that cannot be easily resolved.  This especially applies
 to tests that are broken themselves rather than indicating real problems
 with the software.  However, in some cases you will even find yourself
 ignoring minor test failures.
+
+.. Note::
+
+   When possible, it is preferable to use pytest along with its
+   convenient ignore/deselect options to skip problematic tests.
+   Using pytest instead of unittest is usually possible.
 
 Tests that are known to fail reliably can be marked as *expected
 failures*.  This has the advantage that the test in question will
