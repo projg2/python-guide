@@ -809,7 +809,7 @@ it call ``distutils-r1_src_test``:
     EAPI=7
 
     PYTHON_COMPAT=( python3_{6,7,8} )
-    inherit distutils-r1 virtualx
+    inherit distutils-r1
 
     DESCRIPTION="Extra features for standard library's cmd module"
     HOMEPAGE="https://github.com/python-cmd2/cmd2"
@@ -906,6 +906,35 @@ way::
 
     python_test() {
         epytest -m 'not network'
+    }
+
+
+.. index:: virtx
+
+Running tests with virtualx
+---------------------------
+Test suites requiring a display to work correctly can often be appeased
+usng Xvfb.  If the package in question does not start Xvfb directly,
+``virtualx.eclass`` can be used to do that.  Whenever possible, it is
+preferable to run a single server in ``src_test()`` for all passes
+of the test suite, e.g.::
+
+    distutils_enable_tests pytest
+
+    src_test() {
+        virtx distutils-r1_src_test
+    }
+
+Note that ``virtx`` implicitly enables nonfatal mode.  This means that
+e.g. ``epytest`` will no longer terminate the ebuild on failure, and you
+need to use ``die`` explicitly for it::
+
+    src_test() {
+        virtx distutils-r1_src_test
+    }
+
+    python_test() {
+        epytest -m "not network" || die "Tests failed with ${EPYTHON}"
     }
 
 
