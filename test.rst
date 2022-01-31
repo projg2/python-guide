@@ -295,6 +295,14 @@ users, or pip's test suite still requires old virtualenv that collides
 with the modern versions.  These problems can be resolved by installing
 the packages locally within the ebuild.
 
+.. Warning::
+
+   While the additional packages are installed into a temporary install
+   tree, they can leak into the build directory.  Afterwards, they are
+   picked by ``setup.py install`` and installed alongside the package.
+   If this happens, you need to explicitly remove them
+   from ``${BUILD_DIR}/lib`` afterwards.
+
 To do this, just use ``distutils_install_for_testing`` in every package
 that you need to install.  For example::
 
@@ -308,6 +316,8 @@ that you need to install.  For example::
             distutils_install_for_testing
             popd >/dev/null || die
         done
+        # remove examples leaked into BUILD_DIR
+        rm "${BUILD_DIR}"/lib/example* || die
 
         epytest
     }
@@ -328,6 +338,8 @@ you will also need to fetch them, e.g.::
         pushd "${WORKDIR}/virtualenv-${VENV_PV}" >/dev/null || die
         distutils_install_for_testing
         popd >/dev/null || die
+        # prevent it from being installed
+        rm -r "${BUILD_DIR}"/lib/virtualenv* || die
 
         epytest
     }
