@@ -937,6 +937,14 @@ need to use ``die`` explicitly for it::
         epytest -m "not network" || die "Tests failed with ${EPYTHON}"
     }
 
+.. Warning::
+
+   Explicit ``|| die`` is only necessary when overriding ``python_test``
+   and running ``epytest`` inside a ``nonfatal``.  The ``virtx`` command
+   runs its arguments via a ``nonfatal``.  The default ``python_test``
+   implementation created by ``distutils_enable_tests`` accounts for
+   this.  In other contexts, ``epytest`` will die on its own.
+
 
 .. index:: distutils_enable_sphinx
 
