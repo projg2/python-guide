@@ -64,6 +64,64 @@ tarball::
     SRC_URI="https://github.com/${PN}/${PN}/archive/${PV}.tar.gz -> ${P}.gh.tar.gz"
 
 
+ImportErrors for C extensions
+=============================
+Tests are often invoked in such a way that the Python packages
+and modules from the current directory take precedence over these found
+in the staging area or build directory.  In fact, this is often
+necessary to prevent import collisions — e.g. when modules would
+be loaded first from the staging area due to explicit imports
+then again from the current directory due to test discovery.
+
+Unfortunately, this does not work correctly if C extensions are built
+as part of these packages.  Since the package imported relatively
+does not include the necessary extensions, the imports fail, e.g.:
+
+.. code-block:: pytb
+
+    ____________________ ERROR collecting systemd/test/test_login.py ____________________
+    ImportError while importing test module '/tmp/portage/dev-python/python-systemd-234-r
+    2/work/python-systemd-234/systemd/test/test_login.py'.
+    Hint: make sure your test modules/packages have valid Python names.
+    Traceback:
+    /usr/lib/python3.8/site-packages/_pytest/python.py:578: in _importtestmodule
+        mod = import_path(self.fspath, mode=importmode)
+    /usr/lib/python3.8/site-packages/_pytest/pathlib.py:524: in import_path
+        importlib.import_module(module_name)
+    /usr/lib/python3.8/importlib/__init__.py:127: in import_module
+        return _bootstrap._gcd_import(name[level:], package, level)
+    <frozen importlib._bootstrap>:1014: in _gcd_import
+        ???
+    <frozen importlib._bootstrap>:991: in _find_and_load
+        ???
+    <frozen importlib._bootstrap>:975: in _find_and_load_unlocked
+        ???
+    <frozen importlib._bootstrap>:671: in _load_unlocked
+        ???
+    /usr/lib/python3.8/site-packages/_pytest/assertion/rewrite.py:170: in exec_module
+        exec(co, module.__dict__)
+    systemd/test/test_login.py:6: in <module>
+        from systemd import login
+    E   ImportError: cannot import name 'login' from 'systemd' (/tmp/portage/dev-python/python-systemd-234-r2/work/python-systemd-234/systemd/__init__.py)
+
+The preferred solution is to change the working directory before running
+the tests.  If tests are installed as a part of the package, they can
+be discovered through package search e.g. using pytest::
+
+    python_test() {
+        cd "${T}" || die
+        epytest --pyargs systemd
+    }
+
+If the tests are in a separate directory, an absolute path can be used
+instead::
+
+    python_test() {
+        cd "${T}" || die
+        epytest "${S}"/test
+    }
+
+
 Checklist for dealing with test failures
 ========================================
 If you see some test failures but do not have a guess as to why they
