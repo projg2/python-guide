@@ -1082,6 +1082,130 @@ The eclass tries to automatically determine whether ``--no-autodoc``
 should be used, and issue a warning if it's missing or incorrect.
 
 
+.. index:: DISTUTILS_DEPS
+.. index:: DISTUTILS_OPTIONAL
+
+Packages with optional Python build system usage
+================================================
+The eclass has been written with the assumption that the vast majority
+of its consumers will be using the Python build systems unconditionally.
+For this reason, it sets the ebuild metadata variables (dependencies,
+``REQUIRED_USE``) and exports phase functions by default.  However, it
+also provides support for *optional mode* that can be used when Python
+is used conditionally to USE flags.
+
+If ``DISTUTILS_OPTIONAL`` is set to a non-empty value, then the eclass
+does not alter ebuild metadata or export phase functions by default.
+The ebuild needs to declare appropriate dependencies
+and ``REQUIRED_USE`` explicitly, and call the appropriate phase
+functions.
+
+The ``PYTHON_DEPS`` and ``PYTHON_REQUIRED_USE`` variables provided
+by the underlying Python eclasses should be used, as if using these
+eclasses directly.  Furthermore, in PEP 517 mode an additional
+``DISTUTILS_DEPS`` variable is exported that contains build-time
+dependnecies specific to wheel build and install, and should be added
+to ``BDEPEND``.
+
+At the very least, the phases having default `sub-phase functions`_ need
+to be called, that is:
+
+- ``distutils-r1_src_prepare``
+- ``distutils-r1_src_compile``
+- ``distutils-r1_src_install``
+
+Additional phases need to be called if the ebuild declares sub-phase
+functions for them.
+
+Note that in optional mode, the default implementation
+of ``distutils-r1_python_prepare_all`` does not apply patches (to avoid
+collisions with other eclasses).
+
+.. Warning::
+
+   The ``distutils_enable_sphinx`` and ``distutils_enable_tests`` alter
+   the ebuild metadata variables and declare sub-phase functions
+   independently of the value of ``DISTUTILS_OPTIONAL``.  However,
+   in order for the respective sub-phases to be executed the ebuild
+   needs to call appropriate eclass phase functions (i.e. additionally
+   call ``distutils-r1_src_test`` for the latter).
+
+   If unconditional test dependencies are undesirable, these functions
+   cannot be used, and appropriate dependencies and sub-phases need
+   to be declared explicitly.
+
+   In the legacy mode, the ``DISTUTILS_USE_SETUPTOOLS`` variable is
+   not used if the optional mode is enabled.  Instead, the dependency
+   on ``dev-python/setuptools`` needs to be declared explicitly.
+
+An example ebuild for a package utilizing autotools as a primary build
+system alongside a flit-based ``pyproject.toml`` in the top directory
+follows:
+
+.. code-block:: bash
+   :emphasize-lines: 6-10,13-15,21-24,26-33,37,42,45-47,51,56
+
+    # Copyright 1999-2022 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=8
+
+    DISTUTILS_USE_PEP517=flit
+    DISTUTILS_OPTIONAL=1
+    PYTHON_COMPAT=( python3_{8..10} pypy3  )
+
+    inherit distutils-r1
+
+    # ...
+    IUSE="python test"
+    REQUIRED_USE="
+        python? ( ${PYTHON_REQUIRED_USE} )"
+
+    DEPEND="
+        dev-libs/libfoo:="
+    RDEPEND="
+        ${DEPEND}
+        python? (
+            ${PYTHON_DEPS}
+            dev-python/frobnicate[${PYTHON_USEDEP}]
+        )"
+    BDEPEND="
+        python? (
+            ${PYTHON_DEPS}
+            ${DISTUTILS_DEPS}
+            test? (
+                dev-python/frobnicate[${PYTHON_USEDEP}]
+                dev-python/pytest[${PYTHON_USEDEP}]
+            )
+        )"
+
+    src_prepare() {
+        default
+        use python && distutils-r1_src_prepare
+    }
+
+    src_compile() {
+        default
+        use python && distutils-r1_src_configure
+    }
+
+    python_test() {
+        epytest
+    }
+
+    src_test() {
+        default
+        use python && distutils-r1_src_test
+    }
+
+    src_install() {
+        default
+        use python && distutils-r1_src_install
+    }
+
+
+
+
 .. _distutils-r1.eclass(5):
    https://devmanual.gentoo.org/eclass-reference/distutils-r1.eclass/index.html
 .. _PEP 517:
