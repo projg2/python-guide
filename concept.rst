@@ -196,7 +196,19 @@ namespace should use the following code:
 
 Setuptools normally do not install ``__init__.py`` files but ``*.pth``
 files that do not collide.  It is therefore easy to miss them but they
-can cause quite a mayhem.  Therefore, remember to strip them:
+can cause quite a mayhem.  Therefore, remember to strip them.
+
+In PEP 517 mode, the stripping needs to happen after the compile phase
+to ensure that tests work correctly:
+
+.. code-block:: bash
+
+    python_compile() {
+        distutils-r1_python_compile
+        find "${BUILD_DIR}" -name '*.pth' -delete || die
+    }
+
+In legacy mode, it should be done after the install phase:
 
 .. code-block:: bash
 
