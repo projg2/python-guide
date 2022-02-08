@@ -70,7 +70,7 @@ The simplest case of ebuild is:
     EAPI=8
 
     DISTUTILS_USE_PEP517=setuptools
-    PYTHON_COMPAT=( python3_{8..10} pypy3  )
+    PYTHON_COMPAT=( python3_{8..10} pypy3 )
     inherit distutils-r1
 
     DESCRIPTION="Makes working with XML feel like you are working with JSON"
@@ -1152,7 +1152,7 @@ follows:
 
     DISTUTILS_USE_PEP517=flit
     DISTUTILS_OPTIONAL=1
-    PYTHON_COMPAT=( python3_{8..10} pypy3  )
+    PYTHON_COMPAT=( python3_{8..10} pypy3 )
 
     inherit distutils-r1
 
