@@ -197,6 +197,14 @@ and/or ``setup.py``.  Some packages also include custom code to read
 dependencies from external files; it is usually worthwhile to look
 for ``requirements`` in the name.
 
+.. Warning::
+
+   Unconditional runtime dependencies and unconditional build-time
+   dependencies are often enforced by the script wrappers and build
+   systems respectively.  If upstream lists spurious dependencies,
+   they often need to be explicitly stripped rather than just ommitted
+   from ebuild.
+
 The keys commonly used to list specific kinds of dependencies in common
 Python build systems:
 
