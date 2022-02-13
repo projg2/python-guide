@@ -121,32 +121,55 @@ of implementations your package supports.
 
 A dependency that applies only to a subset of ``PYTHON_COMPAT`` can
 be created using ``python_gen_cond_dep`` function (the same as used
-in ``python-single-r1``).  In addition to the dependency template,
-it accepts an optional list of applicable implementations as arguments.
+in ``python-single-r1``).  It takes a dependency string template,
+followed by zero or more implementation arguments.  The dependencies
+are output for every matching implementation.
 
-For example, ``dev-python/importlib_metadata`` package is a backport
-from Python 3.8.  Therefore, the majority of its consumers require
-it only with older versions of Python::
+The dependency template should contain literal (usually escaped through
+use of single quotes) ``${PYTHON_USEDEP}`` that will be substituted
+with partial USE dependency by the eclass function (when using
+``python-single-r1``, ``${PYTHON_SINGLE_USEDEP}`` is also permitted).
 
-    RDEPEND="
-        $(python_gen_cond_dep '
-            dev-python/importlib_metadata[${PYTHON_USEDEP}]
-        ' pypy3 python3_{6,7})
-    "
+The implementation arguments can be:
 
-Please note that the first argument is a template containing literal
-(escaped through use of single quotes) ``${PYTHON_USEDEP}`` that will
-be substituted with partial USE dependency by the eclass function
-(``${PYTHON_SINGLE_USEDEP}`` is also permitted when using
-``python-single-r1``).  It is followed by a list of implementations that
-are *not* quoted.  The example is using bash brace expansion to express
-``python3_6 python3_7`` shorter.
+1. Literal implementation names.  For example, if a particular feature
+   is only available on a subset of Python implementations supported
+   by the package::
 
-Since ``pypy3`` can refer to any version of PyPy3, the dependency will
-eventually become outdated as PyPy3 upgrades to Python 3.8
-compatibility.  This is a known limitation of the eclasses and currently
-no solution is provided for it, besides updating dependencies once old
-version of PyPy3 is removed.
+       RDEPEND="
+           cli? (
+               $(python_gen_cond_dep '
+                   dev-python/black[${PYTHON_USEDEP}]
+                   dev-python/click[${PYTHON_USEDEP}]
+               ' python3_{8..10})
+           )
+       "
+
+2. ``fnmatch(3)``-style wildcard against implementation names.
+   For example, CFFI is part of PyPy's stdlib, so the explicit package
+   needs to be only installed for CPython::
+
+       RDEPEND="
+           $(python_gen_cond_dep '
+               dev-python/cffi[${PYTHON_USEDEP}]
+           ' 'python*')
+       "
+
+   Remember that the patterns need to be escaped to prevent filename
+   expansion from happening.
+
+3. Python standard library versions that are expanded into appropriate
+   implementations by the eclass.  For example, this makes it convenient
+   to depend on backports::
+
+       RDEPEND="
+           $(python_gen_cond_dep '
+               dev-python/backports-zoneinfo[${PYTHON_USEDEP}]
+           ' 3.8)
+       "
+
+   The advantage of this form is that the dependencies automatically
+   adjust as we switch PyPy3 to a newer stdlib version.
 
 An important feature of ``python_gen_cond_dep`` is that it handles
 removal of old implementations gracefully.  When one of the listed
@@ -154,10 +177,8 @@ implementations is no longer supported, it silently ignores it.  This
 makes it possible to remove old implementations without having to update
 all dependency strings immediately.
 
-For example, in the example below the dependency became empty when
-Python 3.7 was removed.
-
-.. code-block::
+For example, in the following example the dependency became empty when
+Python 3.7 was removed::
 
     RDEPEND="
         $(python_gen_cond_dep '
