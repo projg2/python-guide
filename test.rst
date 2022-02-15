@@ -344,8 +344,8 @@ e.g.::
     $ pytest -s
 
 
-Installing extra dependencies in test environment (e.g. example plugins)
-========================================================================
+Installing extra dependencies in test environment (PEP517 mode)
+===============================================================
 Rarely, the test suite expects some package being installed that
 does not fit being packaged and installed system-wide.  For example,
 isort's tests use a few example plugins that are not useful to end
@@ -353,51 +353,31 @@ users, or pip's test suite still requires old virtualenv that collides
 with the modern versions.  These problems can be resolved by installing
 the packages locally within the ebuild.
 
-.. Warning::
+The ``distutils-r1.eclass`` provides a ``distutils_pep517_install``
+helper that can be used to install additional packages.  Please note
+that this helper is intended for expert users only, and special care
+needs to be taken when using it.  The function takes a single argument
+specifying the destination install root, and installs the package
+from the current directory.
 
-   While the additional packages are installed into a temporary install
-   tree, they can leak into the build directory.  Afterwards, they are
-   picked by ``setup.py install`` and installed alongside the package.
-   If this happens, you need to explicitly remove them
-   from ``${BUILD_DIR}/lib`` afterwards.
+For example, ``dev-python/isort`` uses the following test phase
+to duplicate the install tree and then install additional packages
+into it for the purpose of testing.  Note that ``PATH`` is manipulated
+(rather than ``PYTHONPATH``) to use virtualenv-style install root.
 
-To do this, just use ``distutils_install_for_testing`` in every package
-that you need to install.  For example::
+.. code-block:: bash
 
     python_test() {
-        # the main package
-        distutils_install_for_testing
-        # additional plugins
+        cp -a "${BUILD_DIR}"/{install,test} || die
+        local -x PATH=${BUILD_DIR}/test/usr/bin:${PATH}
+
+        # Install necessary plugins
         local p
         for p in example*/; do
             pushd "${p}" >/dev/null || die
-            distutils_install_for_testing
+            distutils_pep517_install "${BUILD_DIR}"/test
             popd >/dev/null || die
         done
-        # remove examples leaked into BUILD_DIR
-        rm "${BUILD_DIR}"/lib/example* || die
-
-        epytest
-    }
-
-If the extra packages are not included in the main distribution tarball,
-you will also need to fetch them, e.g.::
-
-    VENV_PV=16.7.10
-    SRC_URI+="
-        test? (
-            https://github.com/pypa/virtualenv/archive/${VENV_PV}.tar.gz
-                -> virtualenv-${VENV_PV}.tar.gz
-        )
-    "
-
-    python_test() {
-        distutils_install_for_testing
-        pushd "${WORKDIR}/virtualenv-${VENV_PV}" >/dev/null || die
-        distutils_install_for_testing
-        popd >/dev/null || die
-        # prevent it from being installed
-        rm -r "${BUILD_DIR}"/lib/virtualenv* || die
 
         epytest
     }
