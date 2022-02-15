@@ -56,6 +56,7 @@ the implicitly exported ``pkg_setup`` phase.
 .. index:: python_gen_any_dep; python-any-r1
 .. index:: python_check_deps; python-any-r1
 .. index:: PYTHON_USEDEP; python-any-r1
+.. index:: python_has_version
 
 Dependencies
 ============
@@ -110,8 +111,8 @@ This is best explained using an example:
     "
 
     python_check_deps() {
-        has_version "dev-python/polib[${PYTHON_USEDEP}]" &&
-        has_version "dev-python/pygobject:3[${PYTHON_USEDEP}]"
+        python_has_version "dev-python/polib[${PYTHON_USEDEP}]" &&
+        python_has_version "dev-python/pygobject:3[${PYTHON_USEDEP}]"
     }
 
 This means that the package will work with Python 3.6, 3.7 or 3.8,
@@ -119,6 +120,26 @@ provided that its both dependencies have the same implementation
 enabled.  The generated ``||`` dep ensures that this is true for
 at least one of them, while ``python_check_deps()`` verifies which
 branch was satisfied.
+
+The eclass provides a ``python_has_version`` wrapper that helps
+verifying whether the dependencies are installed.  The wrapper takes
+a single optional dependency class flag, followed by one or more package
+dependencies.  Similarly to EAPI 7+ ``has_version``, the root flag
+can be ``-b`` (for packages from ``BDEPEND``), ``-d`` (for ``DEPEND``)
+or ``-r`` (for ``RDEPEND``, ``IDEPEND`` and ``PDEPEND``).  When no flag
+is passed, ``-b`` is assumed.  The wrapper verifies whether
+the specified packages are installed, verbosely printing the checks
+performed and their results.  It returns success if all packages were
+found, false otherwise.
+
+Note that when multiple invocations are used, ``&&`` needs to be used
+to chain the results.  The example above can be also written as::
+
+    python_check_deps() {
+        python_has_version \
+            "dev-python/polib[${PYTHON_USEDEP}]" \
+            "dev-python/pygobject:3[${PYTHON_USEDEP}]"
+    }
 
 It is important to understand that this works correctly only if
 ``python_gen_any_dep`` and ``python_check_deps()`` match exactly.
@@ -166,8 +187,8 @@ need to be wrapped in appropriate USE conditions:
         )"
 
     python_check_deps() {
-        has_version -d "dev-python/pexpect[${PYTHON_USEDEP}]" &&
-        has_version -d "dev-python/pytest[${PYTHON_USEDEP}]"
+        python_has_version -d "dev-python/pexpect[${PYTHON_USEDEP}]" &&
+        python_has_version -d "dev-python/pytest[${PYTHON_USEDEP}]"
     }
 
     pkg_setup() {
@@ -214,7 +235,7 @@ a similar condition in ``python_check_deps()``:
 
     python_check_deps() {
         use test || return 0
-        has_version -b "dev-python/dbus-python[${PYTHON_USEDEP}]"
+        python_has_version -b "dev-python/dbus-python[${PYTHON_USEDEP}]"
     }
 
 
@@ -259,10 +280,10 @@ USE conditional blocks inside ``python_gen_any_dep``:
 
     python_check_deps() {
         if use introspection; then
-            has_version --host-root "dev-python/pygobject:3[${PYTHON_USEDEP}]" || return 1
+            python_has_version "dev-python/pygobject:3[${PYTHON_USEDEP}]" || return 1
         fi
-        has_version --host-root "dev-python/mock[${PYTHON_USEDEP}]" &&
-        has_version --host-root "dev-python/dbus-python[${PYTHON_USEDEP}]"
+        python_has_version "dev-python/mock[${PYTHON_USEDEP}]" &&
+        python_has_version --host-root "dev-python/dbus-python[${PYTHON_USEDEP}]"
     }
 
     pkg_setup() {

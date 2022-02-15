@@ -154,15 +154,15 @@ be combined.
 
     python_check_deps() {
         if use test; then
-            has_version "dev-python/pymongo[${PYTHON_USEDEP}]" ||
+            python_has_version "dev-python/pymongo[${PYTHON_USEDEP}]" ||
                 return 1
         fi
 
-        has_version ">=dev-util/scons-2.5.0[${PYTHON_USEDEP}]" &&
-        has_version "dev-python/cheetah3[${PYTHON_USEDEP}]" &&
-        has_version "dev-python/psutil[${PYTHON_USEDEP}]" &&
-        has_version "dev-python/pyyaml[${PYTHON_USEDEP}]" &&
-        has_version "virtual/python-typing[${PYTHON_USEDEP}]"
+        python_has_version ">=dev-util/scons-2.5.0[${PYTHON_USEDEP}]" &&
+        python_has_version "dev-python/cheetah3[${PYTHON_USEDEP}]" &&
+        python_has_version "dev-python/psutil[${PYTHON_USEDEP}]" &&
+        python_has_version "dev-python/pyyaml[${PYTHON_USEDEP}]" &&
+        python_has_version "virtual/python-typing[${PYTHON_USEDEP}]"
     }
 
     src_configure() {
@@ -498,7 +498,7 @@ case, the any-r1 API is recommended.
         virtual/pkgconfig"
 
     python_check_deps() {
-        has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
+        python_has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
     }
 
     src_configure() {

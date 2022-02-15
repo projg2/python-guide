@@ -348,8 +348,8 @@ installed dependencies and use one having all dependencies satisfied.
         )"
 
     python_check_deps() {
-        has_version "dev-python/sphinx[${PYTHON_USEDEP}]" &&
-        has_version "dev-python/sphinx_rtd_theme[${PYTHON_USEDEP}]"
+        python_has_version "dev-python/sphinx[${PYTHON_USEDEP}]" &&
+        python_has_version "dev-python/sphinx_rtd_theme[${PYTHON_USEDEP}]"
     }
 
     src_compile() {
@@ -391,8 +391,8 @@ unconditionally but enforce dependencies only with ``doc`` flag enabled.
 
     python_check_deps() {
         use doc || return 0
-        has_version "dev-python/sphinx[${PYTHON_USEDEP}]" &&
-        has_version "dev-python/sphinx_rtd_theme[${PYTHON_USEDEP}]"
+        python_has_version "dev-python/sphinx[${PYTHON_USEDEP}]" &&
+        python_has_version "dev-python/sphinx_rtd_theme[${PYTHON_USEDEP}]"
     }
 
     src_compile() {
@@ -429,8 +429,8 @@ to any-r1 rules.
 
     python_check_deps() {
         use doc || return 0
-        has_version "dev-python/sphinx[${PYTHON_USEDEP}]" &&
-        has_version "dev-python/sphinx_rtd_theme[${PYTHON_USEDEP}]"
+        python_has_version "dev-python/sphinx[${PYTHON_USEDEP}]" &&
+        python_has_version "dev-python/sphinx_rtd_theme[${PYTHON_USEDEP}]"
     }
 
     python_compile_all() {
@@ -489,7 +489,7 @@ to ``python_gen_any_dep``.
         virtual/pkgconfig"
 
     python_check_deps() {
-        has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
+        python_has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
     }
 
     src_configure() {
@@ -541,7 +541,7 @@ to ``python_gen_any_dep``.
 
     python_check_deps() {
         python_is_python3 && return 1
-        has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
+        python_has_version ">=dev-util/scons-2.3.0[${PYTHON_USEDEP}]"
     }
 
     src_configure() {
