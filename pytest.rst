@@ -99,6 +99,14 @@ make options for the job number, e.g.::
 
     inherit multiprocessing
 
+    BDEPEND="
+        test? (
+            dev-python/pytest-xdist[${PYTHON_USEDEP}]
+        )
+    "
+
+    distutils_enable_tests pytest
+
     python_test() {
        epytest -n "$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")"
     }
