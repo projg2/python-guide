@@ -90,7 +90,12 @@ in parallel.  This is especially useful for programs with large test
 suites that take significant time to run single-threaded.
 
 Not all test suites support pytest-xdist.  Particularly, it requires
-that the tests are written not to collide one with another.
+that the tests are written not to collide one with another.  Sometimes,
+xdist may also cause instability of individual tests.
+
+When only a few tests are broken or unstable because of pytest-xdist,
+it is possible to use it and deselect the problematic tests.  It is up
+to the maintainer's discretion to decide whether this is justified.
 
 Using pytest-xdist is recommended if the package in question supports it
 (i.e. it does not cause semi-random test failures) and its test suite
