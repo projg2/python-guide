@@ -704,7 +704,7 @@ The valid values include:
 
 - ``nose`` for ``dev-python/nose``
 - ``pytest`` for ``dev-python/pytest``
-- ``setup.py`` to call ``setup.py test``
+- ``setup.py`` to call ``setup.py test`` (*deprecated*)
 - ``unittest`` to use built-in unittest discovery
 
 
