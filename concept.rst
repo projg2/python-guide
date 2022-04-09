@@ -75,13 +75,13 @@ packages::
 
 There are three common methods of creating namespace packages:
 
-1. PEP-0420_ namespaces implemented in Python 3.3 and newer,
+1. `PEP 420`_ namespaces implemented in Python 3.3 and newer,
 
 2. Using pkgutil_ standard library module,
 
 3. Using `namespace package support in setuptools`_ (discouraged).
 
-PEP-0420 namespaces are created implicitly when a package directory
+PEP 420 namespaces are created implicitly when a package directory
 does not contain ``__init__.py`` file.  While earlier versions
 of Python (including Python 2.7) ignored such directories and did not
 permit importing Python modules within them, Python 3.3 imports such
@@ -103,44 +103,55 @@ into Python.
 Both pkgutil and setuptools namespaces are portable to all versions
 of Python.
 
-PEP-0420 and pkgutil namespaces are considered mutually compatible,
-while setuptools namespaces are considered incompatible with them.
-It is recommended not to mix different methods within a single
-namespace.
-
 More general information on the topic can be found under `packaging
 namespace packages`_ in Python Packaging User Guide.
 
 
-Namespace packages in Python 3
-------------------------------
-Since all supported Python versions in Gentoo support PEP-0420
-namespaces, the other two methods are technically unnecessary.  However,
-the incompatibility between pkg_resources namespaces and the other two
-methods makes removing them non-trivial.
+Determining whether namespaces are used
+---------------------------------------
+The exact method of detecting namespace packages depends on the type
+of namespace used.
 
-If all packages within the namespace are using only pkgutil-style
-namespaces, you can safely remove the dependencies on the package
-providing the namespace and the package itself.  Even partial removal
-should not cause any issues.  However, if the package was explicitly
-provided upstream, note that some packages may carry an explicit
-dependency on it and that dependency would need to be removed or made
-conditional to Python < 3.3.  You will also need to strip colliding
-``__init__.py`` files.
+PEP 420 namespaces can generally be recognized by the lack
+of ``__init__.py`` in an installed package directory.  However, since
+they do not require any specific action, distinguishing them is not very
+important.
 
-If setuptools-style namespace are used, the namespace packages need
-to remain as-is for the time being, as otherwise tests relying
-on the namespaced packages are going to be broken.  We have not yet
-conceived a way forward for them.
+pkgutil namespaces can be recognized through the content of their
+``__init__.py``.  Generally, you should find it suspicious if is
+the only file in a top-level package directory, and if the name of this
+directory is less specific than the package name (e.g. ``zope`` for
+``zope.interface``, ``ruamel`` for ``ruamel.yaml``).  If you miss this,
+then you will learn about the namespace from package collisions
+on the respective ``__init__.py``.
+
+setuptools namespaces usually do not install ``__init__.py`` but
+do install a ``.pth`` file instead.  The distutils-r1 eclass detects
+this automatically and prints a warning.  Prior to installation,
+they can also be recognized by ``namespace_packages`` option
+in ``setup.py`` or ``setup.cfg``.
 
 
-Packaging pkgutil-style namespaces in Gentoo
---------------------------------------------
-Normally all packages using the same pkgutil-style namespace install
-its ``__init__.py`` file causing package collisions.  As having this
-file is no longer necessary for Python 3.3 and newer, the recommended
-solution is to strip it before installing the package.  The presence
-of this file is harmless during build and testing.
+Adding new namespace packages to Gentoo
+---------------------------------------
+If the package uses PEP 420 namespaces, no special action is required.
+Per PEP 420 layout, the package must not install ``__init__.py`` files
+for namespaces.
+
+If the package uses one of the other layouts, their respective files
+must be removed from the install tree.
+
+For pkgutil namespace, its ``__init__.py`` should be removed after
+the PEP 517 build phase:
+
+.. code-block:: bash
+
+    python_compile() {
+        distutils-r1_python_compile
+        rm "${BUILD_DIR}/install$(python_get_sitedir)"/jaraco/__init__.py || die
+    }
+
+The equivalent code for the legacy eclass mode is:
 
 .. code-block:: bash
 
@@ -149,57 +160,7 @@ of this file is harmless during build and testing.
         distutils-r1_python_install
     }
 
-
-Packaging setuptools-style namespaces in Gentoo
------------------------------------------------
-Similar approach is used for setuptools-style namespace packages.
-The only differences are in ``__init__.py`` code and removal method.
-
-The ``dev-python/namespace-<name>`` package for setuptools-style
-namespace should use the following code:
-
-.. code-block:: bash
-   :emphasize-lines: 24-27,31
-
-    # Copyright 1999-2020 Gentoo Authors
-    # Distributed under the terms of the GNU General Public License v2
-
-    EAPI=6
-
-    PYTHON_COMPAT=( pypy3 python{2_7,3_{6,7,8}} )
-    inherit python-r1
-
-    DESCRIPTION="Namespace package declaration for zope"
-    HOMEPAGE="https://wiki.gentoo.org/wiki/Project:Python/Namespace_packages"
-    SRC_URI=""
-
-    LICENSE="public-domain"
-    SLOT="0"
-    KEYWORDS="~alpha amd64 arm arm64 hppa ia64 ~m68k ~mips ppc ppc64 s390 ~sh sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
-    IUSE=""
-    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
-
-    RDEPEND="dev-python/setuptools[${PYTHON_USEDEP}]
-        ${PYTHON_DEPS}"
-    DEPEND="${PYTHON_DEPS}"
-
-    src_unpack() {
-        mkdir -p "${S}"/zope || die
-        cat > "${S}"/zope/__init__.py <<-EOF || die
-            __import__('pkg_resources').declare_namespace(__name__)
-        EOF
-    }
-
-    src_install() {
-        python_foreach_impl python_domodule zope
-    }
-
-Setuptools normally do not install ``__init__.py`` files but ``*.pth``
-files that do not collide.  It is therefore easy to miss them but they
-can cause quite a mayhem.  Therefore, remember to strip them.
-
-In PEP 517 mode, the stripping needs to happen after the compile phase
-to ensure that tests work correctly:
+For setuptools namespace, the ``.pth`` file should be removed instead:
 
 .. code-block:: bash
 
@@ -208,7 +169,7 @@ to ensure that tests work correctly:
         find "${BUILD_DIR}" -name '*.pth' -delete || die
     }
 
-In legacy mode, it should be done after the install phase:
+The setuptools code for the legacy mode is:
 
 .. code-block:: bash
 
@@ -218,7 +179,14 @@ In legacy mode, it should be done after the install phase:
     }
 
 
-.. _PEP-0420: https://www.python.org/dev/peps/pep-0420/
+Legacy namespace packages in Gentoo
+-----------------------------------
+Historically, Gentoo has used ``dev-python/namespace-*`` packages
+to support namespaces.  This method is deprecated and it is in process
+of being retired.
+
+
+.. _PEP 420: https://www.python.org/dev/peps/pep-0420/
 
 .. _pkgutil: https://docs.python.org/3/library/pkgutil.html
 
