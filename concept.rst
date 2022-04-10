@@ -178,6 +178,19 @@ The setuptools code for the legacy mode is:
         find "${D}" -name '*.pth' -delete || die
     }
 
+Some packages include an explicit ``setuptools`` runtime dependency
+(``install_requires``) when using namespaces.  If this is the only
+use of ``pkg_resources`` and ``setuptools`` in installed package
+sources, this dependency needs to be stripped, e.g.:
+
+.. code-block:: bash
+
+    src_prepare() {
+        # strip rdep specific to namespaces
+        sed -i -e "/'setuptools'/d" setup.py || die
+        distutils-r1_src_prepare
+    }
+
 
 Legacy namespace packages in Gentoo
 -----------------------------------
