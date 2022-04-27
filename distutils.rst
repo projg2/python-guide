@@ -204,16 +204,20 @@ The eclass maintains a mapping of backend paths to the respective
 
 The following table summarizes supported backends.
 
-================== ====================== ================================
-USE_PEP517 value   Provider package       build-backend
-================== ====================== ================================
-flit               dev-python/flit_core   flit_core.buildapi
-pdm                dev-python/pdm-pep517  pdm.pep517.api
-poetry             dev-python/poetry-core poetry.core.masonry.api
-setuptools         dev-python/setuptools  setuptools.build_meta
-                                          setuptools.__legacy__.build_meta
-standalone         (none)                 (various)
-================== ====================== ================================
+================== ============================ ================================
+USE_PEP517 value   Provider package             build-backend
+================== ============================ ================================
+flit               dev-python/flit_core         flit_core.buildapi
+flit_scm           dev-python/flit_scm          flit_scm:buildapi
+hatchling          dev-python/hatchling         hatchling.build
+jupyter            dev-python/jupyter_packaging jupyter_packaging.build_api
+maturin            dev-util/maturin             maturin
+pdm                dev-python/pdm-pep517        pdm.pep517.api
+poetry             dev-python/poetry-core       poetry.core.masonry.api
+setuptools         dev-python/setuptools        setuptools.build_meta
+                                                setuptools.__legacy__.build_meta
+standalone         (none)                       (various)
+================== ============================ ================================
 
 The special value ``standalone`` is reserved for bootstrapping build
 systems.  It indicates that the package itself provides its own build
