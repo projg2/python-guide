@@ -1208,6 +1208,77 @@ follows:
     }
 
 
+.. index:: Rust
+
+Packages with Rust extensions (using Cargo)
+===========================================
+Some Python build systems include support for writing extensions
+in the Rust programming language.  Two examples of these are setuptools
+using ``dev-python/setuptools_rust`` plugin and Maturin.  Normally,
+these build systems utilize the Cargo ecosystem to automatically
+download the Rust dependencies over the Internet.  In Gentoo,
+``cargo.eclass`` is used to provide these dependencies to ebuilds.
+
+When creating a new ebuild for a package using Rust extensions
+or bumping one, you need to locate the ``Cargo.lock`` files within
+the package's sources.  For each of these files, run ``cargo-ebuild``
+in the containing directory in order to generate a template ebuild.
+Then combine ``CRATES`` and ``LICENSE`` values from all the generated
+ebuilds.
+
+The actual ebuild inherits both ``cargo`` and ``distutils-r1`` eclasses.
+Prior to inherit, ``CARGO_OPTIONAL`` should be used to avoid exporting
+phase functions, and ``CRATES`` should be declared.  ``SRC_URI`` needs
+to contain URLs generated using ``cargo_crate_uris``, and ``LICENSE``
+the crate licenses in addition to the Python package's license.
+``QA_FLAGS_IGNORED`` needs to match all Rust extensions in order
+to prevent false positives on ignored ``CFLAGS`` and ``LDFLAGS``
+warnings.  Finally, the ebuild needs to call ``cargo_src_unpack``.
+
+An example ebuild follows:
+
+.. code-block:: bash
+   :emphasize-lines: 6,10-15,17,23,28,31,35,38
+
+    # Copyright 2022 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=8
+
+    CARGO_OPTIONAL=1
+    DISTUTILS_USE_PEP517=setuptools
+    PYTHON_COMPAT=( python3_{8..10} pypy3 )
+
+    CRATES="
+        Inflector-0.11.4
+        aliasable-0.1.3
+        asn1-0.8.7
+        asn1_derive-0.8.7
+    "
+
+    inherit cargo distutils-r1
+
+    # ...
+
+    SRC_URI="
+        mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz
+        $(cargo_crate_uris ${CRATES})
+    "
+
+    LICENSE="|| ( BSD-2 Apache-2 )"
+    # Crate licenses
+    LICENSE+=" Apache-2.0 BSD BSD-2 MIT"
+
+    BDEPEND="
+        dev-python/setuptools-rust[${PYTHON_USEDEP}]
+    "
+
+    # Rust does not respect CFLAGS/LDFLAGS
+    QA_FLAGS_IGNORED=".*/_rust.*"
+
+    src_unpack() {
+        cargo_src_unpack
+    }
 
 
 .. _distutils-r1.eclass(5):
