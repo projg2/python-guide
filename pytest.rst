@@ -113,7 +113,7 @@ make options for the job number, e.g.::
     distutils_enable_tests pytest
 
     python_test() {
-       epytest -n "$(makeopts_jobs "${MAKEOPTS}" "$(get_nproc)")"
+       epytest -n "$(makeopts_jobs)"
     }
 
 Please note that some upstream use pytest-xdist even if there is no real
