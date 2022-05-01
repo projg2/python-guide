@@ -212,6 +212,7 @@ flit_scm           dev-python/flit_scm          flit_scm:buildapi
 hatchling          dev-python/hatchling         hatchling.build
 jupyter            dev-python/jupyter_packaging jupyter_packaging.build_api
 maturin            dev-util/maturin             maturin
+pbr                dev-python/pbr               pbr
 pdm                dev-python/pdm-pep517        pdm.pep517.api
 poetry             dev-python/poetry-core       poetry.core.masonry.api
 setuptools         dev-python/setuptools        setuptools.build_meta
