@@ -170,8 +170,19 @@ the following tasks:
 - mask the new target flags on stable profiles
   via ``profiles/base/use.stable.mask``.
 
-- add the new target to ``_PYTHON_ALL_IMPLS`` and update the patterns
-  in ``_python_impl_supported()`` in ``python-utils-r1.eclass``.
+- update ``python-utils-r1.eclass``:
+
+  1. add the implementation to ``_PYTHON_ALL_IMPLS``
+
+  2. update the patterns in ``_python_verify_patterns``
+
+  3. update the patterns in ``_python_set_impls``
+
+  4. update the patterns in ``_python_impl_matches``
+
+  5. add the appropriate dependency to the case for ``PYTHON_PKG_DEP``
+
+- update the tested version range in ``eclass/tests/python-utils-r1.sh``
 
 - add the new implementation to the list
   in ``app-portage/gpyutils/files/implementations.txt``.
