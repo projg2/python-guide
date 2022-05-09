@@ -561,14 +561,29 @@ such as bash completions or examples.
     }
 
 
-Passing arguments to setup.py commands
-======================================
-The PEP 517 mode does not support passing additional commands arguments
-via ``DISTUTILS_ARGS`` anymore.  Instead, the additional parameters
-can be passed using the ``setup.cfg`` file.
+.. index:: DISTUTILS_ARGS
 
-For example, Pillow provides for configuring available backends via
-additional ``build_ext`` command flags::
+Passing arguments to setup.py
+=============================
+There are two main methods of accepting additional command-line options
+in ``setup.py`` scripts: using global options and via command options.
+
+Global options are usually implemented through manipulating ``sys.path``
+directly.  The recommended way to use them is to specify them
+via ``DISTUTILS_ARGS`` array::
+
+    src_configure() {
+        DISTUTILS_ARGS=( --external )
+    }
+
+The options specified via ``DISTUTILS_ARGS`` are passed to all
+``esetup.py`` invocations, as well as to the setuptools PEP517 backend
+(using the ``--global-option`` setting).  For future compatibility,
+it is recommended to avoid adding command names to ``DISTUTILS_ARGS``.
+
+The recommended way to pass command options is to use the ``setup.cfg``
+file.  For example, Pillow provides for configuring available backends
+via additional ``build_ext`` command flags::
 
     setup.py build_ext --enable-tiff --disable-webp ...
 
@@ -587,12 +602,6 @@ take boolean arguments.  In this case, the ebuild can use::
             #...
         EOF
     }
-
-Note that this method works only for arguments to specific commands.
-Some packages use hacks to support global options, e.g. via manipulating
-``sys.argv`` directly.  This is no longer possible with PEP 517 builds
-and the packages need to be fixed not to rely on it.  The possible
-alternatives include using environment variables or custom commands.
 
 
 .. index:: esetup.py
