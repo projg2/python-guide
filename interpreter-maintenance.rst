@@ -191,9 +191,10 @@ the following tasks:
 Porting initial packages
 ------------------------
 The initial porting is quite hard due to a number of circular
-dependencies.  To ease the process, some of the high profile packages
-are ported first with tests and their dependencies disabled for the new
-implementation, e.g.:
+dependencies.  To ease the process, it is recommended to temporarily
+limit testing of the packages that feature many additional test
+dependencies.  The packages needing this have implementation conditions
+in place already.  An example follows:
 
 .. code-block:: bash
    :emphasize-lines: 3,15,20-21
@@ -212,40 +213,46 @@ implementation, e.g.:
                 dev-python/pytest-xdist[${PYTHON_USEDEP}]
                 >=dev-python/virtualenv-20[${PYTHON_USEDEP}]
                 dev-python/wheel[${PYTHON_USEDEP}]
-            ' python3_{7..10} pypy3)
+            ' python3_{8..10} pypy3)
         )
     "
 
     python_test() {
         # keep in sync with python_gen_cond_dep above!
-        has "${EPYTHON}" python3.{7..10} pypy3 || continue
+        has "${EPYTHON}" python3.{8..10} pypy3 || continue
 
-        distutils_install_for_testing
         HOME="${PWD}" epytest setuptools
     }
 
+It is important to remember to update the implementation range
+and therefore enable testing once the test dependencies are ported.
+Please do not remove the conditions entirely, as they will be useful
+for the next porting round.
 
-The recommended process is to, in order:
+During the initial testing it is acceptable to be more lenient on test
+failures, and deselect failing tests on the new implementation when
+the package itself works correctly for its reverse dependencies.
+For example, during Python 3.11 porting we have deselected a few failing
+tests on ``dev-python/attrs`` to unblock porting ``dev-python/pytest``.
+Porting pytest in order to enable testing packages was far more
+important than getting 100% passing tests on ``dev-python/attrs``.
 
-1. Port ``dev-python/setuptools`` and ``dev-python/certifi`` with tests
-   disabled.  Test it via ``tox`` in a git checkout.
+The modern recommendation for the porting process is to focus
+on ``dev-python/pytest`` as the first goal.  It is the most common test
+dependency for Python packages, and porting it makes it possible to
+start testing packages early.  The initial ported package set should
+include all dependencies of pytest, except for test dependencies
+of the package with large test dependency graphs (``dev-python/pytest``
+itself, ``dev-python/setuptools``).  This amounts to around 40 packages.
 
-2. Port ``dev-python/nose`` with additional dependencies disabled
-   (tests skip missing dependencies gracefully).
+Note that emerging the initial set requires installing
+``dev-python/pytest`` with ``USE=-test`` first.  Once it is installed,
+the previously installed dependencies should be reinstalled with tests
+enabled.
 
-3. Port ``dev-python/pytest`` and its runtime dependencies with pytest's
-   tests disabled (but tests of the dependencies enabled).  This should
-   yield around 20 packages.  Test it via ``tox`` in a git checkout.
-
-4. Port ``dev-python/urllib3`` and its runtime dependencies with
-   urllib3's tests disabled (but tests of the dependencies enabled).
-   This should yield another 20 packages.  Test it from a git checkout
-   (it uses nox, so you may want to write ``tox.ini`` yourself).
-
-Once these packages are done, you should be able to work towards
-reenabling tests in them via porting their (deep) dependencies in groups
-of around 10 packages without cyclic dependencies extending out
-of the group.
+After pushing the initial batch, the next recommended goal
+is ``dev-python/urllib3``.  It should be followed by focusing
+on reenabling tests in the packages where they were skipped.
 
 
 Python build system bootstrap
