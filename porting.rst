@@ -53,6 +53,159 @@ Behavior after::
 .. _django PR#14349: https://github.com/django/django/pull/14349
 
 
+Python 3.11
+===========
+
+See also: `what's new in Python 3.11`_
+
+.. _what's new in Python 3.11:
+   https://docs.python.org/3.11/whatsnew/3.11.html
+
+
+Generator-based coroutine removal (asyncio.coroutine)
+-----------------------------------------------------
+Support for `generator-based coroutines`_ has been deprecated since
+Python 3.8, and is finally removed in 3.11.  This usually results
+in the following error::
+
+    AttributeError: module 'asyncio' has no attribute 'coroutine'
+
+The recommended solution is to use `PEP 492 coroutines`_.  They are
+available since Python 3.5.  This means replacing
+the ``@asyncio.coroutine`` decorator with ``async def`` keyword,
+and ``yield from`` with ``await``.
+
+For example, the following snippet::
+
+    @asyncio.coroutine
+    def foo():
+        yield from asyncio.sleep(5)
+
+would become::
+
+    async def foo():
+        await asyncio.sleep(5)
+
+
+.. _generator-based coroutines:
+   https://docs.python.org/3.10/library/asyncio-task.html#generator-based-coroutines
+.. _PEP 492 coroutines:
+   https://docs.python.org/3.10/library/asyncio-task.html#coroutines
+
+
+inspect.getargspec() and inspect.formatargspec() removal
+--------------------------------------------------------
+The `inspect.getargspec()`_ (deprecated since Python 3.0)
+and `inspect.formatargspec()`_ (deprecated since Python 3.5) functions
+are both removed in Python 3.11.
+
+The `inspect.getargspec()`_ function provides a legacy interface
+to inspect the signature of callables.  It is replaced
+by the object-oriented `inspect.signature()`_ API (available since
+Python 3.3), or a mostly compatible `inspect.getfullargspec()`_ function
+(available since Python 3.0).
+
+For example, a trivial function would yield the following results::
+
+    >>> def foo(p1, p2, /, kp3, kp4 = 10, kp5 = None, *args, **kwargs):
+    ...     pass
+    ...
+    >>> inspect.getargspec(foo)
+    ArgSpec(args=['p1', 'p2', 'kp3', 'kp4', 'kp5'],
+            varargs='args',
+            keywords='kwargs',
+            defaults=(10, None))
+    >>> inspect.getfullargspec(foo)
+    FullArgSpec(args=['p1', 'p2', 'kp3', 'kp4', 'kp5'],
+                varargs='args',
+                varkw='kwargs',
+                defaults=(10, None),
+                kwonlyargs=[],
+                kwonlydefaults=None,
+                annotations={})
+    >>> inspect.signature(foo)
+    <Signature (p1, p2, /, kp3, kp4=10, kp5=None, *args, **kwargs)>
+
+The named tuple returned by `inspect.getfullargspec()`_ starts with
+the same information, except that the key used to hold the name
+of ``**`` parameter is ``varkw`` rather than ``keywords``.
+`inspect.signature()`_ returns a ``Signature`` object.
+
+Both of the newer functions support keyword-only arguments and type
+annotations::
+
+    >>> def foo(p1: int, p2: str, /, kp3: str, kp4: int = 10,
+    ...         kp5: float = None, *args, k6: str, k7: int = 12,
+    ...         k8: float, **kwargs) -> float:
+    ...     pass
+    ...
+    >>> inspect.getfullargspec(foo)
+    FullArgSpec(args=['p1', 'p2', 'kp3', 'kp4', 'kp5'],
+                varargs='args',
+                varkw='kwargs',
+                defaults=(10, None),
+                kwonlyargs=['k6', 'k7', 'k8'],
+                kwonlydefaults={'k7': 12},
+                annotations={'return': <class 'float'>,
+                             'p1': <class 'int'>,
+                             'p2': <class 'str'>,
+                             'kp3': <class 'str'>,
+                             'kp4': <class 'int'>,
+                             'kp5': <class 'float'>,
+                             'k6': <class 'str'>,
+                             'k7': <class 'int'>,
+                             'k8': <class 'float'>})
+    >>> inspect.signature(foo)
+    <Signature (p1: int, p2: str, /, kp3: str, kp4: int = 10,
+                kp5: float = None, *args, k6: str, k7: int = 12,
+                k8: float, **kwargs) -> float>
+
+One notable difference between `inspect.signature()`_ and the two other
+functions is that the latter always include the 'self' argument
+of method prototypes, while the former skips it if the method is bound
+to an object.  That is::
+
+    >>> class foo:
+    ...     def x(self, bar):
+    ...         pass
+    ...
+    >>> inspect.getargspec(foo.x)
+    ArgSpec(args=['self', 'bar'], varargs=None, keywords=None, defaults=None)
+    >>> inspect.getargspec(foo().x)
+    ArgSpec(args=['self', 'bar'], varargs=None, keywords=None, defaults=None)
+    >>> inspect.signature(foo.x)
+    <Signature (self, bar)>
+    >>> inspect.signature(foo().x)
+    <Signature (bar)>
+
+The `inspect.formatargspec()`_ function provides a pretty-formatted
+argument spec from the tuple returned by `inspect.getfullargspec()`_
+(or `inspect.getargspec()`_).  It is replaced by stringification
+of ``Signature`` objects::
+
+    >>> def foo(p1: int, p2: str, /, kp3: str, kp4: int = 10,
+    ...         kp5: float = None, *args, k6: str, k7: int = 12,
+    ...         k8: float, **kwargs) -> float:
+    ...     pass
+    ...
+    >>> inspect.formatargspec(*inspect.getfullargspec(foo))
+    '(p1: int, p2: str, kp3: str, kp4: int=10, kp5: float=None, '
+    '*args, k6: str, k7: int=12, k8: float, **kwargs) -> float'
+    >>> str(inspect.signature(foo))
+    '(p1: int, p2: str, /, kp3: str, kp4: int = 10, kp5: float = None, '
+    '*args, k6: str, k7: int = 12, k8: float, **kwargs) -> float'
+
+
+.. _inspect.getargspec():
+   https://docs.python.org/3.10/library/inspect.html#inspect.getargspec
+.. _inspect.formatargspec():
+   https://docs.python.org/3.10/library/inspect.html#inspect.formatargspec
+.. _inspect.getfullargspec():
+   https://docs.python.org/3.10/library/inspect.html#inspect.getfullargspec
+.. _inspect.signature():
+   https://docs.python.org/3.10/library/inspect.html#inspect.signature
+
+
 Python 3.10
 ===========
 
