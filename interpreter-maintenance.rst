@@ -231,6 +231,34 @@ and therefore enable testing once the test dependencies are ported.
 Please do not remove the conditions entirely, as they will be useful
 for the next porting round.
 
+If only a non-significant subset of test dependencies is a problem,
+it is better to make these dependencies conditional and run
+the remainder of the test suite.  If tests are not skipped automatically
+due to missing dependencies, using ``has_version`` to skip them
+conditionally is preferred over hardcoding version ranges, e.g.:
+
+.. code-block:: bash
+   :emphasize-lines: 3-6,12
+
+    BDEPEND="
+        test? (
+            $(python_gen_cond_dep '
+                dev-python/pydantic[${PYTHON_USEDEP}]
+            ' pypy3 python3_{8..10}  # TODO: python3_11
+            )
+        )
+    "
+
+    python_test() {
+        local EPYTEST_DESELECT=()
+        if ! has_version "dev-python/pydantic[${PYTHON_USEDEP}]"; then
+            EPYTEST_DESELECT+=(
+                tests/test_comparison.py::test_close_to_now_{false,true}
+            )
+        fi
+        epytest
+    }
+
 During the initial testing it is acceptable to be more lenient on test
 failures, and deselect failing tests on the new implementation when
 the package itself works correctly for its reverse dependencies.
