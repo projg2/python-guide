@@ -197,7 +197,10 @@ dependencies.  The packages needing this have implementation conditions
 in place already.  An example follows:
 
 .. code-block:: bash
-   :emphasize-lines: 3,15,20-21
+   :emphasize-lines: 6,18,23
+
+    PYTHON_TESTED=( python3_{8..10} pypy3 )
+    PYTHON_COMPAT=( "${PYTHON_TESTED[@]}" python3_11 )
 
     BDEPEND="
         test? (
@@ -213,13 +216,12 @@ in place already.  An example follows:
                 dev-python/pytest-xdist[${PYTHON_USEDEP}]
                 >=dev-python/virtualenv-20[${PYTHON_USEDEP}]
                 dev-python/wheel[${PYTHON_USEDEP}]
-            ' python3_{8..10} pypy3)
+            ' "${PYTHON_TESTED[@]}")
         )
     "
 
     python_test() {
-        # keep in sync with python_gen_cond_dep above!
-        has "${EPYTHON}" python3.{8..10} pypy3 || continue
+        has "${EPYTHON}" "${PYTHON_TESTED[@]/_/.}" || continue
 
         HOME="${PWD}" epytest setuptools
     }
