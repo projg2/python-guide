@@ -82,6 +82,52 @@ The simplest case of ebuild is:
     KEYWORDS="~amd64 ~arm ~arm64 ~x86"
 
 
+Source archives
+===============
+The vast majority of Python packages can be found in the `Python Package
+Index (PyPI)`_.  Often this includes both source (sdist) and binary
+(wheel) packages.  In addition to that, many packages have public VCS
+repositories with an automatic archive generation mechanism
+(e.g. GitHub).
+
+The current recommendation is to prefer these *generated archives*
+(snapshots) over official sdist archives.  This is because sdist
+archives often miss files that are not strictly required for binary
+distribution.  This usually includes tests, test data files,
+documentation but historically there were also instances of sdist
+releases that were entirely nonfunctional.
+
+When using generated archives, it is recommended to append a unique
+suffix (in case of GitHub, using a ``.gh.tar.gz`` suffix is requested)
+to the distfile name, in order to make the archive clearly
+distinguishable from the upstream provided tarball and to use a filename
+that matches the top directory inside the archive, e.g.:
+
+.. code-block:: bash
+
+    SRC_URI="
+        https://github.com/Textualize/rich/archive/v${PV}.tar.gz
+            -> ${P}.gh.tar.gz
+    "
+
+Note that unlike sdist archives, snapshots are often missing generated
+files.  This has some implications, notably:
+
+1. If the package uses setuptools_scm, the version string needs
+   to be provided explicitly, cf. `setuptools_scm and snapshots`_.
+
+2. If the package uses Cython, the C files need to be generated
+   and an explicit ``BDEPEND`` on ``dev-python/cython`` needs to
+   be added.  However, regenerating them is recommended anyway.
+
+Nevertheless, in some cases sdist archives (or even a combination
+of both archive kinds) will be preferable because of pregenerated files
+that may require Internet access or have problematic dependencies
+(e.g. NodeJS).
+
+.. _Python Package Index (PyPI): https://pypi.org/
+
+
 Dependencies
 ============
 Dependencies on Python packages are declared using the same method
