@@ -118,7 +118,8 @@ files.  This has some implications, notably:
 
 2. If the package uses Cython, the C files need to be generated
    and an explicit ``BDEPEND`` on ``dev-python/cython`` needs to
-   be added.  However, regenerating them is recommended anyway.
+   be added.  However, regenerating them is recommended anyway,
+   cf. `packages using Cython`_.
 
 Nevertheless, in some cases sdist archives (or even a combination
 of both archive kinds) will be preferable because of pregenerated files
@@ -373,6 +374,54 @@ via ``SETUPTOOLS_SCM_PRETEND_VERSION``::
     export SETUPTOOLS_SCM_PRETEND_VERSION=${PV}
 
 .. _setuptools_scm: https://pypi.org/project/setuptools-scm/
+
+
+.. index:: Cython
+
+Packages using Cython
+=====================
+Cython_ is a static compiler that permits writing Python extensions
+in a hybrid of C and Python.  Cython files are compiled into C code
+that is compatible with multiple Python interpreters.  This makes it
+possible for packages to include pregenerated C files and build
+the respective extensions without exposing the Cython dependency.
+
+In Gentoo, it is always recommended to depend on ``dev-python/cython``
+and regenerate the C files.  This guarantees that bug fixes found
+in newer versions of Cython are taken advantage of.  Using shipped files
+could e.g. cause compatibility issues with newer versions of Python.
+
+Depending on the package in question, forcing regeneration could be
+as simple as removing the pregenerated files:
+
+.. code-block:: bash
+
+    BDEPEND="
+        dev-python/cython[${PYTHON_USEDEP}]
+    "
+
+    src_configure() {
+        rm src/frobnicate.c || die
+    }
+
+However, in some cases packages utilize the generated C files directly
+in ``setup.py``.  In these cases, sometimes a Makefile is provided
+to run Cythonize.  It is also possible to call Cython directly:
+
+.. code-block:: bash
+
+    BDEPEND="
+        dev-python/cython[${PYTHON_USEDEP}]
+    "
+
+    src_configure() {
+        cython -3 jq.pyx -o jq.c || die
+    }
+
+Note that Cython needs to be called only once, as the resulting code
+is compatible with all Python versions.
+
+.. _Cython: https://cython.org/
 
 
 Parallel build race conditions
