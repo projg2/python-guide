@@ -47,7 +47,7 @@ requires using the local scope.
     python_test() {
         local EPYTEST_IGNORE=(
             # ignore whole file with missing dep
-            --ignore tests/test_client.py
+            tests/test_client.py
         )
         local EPYTEST_DESELECT=(
             # deselect a single test
