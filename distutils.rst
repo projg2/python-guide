@@ -264,6 +264,8 @@ pdm                dev-python/pdm-pep517        pdm.pep517.api
 poetry             dev-python/poetry-core       poetry.core.masonry.api
 setuptools         dev-python/setuptools        setuptools.build_meta
                                                 setuptools.__legacy__.build_meta
+
+sip                dev-python/sip               sipbuild.api
 standalone         (none)                       (various)
 ================== ============================ ================================
 
