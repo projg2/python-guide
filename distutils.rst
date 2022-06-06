@@ -334,6 +334,33 @@ poetry-core produces identical artifacts to poetry.  It has smaller
 dependency footprint and makes isolated builds much faster.
 
 
+setuptools.build_meta:__legacy__
+--------------------------------
+Some packages using setuptools specify the following:
+
+.. code-block:: toml
+
+    [build-system]
+    requires = ["setuptools>=40.8.0", "wheel"]
+    build-backend = "setuptools.build_meta:__legacy__"
+
+This is incorrect, as the legacy backend is intended to be used only
+as an implicit fallback.  All packages should be using the regular
+backend instead:
+
+.. code-block:: toml
+
+    [build-system]
+    requires = ["setuptools>=40.8.0"]
+    build-backend = "setuptools.build_meta"
+
+Please also note that the ``wheel`` package should *not* be listed
+as a dependency, as it is an implementation detail and it was always
+implicitly returned by the backend.  Unfortunately, due to prolonged
+documentation error, a very large number of packages still specifies it,
+and other packages tend to copy that mistake.
+
+
 .. index:: SETUPTOOLS_SCM_PRETEND_VERSION
 
 setuptools_scm and snapshots
