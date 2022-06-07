@@ -3,7 +3,7 @@ Choosing between Python eclasses
 ================================
 
 Overview
---------
+========
 The python-r1 eclass suite features 5 eclasses in total:
 
 1. ``python-utils-r1.eclass`` that provides utility functions common
