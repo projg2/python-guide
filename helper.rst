@@ -56,6 +56,12 @@ to ``python_moduleinto .``).
 
 The install path for headers (4.) cannot be adjusted.
 
+All the helpers can be used in ``src_install`` phase, in which case
+they install the files onto ``${D}``.  Additionally, ``python_domodule``
+can be use in other ebuild phases, in which case it installs
+into ``${BUILD_DIR}/install``.  This provides improved integration
+with distutils-r1 eclass.
+
 ``python_doexe`` is generally used to install executables that reference
 Python but are not Python scripts.  This could be e.g. a bash script
 that calls Python::
@@ -83,7 +89,7 @@ directory::
     python_domodule images application ${MY_PN}.py \
         AUTHORS CHANGES COPYING DEPENDS TODO __init__.py
 
-It is roughly equivalent to ``dodir -r``, except that it byte-compiles
+It is roughly equivalent to ``doins -r``, except that it byte-compiles
 all Python modules found inside it.
 
 ``python_doheader`` is used in the very rare cases when Python packages
