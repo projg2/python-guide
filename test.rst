@@ -344,8 +344,8 @@ e.g.::
     $ pytest -s
 
 
-Installing extra dependencies in test environment (PEP517 mode)
-===============================================================
+Installing extra dependencies in test environment (PEP 517 mode)
+================================================================
 Rarely, the test suite expects some package being installed that
 does not fit being packaged and installed system-wide.  For example,
 isort's tests use a few example plugins that are not useful to end

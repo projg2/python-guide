@@ -701,7 +701,7 @@ via ``DISTUTILS_ARGS`` array::
     }
 
 The options specified via ``DISTUTILS_ARGS`` are passed to all
-``esetup.py`` invocations, as well as to the setuptools PEP517 backend
+``esetup.py`` invocations, as well as to the setuptools PEP 517 backend
 (using the ``--global-option`` setting).  For future compatibility,
 it is recommended to avoid adding command names to ``DISTUTILS_ARGS``.
 
