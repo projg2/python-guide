@@ -15,18 +15,10 @@ Eclass reference: `distutils-r1.eclass(5)`_
 
 The PEP 517 and legacy modes
 ============================
-.. Warning::
-
-   The PEP 517 mode is still experimental and it is not guaranteed
-   to handle all packages correctly.  When using it, please verify
-   that all necessary files are installed correctly.  The hooks provided
-   by ``app-portage/iwdevtools`` can be helpful in checking for
-   regressions when migrating existing packages.
-
 The ``distutils-r1`` eclass has currently two modes of operation:
 the PEP 517 mode and the legacy mode.  The former mode should be
 preferred for new ebuilds; the latter is provided for backwards
-compatibility and packages that are not PEP 517-ready.
+compatibility and packages that are incompatible with the other mode.
 
 The PEP 517 mode uses backends as defined by `PEP 517`_ to build
 packages.  It supports a greater number of Python build systems
@@ -37,6 +29,9 @@ the wheel into a staging directory.  The complete process is done
 in compile phase, and the install phase merely moves the files into
 the image directory.
 
+The PEP 517 mode also features a 'no build system' mode for packages
+that do not or cannot use a PEP 517-compliant build backend.
+
 The legacy mode invokes the ``setup.py`` script directly.  The build
 command is invoked to populate the build directory in the compile phase,
 then the install command is used in the install phase.  Normally, this
@@ -45,7 +40,8 @@ derivatives.  Additionally, it supports flit and poetry through
 pyproject2setuppy hack.  This mode relies on deprecated features.
 
 The PEP 517 mode is enabled via declaring the ``DISTUTILS_USE_PEP517``
-variable.  Otherwise, the legacy mode is used.
+variable.  The legal values can be found in the `PEP 517 build
+systems`_ section.  If unset, the legacy mode is used.
 
 
 Basic use (PEP 517 mode)
@@ -259,6 +255,7 @@ flit_scm           dev-python/flit_scm          flit_scm:buildapi
 hatchling          dev-python/hatchling         hatchling.build
 jupyter            dev-python/jupyter_packaging jupyter_packaging.build_api
 maturin            dev-util/maturin             maturin
+no                 (none)                       (none, see below)
 pbr                dev-python/pbr               pbr
 pdm                dev-python/pdm-pep517        pdm.pep517.api
 poetry             dev-python/poetry-core       poetry.core.masonry.api
@@ -266,11 +263,13 @@ setuptools         dev-python/setuptools        setuptools.build_meta
                                                 setuptools.__legacy__.build_meta
 
 sip                dev-python/sip               sipbuild.api
-standalone         (none)                       (various)
+standalone         (none)                       (various, see below)
 ================== ============================ ================================
 
-The special value ``standalone`` is reserved for bootstrapping build
-systems.  It indicates that the package itself provides its own build
+The eclass recognizes two special values: ``no`` and ``standalone``.
+``no`` is used to enable 'no build system' mode as described
+in `installing packages without a PEP 517 build backend`_.
+``standalone`` indicates that the package itself provides its own build
 backend.
 
 Legacy packages that provide ``setup.py`` but no ``pyproject.toml``
@@ -1412,6 +1411,173 @@ An example ebuild follows:
 
     src_unpack() {
         cargo_src_unpack
+    }
+
+
+Installing packages without a PEP 517 build backend
+===================================================
+The eclass features a special 'no build system' that is dedicated
+to packages that could benefit from distutils-r1 features yet either
+do not use a PEP 517-compliant build system, or cannot use one.  This
+generally means that either:
+
+- it uses a non-PEP 517 build system (autotools, CMake, plain Meson)
+
+- it does not feature a build system at all
+
+- its build system cannot be used as that would cause cyclic
+  dependencies during build backend bootstrap
+
+This mode is not supposed to be used for legacy use of distutils or
+setuptools — these are handled via the setuptools backend.
+
+The use cases for this mode partially overlap with the use of other
+Python eclasses, particularly python-single-r1.  Using distutils-r1
+is recommended if one of the eclass features benefits the particular
+ebuild, e.g. if Python modules are installed or one of the supported
+test runners are used.  For pure bundles of Python scripts,
+python-single-r1 is preferable.
+
+The 'no build system' mode is enabled via setting the following value:
+
+.. code-block:: bash
+
+    DISTUTILS_USE_PEP517=no
+
+When this mode is used, the following applies:
+
+- no dependencies on a build backend or PEP 517 machinery are declared
+  (``DISTUTILS_DEPS`` are empty)
+
+- the default implementations ``distutils-r1_python_compile``
+  and ``distutils-r1_python_install`` are no-ops
+
+However, the following eclass features are still available:
+
+- Python interpreter dependencies, ``REQUIRED_USE`` and distutils-r1
+  phase functions are used (unless disabled via ``DISTUTILS_OPTIONAL``)
+
+- the temporary venv is created in ``${BUILD_DIR}/install`` for test
+  phase to use (but the ebuild needs to install files there explicitly)
+
+- the contents of ``${BUILD_DIR}/install`` are merged into ``${D}``
+  post ``src_install`` (if it is present, temporary venv files are
+  removed)
+
+- ``distutils_enable_sphinx`` and ``distutils_enable_tests``
+  are functional
+
+
+Installing packages manually into BUILD_DIR
+-------------------------------------------
+The simplest approach towards installing packages manually is to use
+``python_domodule`` in ``python_compile`` sub-phase.  This causes
+the modules to be installed into ``${BUILD_DIR}/install`` tree,
+effectively enabling them to be picked up for the test phase
+and merging post ``src_install``.
+
+An example ebuild using a combination of GitHub archive (for tests)
+and PyPI wheel (for generated .dist-info) follows:
+
+.. code-block:: bash
+   :emphasize-lines: 3,19,22
+
+    EAPI=7
+
+    DISTUTILS_USE_PEP517=no
+    PYTHON_COMPAT=( python3_{8..11} pypy3 )
+
+    inherit distutils-r1
+
+    SRC_URI="
+        https://github.com/hukkin/tomli/archive/${PV}.tar.gz
+            -> ${P}.gh.tar.gz
+        https://files.pythonhosted.org/packages/py3/${PN::1}/${PN}/${P}-py3-none-any.whl
+            -> ${P}-py3-none-any.whl.zip
+    "
+
+    BDEPEND="
+        app-arch/unzip
+    "
+
+    distutils_enable_tests unittest
+
+    python_compile() {
+        python_domodule src/tomli "${WORKDIR}"/*.dist-info
+    }
+
+Note that the wheel suffix is deliberately changed in order to enable
+automatic unpacking by the default ``src_unpack``.
+
+
+Installing packages manually into D
+-----------------------------------
+The alternative approach is to install files in ``python_install``
+phase.  This provides a greater number of helpers.  However,
+the installed modules will not be provided in the venv for the test
+phase.
+
+An example ebuild follows:
+
+.. code-block:: bash
+   :emphasize-lines: 3,8,11-17
+
+    EAPI=7
+
+    DISTUTILS_USE_PEP517=no
+    PYTHON_COMPAT=( pypy3 python3_{8..11} )
+
+    inherit distutils-r1
+
+    distutils_enable_tests pytest
+
+    python_install() {
+        python_domodule gpep517
+        python_newscript - gpep517 <<-EOF
+            #!${EPREFIX}/usr/bin/python
+            import sys
+            from gpep517.__main__ import main
+            sys.exit(main())
+        EOF
+    }
+
+It is also valid to combine both approaches, e.g. install Python modules
+in ``python_compile``, and scripts in ``python_install``.
+
+
+Integrating with a non-PEP 517 build system
+-------------------------------------------
+The 'no build system' mode can also be used to use distutils-r1
+sub-phases to integrate with a build system conveniently.  The following
+ebuild fragment demonstrates using it with Meson:
+
+.. code-block:: bash
+
+    EAPI=8
+
+    DISTUTILS_USE_PEP517=no
+    PYTHON_COMPAT=( python3_{8..10} )
+
+    inherit meson distutils-r1
+
+    python_configure() {
+        local emesonargs=(
+            -Dlint=false
+        )
+
+        meson_src_configure
+    }
+
+    python_compile() {
+        meson_src_compile
+    }
+
+    python_test() {
+        meson_src_test
+    }
+
+    python_install() {
+        meson_src_install
     }
 
 
