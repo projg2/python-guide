@@ -2,10 +2,51 @@
 Choosing between Python eclasses
 ================================
 
-Build-time vs runtime use
+Overview
+--------
+The python-r1 eclass suite features 5 eclasses in total:
+
+1. ``python-utils-r1.eclass`` that provides utility functions common
+   to all eclasses.  This eclass is rarely inherited directly.
+
+2. ``python-any-r1.eclass`` that is suitable for packages using Python
+   purely at build time.
+
+3. ``python-single-r1.eclass`` that provides a base for simpler packages
+   installing Python scripts and alike.
+
+4. ``python-r1.eclass`` that provides a base for more complex packages,
+   particularly these installing Python modules.
+
+5. ``distutils-r1.eclass`` that provides convenient phase functions
+   and helpers for packages that primarily involve installing Python
+   files.
+
+.. figure:: diagrams/eclass.svg
+
+    Inheritance graph of python-r1 suite eclasses.
+
+As a rule of thumb, the best eclass to use is the one that makes
+the ebuild the simplest while meeting its requirements.  A more detailed
+process involves:
+
+1. Determining whether Python is used purely at build time,
+   or at runtime as well.  In the former case, ``python-any-r1``
+   is the right choice.
+
+2. Determining whether single-impl or multi-impl approach is more
+   appropriate.  For the former, ``python-single-r1`` is the correct
+   base eclass.  For the latter, ``python-r1``.
+
+3. Determining whether the ebuild benefits from using ``distutils-r1``.
+   If it does, this eclass should be use instead (potentially along
+   with ``DISTUTILS_SINGLE_IMPL`` to switch the underlying eclass).
+
+
+Build time vs runtime use
 =========================
 The first basis for choosing Python eclass is whether Python is used
-merely at build-time or at runtime as well.
+merely at build time or at runtime as well.
 
 A runtime use occurs if the package explicitly needs Python to be
 installed along with it, in order for it to function correctly.  This
@@ -14,13 +55,13 @@ scripts, or executables calling the Python interpreter or linking
 to libpython.  This also applies to bash scripts or other executables
 that call python inline.
 
-A build-time use occurs if the package calls the Python interpreter
+A build time use occurs if the package calls the Python interpreter
 or any kind of aforementioned executables during package's build
 (or install) phases.
 
-If the package uses Python purely at build-time, the ``python-any-r1``
+If the package uses Python purely at build time, the ``python-any-r1``
 eclass is appropriate.  Otherwise, ``python-single-r1``, ``python-r1``
-or their derivatives are to be used.
+or ``distutils-r1`` are to be used.
 
 A specific exception to that rule is when the package is only calling
 external Python scripts directly (i.e. not via ``python /usr/bin/foo``).
@@ -78,49 +119,36 @@ via ``PYTHON_SINGLE_TARGET``, while multi-impl uses ``PYTHON_TARGETS``.
 These USE flag sets can be set independently to provide greater
 flexibility for developers and end users.
 
-
-Distutils and related build systems
-===================================
-The third basis for choosing an eclass is the build system used.
-If the project uses one of Python-specific build systems, that is
-distutils, setuptools, flit or poetry, the ``distutils-r1`` eclass
-should be used instead of the other eclasses.  As a rule of thumb,
-this happens when either ``setup.py`` or ``pyproject.toml`` file exists
-in the distribution.
-
-``distutils-r1`` builds on either ``python-r1`` or ``python-single-r1``,
-therefore it can be used to create both multi-impl and single-impl
-packages.  It provides full set of default phase functions, making
-writing ebuilds much easier.
+Both single-impl and multi-impl installs are supported
+by the ``distutils-r1`` eclass.
 
 
-A rule of thumb
-===============
-As a rule of thumb, the following checklist can be used to determine
-the eclass to use:
+Python-first packages (distutils-r1 eclass)
+===========================================
+The third step in choosing the eclass for runtime use of Python
+is determining whether the ebuild would benefit from ``distutils-r1``.
+This eclass is especially useful for packages that primarily focus
+on providing Python content.  Its advantages include:
 
-1. If the package has ``setup.py`` or ``pyproject.toml`` file,
-   use ``distutils-r1``.
+- adding appropriate dependencies and ``REQUIRED_USE`` by default
 
-2. If the package primarily installs Python modules or extensions
-   or has multi-impl reverse dependencies, use ``python-r1``.
+- a sub-phase function mechanism that makes installing Python modules
+  in multi-impl mode easier
 
-3. If the package (possibly conditionally) qualifies as using Python
-   at runtime, use ``python-single-r1``.
+- convenient support for building documentation using Sphinx
+  and running tests using common Python test runners
 
-4. If the package uses Python at build time only, use ``python-any-r1``.
+In general, ``distutils-r1`` should be preferred over the other eclasses
+if:
 
+- the package uses a PEP 517-compliant build system (i.e. has
+  a ``pyproject.toml`` file with a ``build-system`` section)
 
-python-utils-r1
-===============
-Besides the aforementioned eclasses, the suite includes a common utility
-eclass ``python-utils-r1``.  This eclass is inherited by all other
-eclasses, and it is considered to be a part of their API.  Therefore,
-it must not be inherited directly if any other of the eclasses
-is inherited.
+- the package uses a legacy distutils or setuptools build system
+  (i.e. has a ``setup.py`` file)
 
-The only case for direct inherit of ``python-utils-r1`` is when you
-are only using some of its utility functions without inheriting
-any of the remaining eclasses.  However, note that the majority of those
-utility functions actually rely on mechanics provided by these eclasses
-and are not suitable for being used otherwise.
+- the package primarily installs Python modules
+
+In general, for multi-impl packages ``distutils-r1`` is preferred
+over ``python-r1`` as it usually makes the ebuilds simpler.
+For single-impl packages, ``python-single-r1`` can sometimes be simpler.

@@ -1,0 +1,9 @@
+digraph {
+    node [shape=box];
+    "python-utils-r1" [fontcolor=grey];
+    "python-utils-r1" -> "python-any-r1";
+    "python-utils-r1" -> "python-single-r1";
+    "python-utils-r1" -> "python-r1";
+    "python-single-r1" -> "distutils-r1";
+    "python-r1" -> "distutils-r1";
+}
