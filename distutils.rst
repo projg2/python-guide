@@ -1458,8 +1458,7 @@ When this mode is used, the following applies:
 - no dependencies on a build backend or PEP 517 machinery are declared
   (``DISTUTILS_DEPS`` are empty)
 
-- the default implementations ``distutils-r1_python_compile``
-  and ``distutils-r1_python_install`` are no-ops
+- the default implementation, ``distutils-r1_python_compile`` is a no-op
 
 However, the following eclass features are still available:
 
@@ -1470,8 +1469,8 @@ However, the following eclass features are still available:
   phase to use (but the ebuild needs to install files there explicitly)
 
 - the contents of ``${BUILD_DIR}/install`` are merged into ``${D}``
-  post ``src_install`` (if it is present, temporary venv files are
-  removed)
+  by ``distutils-r1_python_install`` (if present; temporary venv files
+  are removed)
 
 - ``distutils_enable_sphinx`` and ``distutils_enable_tests``
   are functional
@@ -1483,7 +1482,7 @@ The simplest approach towards installing packages manually is to use
 ``python_domodule`` in ``python_compile`` sub-phase.  This causes
 the modules to be installed into ``${BUILD_DIR}/install`` tree,
 effectively enabling them to be picked up for the test phase
-and merging post ``src_install``.
+and merged in ``distutils-r1_python_install``.
 
 An example ebuild using a combination of GitHub archive (for tests)
 and PyPI wheel (for generated .dist-info) follows:
@@ -1551,7 +1550,8 @@ An example ebuild follows:
     }
 
 It is also valid to combine both approaches, e.g. install Python modules
-in ``python_compile``, and scripts in ``python_install``.
+in ``python_compile``, and scripts in ``python_install``.  In this case,
+``distutils-r1_python_install`` needs to be called explicitly.
 
 
 Integrating with a non-PEP 517 build system
