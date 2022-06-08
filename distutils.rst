@@ -109,8 +109,9 @@ that matches the top directory inside the archive, e.g.:
 Note that unlike sdist archives, snapshots are often missing generated
 files.  This has some implications, notably:
 
-1. If the package uses setuptools_scm, the version string needs
-   to be provided explicitly, cf. `setuptools_scm and snapshots`_.
+1. If the package uses setuptools_scm or a similar package, the version
+   string needs to be provided explicitly,
+   cf. `setuptools_scm (flit_scm, hatch-vcs) and snapshots`_.
 
 2. If the package uses Cython, the C files need to be generated
    and an explicit ``BDEPEND`` on ``dev-python/cython`` needs to
@@ -361,9 +362,12 @@ and other packages tend to copy that mistake.
 
 
 .. index:: SETUPTOOLS_SCM_PRETEND_VERSION
+.. index:: flit_scm
+.. index:: hatch-vcs
+.. index:: setuptools_scm
 
-setuptools_scm and snapshots
-============================
+setuptools_scm (flit_scm, hatch-vcs) and snapshots
+==================================================
 setuptools_scm_ is a package providing additional features for running
 inside a VCS checkout, in particular the ability to determine version
 from VCS tags.  However, this works correctly only when the package
@@ -401,7 +405,12 @@ via ``SETUPTOOLS_SCM_PRETEND_VERSION``::
 
     export SETUPTOOLS_SCM_PRETEND_VERSION=${PV}
 
+The flit_scm_ and hatch-vcs_ packages are both built on top
+of setuptools_scm.  The same approach applies to both of them.
+
 .. _setuptools_scm: https://pypi.org/project/setuptools-scm/
+.. _flit_scm: https://pypi.org/project/flit_scm/
+.. _hatch-vcs: https://pypi.org/project/hatch-vcs/
 
 
 .. index:: Cython
