@@ -153,9 +153,10 @@ if it causes the subset of failing tests to change:
    Some test suite also depend on paths relative to where upstream run
    tests.
 
-3. Switch to PEP 517 mode, add ``distutils_install_for_testing``
-   to the test sub-phase or ``--install`` to ``distutils_enable_tests``
-   call.  This resolves majority of problems with the test suite
+3. Either switch to PEP 517 mode (preferred), or
+   add ``distutils_install_for_testing`` to the test sub-phase or
+   ``--install`` to the ``distutils_enable_tests`` call.
+   This resolves the majority of problems that arise from the test suite
    requiring the package to be installed prior to testing.
 
 4. Actually install the package to the system (with tests disabled).
