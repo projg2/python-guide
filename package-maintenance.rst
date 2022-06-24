@@ -81,6 +81,49 @@ This does not apply to test dependencies — they are not strictly
 necessary to install a new Portage version.
 
 
+Monitoring new package versions
+===============================
+
+PyPI release feeds
+------------------
+The most efficient way to follow new Python package releases are
+the feeds found on PyPI_.  These can be found in the package's
+"Release history" tab, as "RSS feed".
+
+The Gentoo Python project maintains a comprehensive `list of PyPI feeds
+for packages`_ in ``dev-python/`` category (as well as other important
+packages maintained by the Python team) in OPML format.
+
+
+Checking via pip
+----------------
+The `pip list -\-outdated`_ command described in a followup section
+can also be used to verify installed packages against their latest PyPI
+releases.  However, this is naturally limited to packages installed
+on the particular system, and does not account for newer versions being
+already available in the Gentoo repository.
+
+
+Repology
+--------
+Repology_ provides a comprehensive service for tracking distribution
+package versions and upstream releases.  The easiest ways to find Python
+packages present in the Gentoo repository is to search by their
+maintainer's e-mail or category (e.g. ``dev-python``).  When searching
+by name, the majority of Python-specific package use ``python:`` prefix
+in their Repology names.
+
+Unfortunately, Repology is very susceptible to false positives.
+Examples of false positives include other distributions using custom
+version numbers, replacing packages with forks or simply Repology
+confusing different packages with the same name.  If you find false
+positives, please use the 'Report' option to request a correction.
+
+Please also note that Repology is unable to handle the less common
+version numbers that do not have a clear mapping to Gentoo version
+syntax (e.g. ``.post`` releases).
+
+
 Routine checks on installed Python packages
 ===========================================
 The following actions are recommended to be run periodically on systems
@@ -194,3 +237,11 @@ Similarly to ``pip check`` results, every dependency needs to be
 verified.  In many cases, upstream metadata lists optional or build-time
 dependencies as runtime dependencies, and it is preferable to strip them
 than to copy the mistakes into the ebuild.
+
+
+.. _PyPI: https://pypi.org/
+
+.. _list of PyPI feeds for packages:
+   https://projects.gentoo.org/python/release-feeds.opml
+
+.. _Repology: https://repology.org/
