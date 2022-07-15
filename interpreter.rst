@@ -46,17 +46,35 @@ follows roughly the following life cycle:
 1. The interpreter is added to ``~arch`` for initial testing.  At this
    point, packages can not declare support for the implementation yet.
 
+   New CPython releases enter this stage when upstream releases
+   the first alpha version.  Since the feature set is not stable yet,
+   it is premature to declare the package compatibility with these
+   versions.
+
 2. The new Python target is added.  It is initially stable-masked,
    so only ``~arch`` users can use it.  At this point, packages start
    being tested against the new target and its support starts being
    declared in ``PYTHON_COMPAT``.
 
+   CPython releases enter this stage when the first beta release
+   is made.  These versions are not fully stable yet either and package
+   regressions do happen between beta releases but they are stable
+   enough for initial testing.
+
 3. When ready, the new interpreter is stabilized.  The target is not yet
    available for stable users, though.
+
+   CPython releases enter this stage roughly 30 days after the first
+   stable release (i.e. X.Y.0 final) is made.  This is also the stage
+   where PyPy3 releases are in Gentoo for the time being.
 
 4. The stable-mask for the target is removed.  For this to happen,
    the inconsistencies in stable graph need to be addressed first
    via stabilizing newer versions of packages.
+
+   CPython releases enter this stage after the interpreter is marked
+   stable on all architectures and all the packages needed to clear
+   the stable depenendency graph are stable as well.
 
 5. Over time, developers are repeatedly asked to push testing packages
    for the new target forward and stabilize new versions supporting it.
@@ -67,43 +85,25 @@ follows roughly the following life cycle:
    are required to test new packages against it.  The support for old
    target is slowly being discontinued.
 
+   Currently, we try to plan the switch to the next CPython version
+   around June — July every year, to make these events more predictable
+   to Gentoo users.
+
 7. Eventually, the target becomes replaced by the next one.  When it
    nears end of life, the final packages requiring it are masked for
    removal and the target flags are disabled.
 
-8. The compatibility declarations are cleaned up from ``PYTHON_COMPAT``
+   We generally aim to preserve support for old targets for as long
+   as they are found still needed by Gentoo users.  However, as more
+   upstream packages remove support for older versions of Python,
+   the cost of preserving the support becomes too great.
+
+8. The compatibility declarations are cleaned up from ``PYTHON_COMPAT``,
    and obsolete ebuild and eclass code is cleaned up.
 
 9. Finally, the interpreter is removed when it becomes no longer
    feasible to maintain it (usually because of the cost of fixing
    vulnerabilities or build failures).
-
-For example, Python 3.9 is at stage 1 at the time of writing.  It is
-still in alpha stage, and upstream has not finalized its feature set,
-therefore it is too early to declare package support for Python 3.9
-and there are no target flags.
-
-Python 3.8 is moving from stage 2 to stage 3 — it is being stabilized
-by arch teams at this very moment.  When that's done, we will work
-on unmasking the flag on stable systems and it will become our next
-default target.
-
-Python 3.7 is moving from stage 5 to stage 6.  The vast majority
-of packages have been ported to it, and we have already announced
-the switch date.
-
-When the switch happens, Python 3.6 will move from stage 6 to stage 7.
-We are going to support it for quite some time still but as things
-progress, we will eventually decide to remove it.
-
-Python 2.7 is currently somewhere between stages 6 and 7.  It is still
-enabled by default for backwards compatibility but we are aggressively
-removing it.
-
-PyPy3 has recently reached stage 3.  It is not clear if we are going
-to pursue enabling the target on stable system though.  PyPy2.7 is
-at stage 8, as the targets were removed already and it is kept
-as a dependency and testing target.
 
 
 Alternative Python implementations
