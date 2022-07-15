@@ -74,8 +74,9 @@ follows roughly the following life cycle:
 8. The compatibility declarations are cleaned up from ``PYTHON_COMPAT``
    and obsolete ebuild and eclass code is cleaned up.
 
-9. Finally, the interpreter is moved to `python repository`_ where it
-   lives for as long as it builds.
+9. Finally, the interpreter is removed when it becomes no longer
+   feasible to maintain it (usually because of the cost of fixing
+   vulnerabilities or build failures).
 
 For example, Python 3.9 is at stage 1 at the time of writing.  It is
 still in alpha stage, and upstream has not finalized its feature set,
@@ -94,10 +95,6 @@ the switch date.
 When the switch happens, Python 3.6 will move from stage 6 to stage 7.
 We are going to support it for quite some time still but as things
 progress, we will eventually decide to remove it.
-
-Python 3.5 and 3.4 are at stage 9.  They live in the Python repository
-but have no targets.  You can still use them e.g. inside a virtualenv
-to test your own software.
 
 Python 2.7 is currently somewhere between stages 6 and 7.  It is still
 enabled by default for backwards compatibility but we are aggressively
@@ -258,8 +255,6 @@ syntax than native asyncio code.
 
 .. _platform.linux_distribution():
    https://docs.python.org/3.7/library/platform.html#platform.linux_distribution
-
-.. _python repository: https://gitweb.gentoo.org/proj/python.git/
 
 .. _PyPy: https://www.pypy.org/
 
