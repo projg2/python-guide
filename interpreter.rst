@@ -106,6 +106,38 @@ follows roughly the following life cycle:
    vulnerabilities or build failures).
 
 
+Stability guarantees of Python implementations
+==============================================
+The language and standard library API of every Python version is
+expected to be stable since the first beta release of the matching
+CPython version.  However, historically there were cases of breaking
+changes prior to a final release (e.g. the revert of ``enum`` changes
+in Python 3.10), as well as across minor releases (e.g. ``urlsplit()``
+URL sanitization / security fix).
+
+The ABI of every CPython version is considered stable across bugfix
+releases since the first RC.  This includes the public ABI of libpython,
+C extensions and compiled Python modules.  Prior to the first RC,
+breaking changes to either may still happen.  Gentoo currently does not
+account for these changes to the high cost of using slot operators,
+and therefore users using ``~arch`` CPython may have to occasionally
+rebuild Python packages manually.
+
+Additionally, modern versions of CPython declare so-called 'stable ABI'
+that remains forward compatible across Python versions.  This permits
+upstreams to release wheels that can be used with multiple CPython
+versions (contrary to the usual case of building wheels separately
+for each version).  However, this does not affect Gentoo packaging
+at the moment.
+
+PyPy does not hold specific ABI stability guarantees.  Gentoo packages
+use subslots to declare the current ABI version, and the eclasses use
+slot operators in dependencies to enforce rebuilds whenever the ABI
+version changes.  Fortunately, lately this has only occurred whenever
+Gentoo switched to the next PyPy branch (i.e. the one corresponding
+to the next Python language version).
+
+
 Alternative Python implementations
 ==================================
 CPython is the reference and most commonly used Python implementation.
