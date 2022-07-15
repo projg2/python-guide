@@ -38,6 +38,77 @@ window of 3-4 versions of Python 3.  They are provided as slots
 of ``dev-lang/python``.
 
 
+Life cycle of a Python implementation
+=====================================
+Every Python implementation (understood as a potential target) in Gentoo
+follows roughly the following life cycle:
+
+1. The interpreter is added to ``~arch`` for initial testing.  At this
+   point, packages can not declare support for the implementation yet.
+
+2. The new Python target is added.  It is initially stable-masked,
+   so only ``~arch`` users can use it.  At this point, packages start
+   being tested against the new target and its support starts being
+   declared in ``PYTHON_COMPAT``.
+
+3. When ready, the new interpreter is stabilized.  The target is not yet
+   available for stable users, though.
+
+4. The stable-mask for the target is removed.  For this to happen,
+   the inconsistencies in stable graph need to be addressed first
+   via stabilizing newer versions of packages.
+
+5. Over time, developers are repeatedly asked to push testing packages
+   for the new target forward and stabilize new versions supporting it.
+   Eventually, the final push for updates happens and packages
+   not supporting the new target start being removed.
+
+6. If applicable, the new target becomes the default.  The developers
+   are required to test new packages against it.  The support for old
+   target is slowly being discontinued.
+
+7. Eventually, the target becomes replaced by the next one.  When it
+   nears end of life, the final packages requiring it are masked for
+   removal and the target flags are disabled.
+
+8. The compatibility declarations are cleaned up from ``PYTHON_COMPAT``
+   and obsolete ebuild and eclass code is cleaned up.
+
+9. Finally, the interpreter is moved to `python repository`_ where it
+   lives for as long as it builds.
+
+For example, Python 3.9 is at stage 1 at the time of writing.  It is
+still in alpha stage, and upstream has not finalized its feature set,
+therefore it is too early to declare package support for Python 3.9
+and there are no target flags.
+
+Python 3.8 is moving from stage 2 to stage 3 — it is being stabilized
+by arch teams at this very moment.  When that's done, we will work
+on unmasking the flag on stable systems and it will become our next
+default target.
+
+Python 3.7 is moving from stage 5 to stage 6.  The vast majority
+of packages have been ported to it, and we have already announced
+the switch date.
+
+When the switch happens, Python 3.6 will move from stage 6 to stage 7.
+We are going to support it for quite some time still but as things
+progress, we will eventually decide to remove it.
+
+Python 3.5 and 3.4 are at stage 9.  They live in the Python repository
+but have no targets.  You can still use them e.g. inside a virtualenv
+to test your own software.
+
+Python 2.7 is currently somewhere between stages 6 and 7.  It is still
+enabled by default for backwards compatibility but we are aggressively
+removing it.
+
+PyPy3 has recently reached stage 3.  It is not clear if we are going
+to pursue enabling the target on stable system though.  PyPy2.7 is
+at stage 8, as the targets were removed already and it is kept
+as a dependency and testing target.
+
+
 Alternative Python implementations
 ==================================
 CPython is the reference and most commonly used Python implementation.
@@ -187,6 +258,8 @@ syntax than native asyncio code.
 
 .. _platform.linux_distribution():
    https://docs.python.org/3.7/library/platform.html#platform.linux_distribution
+
+.. _python repository: https://gitweb.gentoo.org/proj/python.git/
 
 .. _PyPy: https://www.pypy.org/
 
