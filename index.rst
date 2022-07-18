@@ -26,6 +26,7 @@ Gentoo Python Guide
    buildsys
    porting
    migration
+   qawarn
    package-maintenance
    interpreter-maintenance
 
