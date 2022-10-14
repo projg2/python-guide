@@ -205,3 +205,59 @@ dependencies conditional to CPython::
 .. _sqlite3: https://docs.python.org/3.8/library/sqlite3.html
 .. _cffi: https://pypi.org/project/cffi/
 .. _greenlet: https://pypi.org/project/greenlet/
+
+
+.. index:: test-rust
+
+Optional test suite dependencies on Rust packages
+=================================================
+When the test suite of a high-profile Python package starts depending
+on Python-Rust packages, it may not be feasible to mask the package
+on all architectures that are not supported by Rust.  In this case,
+it is preferable to skip the tests that require the particular
+dependencies.
+
+If upstream does not handle missing dependencies gracefully and refuses
+to merge a patch to do so, it is possible to conditionally deselect
+tests from the ebuild based on whether the particular dependencies are
+installed::
+
+    python_test() {
+        local EPYTEST_DESELECT=()
+
+        if ! has_version "dev-python/trustme[${PYTHON_USEDEP}]"; then
+            EPYTEST_DESELECT+=(
+                tests/test_requests.py::TestRequests::test_https_warnings
+            )
+        fi
+
+        epytest
+    }
+
+Note that if the modules are imported in outer scope, ignoring the whole
+test file may be necessary.  If a file contains both tests requiring
+the dependency and other useful tests, sometimes it is possible
+to convince upstream to move imports into specific test functions,
+in order to make it possible to deselect specific tests.
+
+If the tests requiring these packages are not very important, it is
+acceptable to skip the dependency and assume they would be run
+if the package was installed independently.  However, if they are
+significant (e.g. tests for TLS support), the ``test-rust`` flag
+can be used to pull them in, e.g.::
+
+    IUSE="test test-rust"
+    RESTRICT="!test? ( test )"
+
+    BDEPEND="
+        test? (
+            test-rust? (
+                dev-python/trustme[${PYTHON_USEDEP}]
+            )
+        )
+    "
+
+This flag is masked on profiles for architectures that do not provide
+a Rust toolchain, and forced on all the remaining profiles.  This
+ensures that the respective tests are run whenever it is possible
+to run them.
