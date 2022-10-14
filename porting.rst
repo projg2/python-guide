@@ -349,3 +349,143 @@ are provided for the purpose.
 
 To achieve backwards compatibility, you should query
 ``python-X.Y-embed`` first and fall back to ``python-X.Y``.
+
+
+Replacing the toml package
+==========================
+
+The old toml_ package is no longer maintained.  It was last released
+in November 2020 and it was never updated to implement TOML 1.0.
+The recommended alternatives are:
+
+- the built-in tomllib_ module (since Python 3.11) with fallback to
+  tomli_ package for reading TOML files
+
+- the tomli-w_ package for writing TOML files
+
+- the tomlkit_ package for editing already existing TOML files
+  while preserving style
+
+
+Porting to tomllib/tomli without toml fallback
+----------------------------------------------
+Using a combination of tomllib_ and tomli_ is the recommended approach
+for packages that only read TOML files, or both read and write them
+but do not need to preserve style.  The tomllib module is available
+since Python 3.11, while tomli versions providing a compatible API
+are compatible with Python 3.6 and newer.
+
+The key differences between toml_ and tomllib/tomli are:
+
+- the ``load()`` function accepts only a file object open for reading
+  in binary mode whereas toml expects a path or a file object open
+  for reading in text mode
+
+- the exception raised for invalid input is named ``TOMLDecodeError``
+  where it is named ``TomlDecodeError`` in toml
+
+For example, the following code::
+
+    import toml
+
+    try:
+        d1 = toml.load("in1.toml")
+    except toml.TomlDecodeError:
+        d1 = None
+
+    with open("in2.toml", "r") as f:
+        d2 = toml.load(f)
+
+    d3 = toml.loads('test = "foo"\n')
+
+would normally be written as::
+
+    import sys
+
+    if sys.version_info >= (3, 11):
+        import tomllib
+    else:
+        import tomli as tomllib
+
+    try:
+        # tomllib does not accept paths
+        with open("in1.toml", "rb") as f:
+            d1 = tomllib.load(f)
+    # the exception uses uppercase "TOML"
+    except tomllib.TOMLDecodeError:
+        d1 = None
+
+    # the file must be open in binary mode
+    with open("in2.toml", "rb") as f:
+        d2 = tomllib.load(f)
+
+    d3 = tomllib.loads('test = "foo"\n')
+
+
+Porting to tomllib/tomli with toml fallback
+-------------------------------------------
+If upstream insists on preserving compatibility with EOL versions
+of Python, it is possible to use a combination of tomllib_, tomli_
+and toml_.  Unfortunately, the incompatibilites in API need to be taken
+into consideration.
+
+For example, a backwards compatible code for loading a TOML file could
+look like the following::
+
+    import sys
+
+    try:
+        if sys.version_info >= (3, 11):
+            import tomllib
+        else:
+            import tomli as tomllib
+
+        try:
+            with open("in1.toml", "rb") as f:
+                d1 = tomllib.load(f)
+        except tomllib.TOMLDecodeError:
+            d1 = None
+    except ImportError:
+        import toml
+
+        try:
+            with open("in1.toml", "r") as f:
+                d1 = toml.load(f)
+        except toml.TomlDecodeError:
+            d1 = None
+
+
+Porting to tomli-w
+------------------
+tomli-w_ provides a minimal module for dumping TOML files.
+
+The key differences between toml_ and tomli-w are:
+
+- the ``dump()`` function takes a file object open for writing in binary
+  mode whereas toml expected a file object open for writing in text mode
+
+- providing a custom encoder instance is not supported
+
+For example, the following code::
+
+    import toml
+
+    with open("out.toml", "w") as f:
+        toml.dump({"test": "data"}, f)
+
+would be replaced by::
+
+    import tomli_w
+
+    with open("out.toml", "wb") as f:
+        tomli_w.dump({"test": "data"}, f)
+
+Note that when both reading and writing TOML files is necessary, two
+modules need to be imported and used separately rather than one.
+
+
+.. _toml: https://pypi.org/project/toml/
+.. _tomllib: https://docs.python.org/3.11/library/tomllib.html
+.. _tomli: https://pypi.org/project/tomli/
+.. _tomli-w: https://pypi.org/project/tomli-w/
+.. _tomlkit: https://pypi.org/project/tomlkit/
