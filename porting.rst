@@ -421,6 +421,22 @@ would normally be written as::
 
     d3 = tomllib.loads('test = "foo"\n')
 
+The following dependency string:
+
+.. code-block:: toml
+
+    dependencies = [
+        "toml",
+    ]
+
+would be replaced by:
+
+.. code-block:: toml
+
+    dependencies = [
+        "tomli >= 1.2.3; python_version < '3.11'",
+    ]
+
 
 Porting to tomllib/tomli with toml fallback
 -------------------------------------------
@@ -453,6 +469,15 @@ look like the following::
                 d1 = toml.load(f)
         except toml.TomlDecodeError:
             d1 = None
+
+In this case, the dependency string becomes more complex:
+
+.. code-block:: toml
+
+    dependencies = [
+        "tomli >= 1.2.3; python_version >= '3.6' and python_version < '3.11'",
+        "toml; python_version < '3.6'",
+    ]
 
 
 Porting to tomli-w
