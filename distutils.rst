@@ -1333,7 +1333,7 @@ follows:
 
     src_compile() {
         default
-        use python && distutils-r1_src_configure
+        use python && distutils-r1_src_compile
     }
 
     python_test() {
