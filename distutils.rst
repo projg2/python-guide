@@ -1408,7 +1408,7 @@ An example ebuild follows:
         $(cargo_crate_uris ${CRATES})
     "
 
-    LICENSE="|| ( BSD-2 Apache-2 )"
+    LICENSE="|| ( BSD-2 Apache-2.0 )"
     # Crate licenses
     LICENSE+=" Apache-2.0 BSD BSD-2 MIT"
 
