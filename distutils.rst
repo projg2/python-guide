@@ -1364,10 +1364,10 @@ download the Rust dependencies over the Internet.  In Gentoo,
 
 When creating a new ebuild for a package using Rust extensions
 or bumping one, you need to locate the ``Cargo.lock`` files within
-the package's sources.  For each of these files, run ``cargo-ebuild``
-in the containing directory in order to generate a template ebuild.
-Then combine ``CRATES`` and ``LICENSE`` values from all the generated
-ebuilds.
+the package's sources.  Run ``pycargoebuild`` passing the list of
+the containing directories to generate a template ebuild, e.g.::
+
+    pycargoebuild /tmp/portage/dev-python/setuptools-rust-1.5.2/work/setuptools-rust-1.5.2/examples/*/
 
 The actual ebuild inherits both ``cargo`` and ``distutils-r1`` eclasses.
 Prior to inherit, ``CARGO_OPTIONAL`` should be used to avoid exporting
