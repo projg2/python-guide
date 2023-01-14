@@ -116,6 +116,8 @@ the following tasks:
 - add the new implementation to the list
   in ``app-portage/gpyutils/files/implementations.txt``.
 
+- update the `implementation tables`_ on Gentoo wiki
+
 
 Porting initial packages
 ------------------------
@@ -256,6 +258,8 @@ dependencies will be added or vendored into flit_core.
    https://gitweb.gentoo.org/fork/cpython.git/
 .. _Docker: https://www.docker.com/
 .. _binpkg-docker: https://github.com/mgorny/binpkg-docker
+.. _implementation tables:
+   https://wiki.gentoo.org/wiki/Project:Python/Implementations
 .. _PEP 517 build requirements:
    https://www.python.org/dev/peps/pep-0517/#build-requirements
 .. _flit_core vendoring README:
