@@ -216,6 +216,58 @@ is ``dev-python/urllib3``.  It should be followed by focusing
 on reenabling tests in the packages where they were skipped.
 
 
+Removing a Python implementation
+================================
+Preparation
+-----------
+The obsolescence of the implementation needs to be announced on mailing
+lists, along with request to proceed with porting packages to a newer
+implementation.  The package lists found on `QA reports`_ can be used
+to track the porting progress.
+
+As the time for removal approaches, the packages showing no signs
+of porting effort (except for backports, i.e. packages dedicated
+to the old implementation and used only conditionally to it) need to
+be masked for removal.
+
+
+Eclass and profile changes
+--------------------------
+Rather than being removed entirely, old targets are implicitly disabled
+via the eclass.  This ensures that old entries in ``PYTHON_COMPAT``
+do not trigger errors.
+
+When disabling an old target, please remember to:
+
+- remove the ``dev-lang/python-exec`` dependency from the interpreter
+  ebuilds (with a revision bump)
+
+- mask and remove the remaining backport packages immediately (they
+  would fail to source once the only listed implementation is disabled
+  but the mask should remain to hint users at the removal)
+
+- update the tested version range in ``eclass/tests/python-utils-r1.sh``
+
+- update ``python-utils-r1.eclass``:
+
+  1. move the implementation from ``_PYTHON_ALL_IMPLS``
+     to ``_PYTHON_HISTORICAL_IMPLS``
+
+  2. update the patterns in ``_python_set_impls``
+
+  3. remove the respective case for ``PYTHON_PKG_DEP``
+
+- remove the use of implementation flags from ``profiles/`` tree
+
+- remove the flags from ``profiles/desc/python_targets.desc``
+  and ``profiles/desc/python_single_target.desc``
+
+- set the implementation status to ``dead``
+  in ``app-portage/gpyutils/files/implementations.txt``
+
+- update the `implementation tables`_ on Gentoo wiki
+
+
 Python build system bootstrap
 =============================
 Python build systems are often facing the bootstrap problem — that is,
@@ -260,6 +312,7 @@ dependencies will be added or vendored into flit_core.
 .. _binpkg-docker: https://github.com/mgorny/binpkg-docker
 .. _implementation tables:
    https://wiki.gentoo.org/wiki/Project:Python/Implementations
+.. _QA reports: https://qa-reports.gentoo.org/
 .. _PEP 517 build requirements:
    https://www.python.org/dev/peps/pep-0517/#build-requirements
 .. _flit_core vendoring README:
