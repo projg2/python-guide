@@ -2,6 +2,66 @@
 Python package maintenance
 ==========================
 
+Package name policy
+===================
+All packages in ``dev-python/*`` that are published on PyPI_, must be
+named to match their respective PyPI names.  The package names must
+match after `normalization specified in PEP 503`_, i.e. after replacing
+all runs of dot, hyphen and underscore characters (``[-_.]``) with
+a single hyphen (``-``) and matching case-insensitively.
+
+Notably, prefixes and suffixes such as ``python-`` must not be removed.
+To follow Gentoo package naming rules, all dots must be replaced
+by hyphens.  There is no preference of whether uppercase letters
+in package names should be preserved or turned lowercase, or whether
+underscores should be replaced by hyphens.  However, preserving
+consistency within groups of related packages is recommended.
+
+Since it is not uncommon for multiple packages to be published with very
+similar names, it is crucial that all packages conform to this policy.
+Gentoo-specific renames not only make it harder for users to find
+the specific package they need but can also create name conflicts when
+another package needs to be added.  For example, adding
+``python-bugzilla`` package as ``dev-python/bugzilla`` would conflict
+with the ``bugzilla`` package that is also present on PyPI.
+
+The following table illustrates mapping PyPI package names to Gentoo
+package names.
+
+  ================= ===================================================
+  PyPI package name Correct Gentoo package name
+  ================= ===================================================
+  Flask             ``dev-python/Flask`` or ``/flask``
+  flask-babel       ``dev-python/flask-babel``
+  github3.py        ``dev-python/github3-py``
+  python-bugzilla   ``dev-python/python-bugzilla``
+  sphinx_pytest     ``dev-python/sphinx_pytest`` or ``/sphinx-pytest``
+  sphinx-tabs       ``dev-python/sphinx-tabs``
+  zope.interface    ``dev-python/zope-interface``
+  ================= ===================================================
+
+Note that the presented table provides multiple options for some
+packages.  This is particularly a problem when upstreams use
+inconsistent naming rules.  For example, ``Flask`` itself uses title
+case name, while ``flask-babel`` has recently switched to lowercase.
+Using lowercase for all packages can avoid the inconsistency within
+Gentoo.  It may also be a good idea to point upstream to `PEP 423`_
+that specifies package naming recommendations.
+
+PyPI automatically redirects to canonical package URLs.  However, please
+make sure to use these canonical URLs in ``HOMEPAGE``, ``SRC_URI``
+and ``remote-id`` to avoid unnecessary redirects.  These are reported
+by ``pkgcheck scan --net``.
+
+When packaging software that is not published on PyPI, or adding
+multiple Gentoo packages corresponding to the same PyPI project, please
+bear potential future collisions in mind when naming it.  Avoid names
+that are already used for other PyPI projects.  When in doubt, prefer
+more verbose names that are less likely to be reused in the future.  You
+may also suggest that upstream publishes to PyPI, or at least pushes
+an empty package to reserve the name.
+
+
 Support for Python 2
 ====================
 Since Python 2.7 reached EOL, Gentoo is currently phasing out support
@@ -240,6 +300,11 @@ than to copy the mistakes into the ebuild.
 
 
 .. _PyPI: https://pypi.org/
+
+.. _normalization specified in PEP 503:
+   https://peps.python.org/pep-0503/#normalized-names
+
+.. _PEP 423: https://peps.python.org/pep-0423/
 
 .. _list of PyPI feeds for packages:
    https://projects.gentoo.org/python/release-feeds.opml
