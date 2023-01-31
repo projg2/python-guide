@@ -409,6 +409,13 @@ via ``SETUPTOOLS_SCM_PRETEND_VERSION``::
 The flit_scm_ and hatch-vcs_ packages are both built on top
 of setuptools_scm.  The same approach applies to both of them.
 
+.. Warning::
+
+   While ``SETUPTOOLS_SCM_PRETEND_VERSION`` is sufficient to make
+   the package build, setuptools may install incomplete set of package
+   data files.  Please take special care to verify that all files are
+   installed.
+
 .. _setuptools_scm: https://pypi.org/project/setuptools-scm/
 .. _flit_scm: https://pypi.org/project/flit_scm/
 .. _hatch-vcs: https://pypi.org/project/hatch-vcs/
