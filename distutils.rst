@@ -763,45 +763,6 @@ beforehand (much like ``econf`` or ``emake``).
     }
 
 
-Preventing test directory from being installed
-==============================================
-Many packages using the setuptools build system utilize the convenient
-``find_packages()`` method to locate the Python sources.  In some cases,
-this method also wrongly grabs top-level test directories or other files
-that were not intended to be installed.
-
-The eclass attempts to detect and report the most common mistakes:
-
-.. code-block:: console
-
-     *   Package installs 'tests' package which is forbidden and likely a bug in the build system.
-
-The correct fix for this problem is to add an ``exclude`` parameter
-to the ``find_packages()`` call in ``setup.py``, e.g.:
-
-.. code-block:: python
-
-    setup(
-        packages=find_packages(exclude=["tests", "tests.*"]))
-
-Note that if the top-level ``tests`` package has any subpackages, both
-``tests`` and ``tests.*`` need to be listed.
-
-.. warning::
-
-   In order to test your fix properly, you need to remove the previous
-   build directory.  Otherwise, the install command will install all
-   files found there, including the files that are now excluded.
-
-As an intermediate solution it is possible to strip the extra
-directories in the install phase::
-
-    python_install() {
-        rm -r "${BUILD_DIR}"/lib/tests || die
-        distutils-r1_python_install
-    }
-
-
 .. index:: distutils_enable_tests
 
 Enabling tests

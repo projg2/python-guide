@@ -146,5 +146,116 @@ There are two common causes for this:
    not to install them in the first place.
 
 
+Stray top-level files in site-packages
+======================================
+distutils-r1 checks for the common mistake of installing unexpected
+files that are installed top-level into the site-packages directory.
+An example error due to that looks like the following::
+
+     * The following unexpected files/directories were found top-level
+     * in the site-packages directory:
+     *
+     *   /usr/lib/python3.10/site-packages/README.md
+     *   /usr/lib/python3.10/site-packages/LICENSE
+     *   /usr/lib/python3.10/site-packages/CHANGELOG
+     *
+     * This is most likely a bug in the build system.  More information
+     * can be found in the Python Guide:
+     * https://projects.gentoo.org/python/guide/qawarn.html#stray-top-level-files-in-site-packages
+
+In general, it is desirable to prepare a fix for the build system
+and submit it upstream.  However, it is acceptable to remove the files
+locally in the ebuild while waiting for a release with the fix.
+
+The subsequent sections describe the common causes and the suggested
+fixes.
+
+
+Example or test packages installed by setuptools
+------------------------------------------------
+Many packages using the setuptools build system utilize the convenient
+``find_packages()`` method to locate the Python sources.  In some cases,
+this method also wrongly grabs top-level test directories or other files
+that were not intended to be installed.
+
+For example, the following invocation will install everything that looks
+like a Python package from the source tree:
+
+.. code-block:: python
+
+    setup(
+        packages=find_packages())
+
+The correct fix for this problem is to add an ``exclude`` parameter
+that restricts the installed package list, for example:
+
+.. code-block:: python
+
+    setup(
+        packages=find_packages(exclude=["tests", "tests.*"]))
+
+Note that if the top-level ``tests`` package has any subpackages, both
+``tests`` and ``tests.*`` need to be listed.
+
+If ``setup.cfg`` is used instead, the excludes are specified as follows:
+
+.. code-block:: ini
+
+    [options.packages.find]
+    exclude =
+        tests
+        tests.*
+
+If ``pyproject.toml`` is used:
+
+.. code-block:: toml
+
+    [tool.setuptools.packages.find]
+    exclude = [
+        "tests",
+        "tests.*",
+    ]
+
+For reference, see `custom discovery in setuptools documentation`_.
+
+
+Documentation files installed by Poetry
+---------------------------------------
+It is a relatively common problem that packages using the Poetry build
+system are installing documentation files (such as ``README``)
+to the site-packages directory.  This is because of incorrect
+``include`` use in ``pyproject.toml``.  For example, consider
+the following configuration:
+
+.. code-block:: toml
+
+    include = [
+        "CHANGELOG",
+        "README.md",
+        "LICENSE"
+    ]
+
+The author meant to include these files in the source distribution
+packages.  However, the ``include`` key applies to wheels as well,
+effectively including them in files installed into ``site-packages``.
+
+To fix that, you need to specify file formats explicitly, for every
+entry:
+
+.. code-block:: toml
+
+    include = [
+        { path = "CHANGELOG", format = "sdist" },
+        { path = "README.md", format = "sdist" },
+        { path = "LICENSE", format = "sdist" },
+    ]
+
+For reference, see `include and exclude in Poetry documentation`_.
+
+
 .. _make.conf.example:
    https://gitweb.gentoo.org/proj/portage.git/tree/cnf/make.conf.example#n330
+.. _custom discovery in setuptools documentation:
+   https://setuptools.pypa.io/en/latest/userguide/package_discovery.html#custom-discovery
+.. _include and exclude in Poetry documentation:
+   https://python-poetry.org/docs/pyproject/#include-and-exclude
