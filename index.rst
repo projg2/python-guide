@@ -18,6 +18,7 @@ Gentoo Python Guide
    distutils
    test
    distutils-legacy
+   pypi
    helper
    depend
    pytest

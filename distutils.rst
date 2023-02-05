@@ -78,6 +78,8 @@ The simplest case of ebuild is:
     KEYWORDS="~amd64 ~arm ~arm64 ~x86"
 
 
+.. _source archives:
+
 Source archives
 ===============
 The vast majority of Python packages can be found in the `Python Package
@@ -92,6 +94,9 @@ archives often miss files that are not strictly required for binary
 distribution.  This usually includes tests, test data files,
 documentation but historically there were also instances of sdist
 releases that were entirely nonfunctional.
+
+When fetching archives from PyPI, ``pypi.eclass`` should be used.
+It is documented in its own chapter: :doc:`pypi`.
 
 When using generated archives, it is recommended to append a unique
 suffix (in case of GitHub, using a ``.gh.tar.gz`` suffix is requested)
