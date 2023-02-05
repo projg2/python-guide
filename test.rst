@@ -5,26 +5,22 @@ Tests in Python packages
 .. highlight:: bash
 
 
-.. index:: distutils_enable_tests
-
-Enabling tests
-==============
+Why is running tests important?
+===============================
 Since Python performs only minimal build-time (or more precisely,
 import-time) checking of correctness, it is important to run tests
 of Python packages in order to catch any problems early.  This is
 especially important for permitting others to verify support for new
 Python implementations.
 
-Many Python packages use one of the standard test runners, and work fine
-with the default ways of calling them.  Note that upstreams sometimes
-specify a test runner that's not strictly necessary — e.g. specify
-``dev-python/pytest`` as a dependency while the tests do not use it
-anywhere and work just fine with built-in modules.  The best way
-to determine the test runner to use is to grep the test sources.
 
+.. index:: distutils_enable_tests
 
 Using distutils_enable_tests
-----------------------------
+============================
+
+Basic use case
+--------------
 The simplest way of enabling tests is to call ``distutils_enable_tests``
 in global scope, passing the test runner name as the first argument.
 This function takes care of declaring test phase, setting appropriate
@@ -64,12 +60,16 @@ The valid values include:
 - ``setup.py`` to call ``setup.py test`` (*deprecated*)
 - ``unittest`` to use built-in unittest discovery
 
+See `choosing the correct test runner`_ for more information.
+
 
 Adding more test dependencies
 -----------------------------
 Additional test dependencies can be specified in ``test?`` conditional.
 The flag normally does not need to be explicitly declared,
 as ``distutils_enable_tests`` does that in the majority of cases.
+
+Please read the section on `undesirable test dependencies`_ too.
 
 .. code-block:: bash
    :emphasize-lines: 18,21
@@ -110,6 +110,7 @@ can be rewritten as:
         test? ( dev-python/hypothesis[${PYTHON_USEDEP}] )
     "
 
+
 Installing the package before running tests
 -------------------------------------------
 In PEP 517 mode, the eclass automatically exposes a venv-style install
@@ -119,36 +120,6 @@ In the legacy mode, ``distutils_enable_tests`` has an optional
 ``--install`` option that can be used to force performing an install
 to a temporary directory.  More information can be found in the legacy
 section.
-
-
-Undesirable test dependencies
------------------------------
-There is a number of packages that are frequently listed as test
-dependencies upstream but have little to no value for Gentoo users.
-It is recommended to skip those test dependencies whenever possible.
-If tests fail to run without them, it is often preferable to strip
-the dependencies and/or configuration values enforcing them.
-
-*Coverage testing* establishes how much of the package's code is covered
-by the test suite.  While this is useful statistic upstream, it has
-no value for Gentoo users who just want to install the package.  This
-is often represented by dependencies on ``dev-python/coverage``,
-``dev-python/pytest-cov``.  In the latter case, you usually need
-to strip ``--cov`` parameter from ``pytest.ini``.
-
-*PEP-8 testing* enforces standard coding style across Python programs.
-Issues found by it are relevant to upstream but entirely irrelevant
-to Gentoo users.  If the package uses ``dev-python/pep8``,
-``dev-python/pycodestyle``, ``dev-python/flake8``, strip that
-dependency.
-
-``dev-python/pytest-runner`` is a thin wrapper to run pytest
-from ``setup.py``.  Do not use it, just call pytest directly.
-
-``dev-python/tox`` is a convenient wrapper to run tests for multiple
-Python versions, in a virtualenv.  The eclass already provides the logic
-for the former, and an environment close enough to the latter.  Do not
-use tox in ebuilds.
 
 
 Customizing the test phase
@@ -346,6 +317,36 @@ If both pytest and nose seem equally good, the former is recommended
 as the latter has ceased development and requires downstream patching.
 If you have some free time, convincing upstream to switch from nose
 to pytest is a worthwhile goal.
+
+
+Undesirable test dependencies
+=============================
+There is a number of packages that are frequently listed as test
+dependencies upstream but have little to no value for Gentoo users.
+It is recommended to skip those test dependencies whenever possible.
+If tests fail to run without them, it is often preferable to strip
+the dependencies and/or configuration values enforcing them.
+
+*Coverage testing* establishes how much of the package's code is covered
+by the test suite.  While this is useful statistic upstream, it has
+no value for Gentoo users who just want to install the package.  This
+is often represented by dependencies on ``dev-python/coverage``,
+``dev-python/pytest-cov``.  In the latter case, you usually need
+to strip ``--cov`` parameter from ``pytest.ini``.
+
+*PEP-8 testing* enforces standard coding style across Python programs.
+Issues found by it are relevant to upstream but entirely irrelevant
+to Gentoo users.  If the package uses ``dev-python/pep8``,
+``dev-python/pycodestyle``, ``dev-python/flake8``, strip that
+dependency.
+
+``dev-python/pytest-runner`` is a thin wrapper to run pytest
+from ``setup.py``.  Do not use it, just call pytest directly.
+
+``dev-python/tox`` is a convenient wrapper to run tests for multiple
+Python versions, in a virtualenv.  The eclass already provides the logic
+for the former, and an environment close enough to the latter.  Do not
+use tox in ebuilds.
 
 
 Missing test files in PyPI packages
