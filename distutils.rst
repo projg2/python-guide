@@ -281,87 +281,6 @@ as well).  The eclass automatically uses the legacy setuptools backend
 for them.
 
 
-Deprecated PEP 517 backends
-===========================
-
-flit.buildapi
--------------
-Some packages are still found using the historical flit build backend.
-Their ``pyproject.toml`` files contain a section similar
-to the following:
-
-.. code-block:: toml
-
-    [build-system]
-    requires = ["flit"]
-    build-backend = "flit.buildapi"
-
-This backend requires installing the complete flit package manager.
-Instead, the package should be fixed upstream to use flit_core
-per `flit build system section documentation`_ instead:
-
-.. code-block:: toml
-
-    [build-system]
-    requires = ["flit_core"]
-    build-backend = "flit_core.buildapi"
-
-flit_core produces identical artifacts to flit.  At the same time, it
-reduces the build-time dependency footprint and therefore makes isolated
-PEP 517 builds faster.
-
-
-poetry.masonry.api
-------------------
-A similar problem applies to the packages using poetry.  The respective
-``pyproject.toml`` files contain:
-
-.. code-block:: toml
-
-    [build-system]
-    requires = ["poetry>=0.12"]
-    build-backend = "poetry.masonry.api"
-
-Instead, the lightweight poetry-core module should be used per `poetry
-PEP-517 documentation`_:
-
-.. code-block:: toml
-
-    [build-system]
-    requires = ["poetry_core>=1.0.0"]
-    build-backend = "poetry.core.masonry.api"
-
-poetry-core produces identical artifacts to poetry.  It has smaller
-dependency footprint and makes isolated builds much faster.
-
-
-setuptools.build_meta:__legacy__
---------------------------------
-Some packages using setuptools specify the following:
-
-.. code-block:: toml
-
-    [build-system]
-    requires = ["setuptools>=40.8.0", "wheel"]
-    build-backend = "setuptools.build_meta:__legacy__"
-
-This is incorrect, as the legacy backend is intended to be used only
-as an implicit fallback.  All packages should be using the regular
-backend instead:
-
-.. code-block:: toml
-
-    [build-system]
-    requires = ["setuptools>=40.8.0"]
-    build-backend = "setuptools.build_meta"
-
-Please also note that the ``wheel`` package should *not* be listed
-as a dependency, as it is an implementation detail and it was always
-implicitly returned by the backend.  Unfortunately, due to prolonged
-documentation error, a very large number of packages still specifies it,
-and other packages tend to copy that mistake.
-
-
 .. index:: SETUPTOOLS_SCM_PRETEND_VERSION
 .. index:: flit_scm
 .. index:: hatch-vcs
@@ -1270,7 +1189,3 @@ ebuild fragment demonstrates using it with Meson:
    https://devmanual.gentoo.org/eclass-reference/distutils-r1.eclass/index.html
 .. _PEP 517:
    https://www.python.org/dev/peps/pep-0517/
-.. _flit build system section documentation:
-   https://flit.readthedocs.io/en/latest/pyproject_toml.html#build-system-section
-.. _poetry PEP-517 documentation:
-   https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
