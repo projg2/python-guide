@@ -16,10 +16,10 @@ Gentoo Python Guide
    single
    multi
    distutils
+   test
    distutils-legacy
    helper
    depend
-   test
    pytest
    concept
    expert-multi

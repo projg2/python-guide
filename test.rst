@@ -1,8 +1,307 @@
-=============================
-Resolving test suite problems
-=============================
+========================
+Tests in Python packages
+========================
 
 .. highlight:: bash
+
+
+.. index:: distutils_enable_tests
+
+Enabling tests
+==============
+Since Python performs only minimal build-time (or more precisely,
+import-time) checking of correctness, it is important to run tests
+of Python packages in order to catch any problems early.  This is
+especially important for permitting others to verify support for new
+Python implementations.
+
+Many Python packages use one of the standard test runners, and work fine
+with the default ways of calling them.  Note that upstreams sometimes
+specify a test runner that's not strictly necessary — e.g. specify
+``dev-python/pytest`` as a dependency while the tests do not use it
+anywhere and work just fine with built-in modules.  The best way
+to determine the test runner to use is to grep the test sources.
+
+
+Using distutils_enable_tests
+----------------------------
+The simplest way of enabling tests is to call ``distutils_enable_tests``
+in global scope, passing the test runner name as the first argument.
+This function takes care of declaring test phase, setting appropriate
+dependencies and ``test`` USE flag if necessary.  If called after
+setting ``RDEPEND``, it also copies it to test dependencies.
+
+.. code-block:: bash
+   :emphasize-lines: 22
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( python2_7 python3_{6,7,8} pypy3 )
+    inherit distutils-r1
+
+    DESCRIPTION="An easy whitelist-based HTML-sanitizing tool"
+    HOMEPAGE="https://github.com/mozilla/bleach https://pypi.org/project/bleach/"
+    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+
+    LICENSE="Apache-2.0"
+    SLOT="0"
+    KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
+
+    RDEPEND="
+        dev-python/six[${PYTHON_USEDEP}]
+        dev-python/webencodings[${PYTHON_USEDEP}]
+    "
+
+    distutils_enable_tests pytest
+
+The valid values include:
+
+- ``nose`` for ``dev-python/nose``
+- ``pytest`` for ``dev-python/pytest``
+- ``setup.py`` to call ``setup.py test`` (*deprecated*)
+- ``unittest`` to use built-in unittest discovery
+
+
+Adding more test dependencies
+-----------------------------
+Additional test dependencies can be specified in ``test?`` conditional.
+The flag normally does not need to be explicitly declared,
+as ``distutils_enable_tests`` does that in the majority of cases.
+
+.. code-block:: bash
+   :emphasize-lines: 18,21
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=6
+
+    PYTHON_COMPAT=( python2_7 python3_{6,7,8} pypy3 )
+    inherit distutils-r1
+
+    DESCRIPTION="Universal encoding detector"
+    HOMEPAGE="https://github.com/chardet/chardet https://pypi.org/project/chardet/"
+    SRC_URI="https://github.com/chardet/chardet/archive/${PV}.tar.gz -> ${P}.tar.gz"
+
+    LICENSE="LGPL-2.1"
+    SLOT="0"
+    KEYWORDS="~alpha amd64 arm arm64 hppa ia64 ~m68k ~mips ppc ppc64 s390 ~sh sparc x86 ~x64-cygwin ~amd64-linux ~x86-linux ~x64-macos ~x86-macos ~x64-solaris"
+
+    DEPEND="
+        test? ( dev-python/hypothesis[${PYTHON_USEDEP}] )
+    "
+
+    distutils_enable_tests pytest
+
+Note that ``distutils_enable_tests`` modifies variables directly
+in the ebuild environment.  This means that if you wish to change their
+values, you need to append to them, i.e. the bottom part of that ebuild
+can be rewritten as:
+
+.. code-block:: bash
+   :emphasize-lines: 3
+
+    distutils_enable_tests pytest
+
+    DEPEND+="
+        test? ( dev-python/hypothesis[${PYTHON_USEDEP}] )
+    "
+
+Installing the package before running tests
+-------------------------------------------
+In PEP 517 mode, the eclass automatically exposes a venv-style install
+tree to the test phase.  No explicit action in necessary.
+
+In the legacy mode, ``distutils_enable_tests`` has an optional
+``--install`` option that can be used to force performing an install
+to a temporary directory.  More information can be found in the legacy
+section.
+
+
+Undesirable test dependencies
+-----------------------------
+There is a number of packages that are frequently listed as test
+dependencies upstream but have little to no value for Gentoo users.
+It is recommended to skip those test dependencies whenever possible.
+If tests fail to run without them, it is often preferable to strip
+the dependencies and/or configuration values enforcing them.
+
+*Coverage testing* establishes how much of the package's code is covered
+by the test suite.  While this is useful statistic upstream, it has
+no value for Gentoo users who just want to install the package.  This
+is often represented by dependencies on ``dev-python/coverage``,
+``dev-python/pytest-cov``.  In the latter case, you usually need
+to strip ``--cov`` parameter from ``pytest.ini``.
+
+*PEP-8 testing* enforces standard coding style across Python programs.
+Issues found by it are relevant to upstream but entirely irrelevant
+to Gentoo users.  If the package uses ``dev-python/pep8``,
+``dev-python/pycodestyle``, ``dev-python/flake8``, strip that
+dependency.
+
+``dev-python/pytest-runner`` is a thin wrapper to run pytest
+from ``setup.py``.  Do not use it, just call pytest directly.
+
+``dev-python/tox`` is a convenient wrapper to run tests for multiple
+Python versions, in a virtualenv.  The eclass already provides the logic
+for the former, and an environment close enough to the latter.  Do not
+use tox in ebuilds.
+
+
+Customizing the test phase
+--------------------------
+If additional pre-/post-test phase actions need to be performed,
+they can be easily injected via overriding ``src_test()`` and making
+it call ``distutils-r1_src_test``:
+
+.. code-block:: bash
+   :emphasize-lines: 30-34
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( python3_{6,7,8} )
+    inherit distutils-r1
+
+    DESCRIPTION="Extra features for standard library's cmd module"
+    HOMEPAGE="https://github.com/python-cmd2/cmd2"
+    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+
+    LICENSE="MIT"
+    SLOT="0"
+    KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~x86 ~amd64-linux ~x86-linux"
+
+    RDEPEND="
+        dev-python/attrs[${PYTHON_USEDEP}]
+        >=dev-python/colorama-0.3.7[${PYTHON_USEDEP}]
+        >=dev-python/pyperclip-1.6[${PYTHON_USEDEP}]
+        dev-python/six[${PYTHON_USEDEP}]
+        dev-python/wcwidth[${PYTHON_USEDEP}]
+    "
+    BDEPEND="
+        dev-python/setuptools_scm[${PYTHON_USEDEP}]
+    "
+
+    distutils_enable_tests pytest
+
+    src_test() {
+        # tests rely on very specific text wrapping...
+        local -x COLUMNS=80
+        distutils-r1_src_test
+    }
+
+If the actual test command needs to be customized, or a non-standard
+test tool needs to be used, you can define a ``python_test()`` sub-phase
+function.  This function is called for every enabled Python target
+by the default ``src_test`` implementation.  This can either be combined
+with ``distutils_enable_tests`` call, or used instead of it.  In fact,
+the former function simply defines a ``python_test()`` function as part
+of its logic.
+
+.. code-block:: bash
+   :emphasize-lines: 16,17,26-31,33-35
+
+    # Copyright 1999-2020 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=7
+
+    PYTHON_COMPAT=( python{2_7,3_6,3_7,3_8} pypy3 )
+    inherit distutils-r1
+
+    DESCRIPTION="Bash tab completion for argparse"
+    HOMEPAGE="https://pypi.org/project/argcomplete/"
+    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+
+    LICENSE="Apache-2.0"
+    SLOT="0"
+    KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~x86 ~amd64-linux ~x86-linux ~x64-macos"
+    IUSE="test"
+    RESTRICT="!test? ( test )"
+
+    RDEPEND="
+        $(python_gen_cond_dep '
+            <dev-python/importlib_metadata-2[${PYTHON_USEDEP}]
+        ' -2 python3_{5,6,7} pypy3)"
+    # pip is called as an external tool
+    BDEPEND="
+        dev-python/setuptools[${PYTHON_USEDEP}]
+        test? (
+            app-shells/fish
+            app-shells/tcsh
+            dev-python/pexpect[${PYTHON_USEDEP}]
+            dev-python/pip
+        )"
+
+    python_test() {
+        "${EPYTHON}" test/test.py -v || die
+    }
+
+Note that ``python_test`` is called by ``distutils-r1_src_test``,
+so you must make sure to call it if you override ``src_test``.
+
+
+.. index:: epytest
+
+Customizing the test phase for pytest
+-------------------------------------
+For the relatively frequent case of pytest-based packages needing
+additional customization, a ``epytest`` helper is provided.  The helper
+runs ``pytest`` with a standard set of options and automatic handling
+of test failures.
+
+For example, if upstream uses ``network`` marker to disable
+network-based tests, you can override the test phase in the following
+way::
+
+    distutils_enable_tests pytest
+
+    python_test() {
+        epytest -m 'not network'
+    }
+
+
+.. index:: virtx
+
+Running tests with virtualx
+---------------------------
+Test suites requiring a display to work correctly can often be appeased
+usng Xvfb.  If the package in question does not start Xvfb directly,
+``virtualx.eclass`` can be used to do that.  Whenever possible, it is
+preferable to run a single server in ``src_test()`` for all passes
+of the test suite, e.g.::
+
+    distutils_enable_tests pytest
+
+    src_test() {
+        virtx distutils-r1_src_test
+    }
+
+Note that ``virtx`` implicitly enables nonfatal mode.  This means that
+e.g. ``epytest`` will no longer terminate the ebuild on failure, and you
+need to use ``die`` explicitly for it::
+
+    src_test() {
+        virtx distutils-r1_src_test
+    }
+
+    python_test() {
+        epytest -m "not network" || die "Tests failed with ${EPYTHON}"
+    }
+
+.. Warning::
+
+   Explicit ``|| die`` is only necessary when overriding ``python_test``
+   and running ``epytest`` inside a ``nonfatal``.  The ``virtx`` command
+   runs its arguments via a ``nonfatal``.  The default ``python_test``
+   implementation created by ``distutils_enable_tests`` accounts for
+   this.  In other contexts, ``epytest`` will die on its own.
+
 
 Choosing the correct test runner
 ================================
