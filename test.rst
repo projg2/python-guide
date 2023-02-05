@@ -55,7 +55,7 @@ setting ``RDEPEND``, it also copies it to test dependencies.
 
 The valid values include:
 
-- ``nose`` for ``dev-python/nose``
+- ``nose`` for ``dev-python/nose`` (*deprecated*)
 - ``pytest`` for ``dev-python/pytest``
 - ``setup.py`` to call ``setup.py test`` (*deprecated*)
 - ``unittest`` to use built-in unittest discovery
