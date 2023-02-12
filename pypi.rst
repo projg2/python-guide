@@ -117,12 +117,35 @@ Packages with matching name and version
 In the most common case, the upstream package will have exactly the same
 name as the Gentoo package, and the version numbers will be entirely
 compatible.  In this case, it is sufficient to inherit the eclass,
-and it will automatically set a suitable default ``SRC_URI``.  The URI
-will be equivalent to::
+and it will automatically set a suitable default ``SRC_URI``.
+The result will be roughly equivalent to::
 
     SRC_URI="
         https://files.pythonhosted.org/packages/source/${PN::1}/${PN}/${P}.tar.gz
     "
+    S=${WORKDIR}/${P}
+
+with ``${P}`` actually using the normalized project name and the Gentoo
+version being translated to its PyPI equivalent.  The version
+translation performs the following replacements:
+
+  ============= ===========
+  Gentoo suffix PyPI suffix
+  ============= ===========
+  _alpha        a
+  _beta         b
+  _rc           rc
+  _p            .post
+  ============= ===========
+
+If the project in question uses a build system that is not compliant
+with `PEP 625`_ and has uppercase letters or dots in its name, you may
+need to set ``PYPI_NO_NORMALIZE`` to a non-empty value to disable name
+normalization, e.g.::
+
+    PYPI_NO_NORMALIZE=1
+
+    inherit distutils-r1 pypi
 
 Note that ``SRC_URI`` is not combined between eclasses and ebuilds.
 Should you need to fetch additional files, you need to explicitly append
@@ -139,19 +162,38 @@ to the variable or the default will be overwritten, e.g.::
 Customizing the generated URL
 =============================
 The default value may not be suitable for your package if it uses
-a different project name, version numbers that are incompatible with
-Gentoo or the legacy ``.zip`` sdist format.  The ``pypi_sdist_url``
-function can be used to generate URLs in that case.  Its usage is::
+a different project name than the Gentoo package name, a version number
+that needs to be translated differently or the legacy ``.zip`` sdist
+format.  The ``pypi_sdist_url`` function can be used to generate URLs
+in that case.  Its usage is::
 
-    pypi_sdist_url [<project> [<version> [<suffix>]]]
+    pypi_sdist_url [--no-normalize] [<project> [<version> [<suffix>]]]
 
-with package defaulting to ``${PN}``, version to ``${PV}`` and suffix
-to ``.tar.gz``.  For example, the Gentoo ``dev-python/markups`` package
-uses title-case ``Markups`` project name, and so the ebuild uses::
+with package defaulting to ``${PN}``, version to translated ``${PV}``
+and suffix to ``.tar.gz``.  The generated filename uses `PEP 625`_
+normalization, unless ``--no-normalize`` is provided
+(``PYPI_NO_NORMALIZE`` does not affect explicit function calls).
+For example, the Gentoo ``dev-python/markups`` package uses title-case
+``Markups`` project name and legacy filename, and so the ebuild needs
+to use::
+
+    inherit distutils-r1 pypi
+
+    SRC_URI="$(pypi_sdist_url --no-normalize "${PN^}")"
+    S=${WORKDIR}/${P^}
+
+Should the package start using source distributions with normalized
+filenames, then only project name would need to be overriden
+and the default ``S`` would be correct (``Markups`` and ``markups``
+normalize the same)::
 
     inherit distutils-r1 pypi
 
     SRC_URI="$(pypi_sdist_url "${PN^}")"
+
+Note that due to project name normalization, the ebuild would also work
+without ``SRC_URI`` override.  However, it is recommended to pass
+the canonical project name, as normalization is not guaranteed.
 
 
 Fetching wheels
@@ -162,10 +204,10 @@ function is provided to aid this purpose.  Its usage is::
 
     pypi_wheel_url [<project> [<version> [<python-tag> [<abi-platform-tag>]]]]
 
-with package defaulting to ``${PN}``, version to ``${PV}``, python-tag
-to ``py3`` and abi-platform-tag to ``none-any`` (i.e. indicating a pure
-Python package).  For example, ``dev-python/ensurepip-setuptools``
-does::
+with package defaulting to ``${PN}``, version to translated ``${PV}``,
+python-tag to ``py3`` and abi-platform-tag to ``none-any``
+(i.e. indicating a pure Python package).  For example,
+``dev-python/ensurepip-setuptools`` does::
 
     inherit pypi
     SRC_URI="$(pypi_wheel_url "${PN#ensurepip-}")"
