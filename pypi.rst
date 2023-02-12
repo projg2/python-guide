@@ -202,7 +202,7 @@ In very specific cases, it may be necessary to fetch wheels
 (i.e. prebuilt Python packages) instead.  The ``pypi_wheel_url``
 function is provided to aid this purpose.  Its usage is::
 
-    pypi_wheel_url [<project> [<version> [<python-tag> [<abi-platform-tag>]]]]
+    pypi_wheel_url [--unpack] [<project> [<version> [<python-tag> [<abi-platform-tag>]]]]
 
 with package defaulting to ``${PN}``, version to translated ``${PV}``,
 python-tag to ``py3`` and abi-platform-tag to ``none-any``
@@ -213,10 +213,11 @@ python-tag to ``py3`` and abi-platform-tag to ``none-any``
     SRC_URI="$(pypi_wheel_url "${PN#ensurepip-}")"
 
 Note that wheels are ZIP archives suffixed ``.whl``, and they are not
-unpacked by the package manager automatically.  You either need to
-unzip it explicitly or use ``->`` to rename it, e.g. by appending
-``.zip`` suffix.  Remember to add an explicit dependency
-on ``app-arch/unzip`` as well.
+unpacked by the package manager automatically.  Should you need them
+unpacked, you can pass ``--unpack`` option to include a ``->`` operator
+that renames the wheel to use ``.whl.zip`` suffix, causing it to be
+unpacked.  Remember to add an explicit dependency on ``app-arch/unzip``
+in that case.
 
 The ``pypi_wheel_filename`` function is provided to aid getting
 the wheel filename.  It has a matching synopsis::
