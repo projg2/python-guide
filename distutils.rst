@@ -88,12 +88,13 @@ Index (PyPI)`_.  Often this includes both source (sdist) and binary
 repositories with an automatic archive generation mechanism
 (e.g. GitHub).
 
-The current recommendation is to prefer these *generated archives*
-(snapshots) over official sdist archives.  This is because sdist
-archives often miss files that are not strictly required for binary
-distribution.  This usually includes tests, test data files,
-documentation but historically there were also instances of sdist
-releases that were entirely nonfunctional.
+The current recommendation is to prefer source distributions from PyPI
+*if and only if* they include all files needed for the package,
+especially tests.  If the PyPI distribution is missing some files,
+VCS generated archives should be used instead.  In some extreme cases,
+it may be necessary to use both and combine the files contained in them
+(e.g. to combine files pregenerated using NodeJS from sdist with tests
+from GitHub archive).
 
 When fetching archives from PyPI, ``pypi.eclass`` should be used.
 It is documented in its own chapter: :doc:`pypi`.
@@ -122,11 +123,6 @@ files.  This has some implications, notably:
    and an explicit ``BDEPEND`` on ``dev-python/cython`` needs to
    be added.  However, regenerating them is recommended anyway,
    cf. `packages using Cython`_.
-
-Nevertheless, in some cases sdist archives (or even a combination
-of both archive kinds) will be preferable because of pregenerated files
-that may require Internet access or have problematic dependencies
-(e.g. NodeJS).
 
 .. _Python Package Index (PyPI): https://pypi.org/
 
