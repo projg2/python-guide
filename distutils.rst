@@ -444,7 +444,7 @@ run in the following order:
 
 1. ``python_prepare_all`` (for ``src_prepare``, has default)
 2. ``python_prepare`` (for each impl.)
-3. ``python_configure`` (for ``src_configure``, foreach impl.)
+3. ``python_configure`` (for ``src_configure``, for each impl.)
 4. ``python_configure_all``
 5. ``python_compile`` (for ``src_compile``, for each impl., has default)
 6. ``python_compile_all``
