@@ -118,18 +118,18 @@ they do not require any specific action, distinguishing them is not very
 important.
 
 pkgutil namespaces can be recognized through the content of their
-``__init__.py``.  Generally, you should find it suspicious if is
+``__init__.py``.  Generally, you should find it suspicious if it is
 the only file in a top-level package directory, and if the name of this
 directory is less specific than the package name (e.g. ``zope`` for
 ``zope.interface``, ``ruamel`` for ``ruamel.yaml``).  If you miss this,
-then you will learn about the namespace from package collisions
-on the respective ``__init__.py``.
+then you will learn about it when the ``__init__.py`` file collides
+between multiple packages.
 
 setuptools namespaces usually do not install ``__init__.py`` but
-do install a ``.pth`` file instead.  The distutils-r1 eclass detects
-this automatically and prints a warning.  Prior to installation,
-they can also be recognized by ``namespace_packages`` option
-in ``setup.py`` or ``setup.cfg``.
+do install a ``.pth`` file instead.  Prior to installation, they can
+also be recognized by ``namespace_packages`` option in ``setup.py``
+or ``setup.cfg``.  However, some packages use a custom ``__init__.py``
+file that does enable setuptools namespaces.
 
 
 Adding new namespace packages to Gentoo
@@ -138,11 +138,17 @@ If the package uses PEP 420 namespaces, no special action is required.
 Per PEP 420 layout, the package must not install ``__init__.py`` files
 for namespaces.
 
-If the package uses one of the other layouts, their respective files
-must be removed from the install tree.
+If the package uses the regular setuptools namespace install method
+(i.e. ``namespace_packages`` option), then the eclass detects that
+and strips the namespaces automatically, e.g.::
 
-For pkgutil namespace, its ``__init__.py`` should be removed after
-the PEP 517 build phase:
+     * python3_11: running distutils-r1_run_phase distutils-r1_python_install
+     * Stripping pkg_resources-style namespace ruamel
+     * Stripping pkg_resources-style namespace ruamel.std
+
+If the package uses pkgutil-style or setuptools-style namespaces
+via ``__init__.py`` files, these files need to be removed manually.
+This is done after the PEP 517 build phase:
 
 .. code-block:: bash
 
@@ -151,32 +157,9 @@ the PEP 517 build phase:
         rm "${BUILD_DIR}/install$(python_get_sitedir)"/jaraco/__init__.py || die
     }
 
-The equivalent code for the legacy eclass mode is:
-
-.. code-block:: bash
-
-    python_install() {
-        rm "${BUILD_DIR}"/lib/jaraco/__init__.py || die
-        distutils-r1_python_install
-    }
-
-For setuptools namespace, the ``.pth`` file should be removed instead:
-
-.. code-block:: bash
-
-    python_compile() {
-        distutils-r1_python_compile
-        find "${BUILD_DIR}" -name '*.pth' -delete || die
-    }
-
-The setuptools code for the legacy mode is:
-
-.. code-block:: bash
-
-    python_install_all() {
-        distutils-r1_python_install_all
-        find "${D}" -name '*.pth' -delete || die
-    }
+Note that in some extreme cases, upstream combines namespace support
+and other code in the ``__init__.py`` file.  Naturally, this file cannot
+be removed.  No good solution has been found for this problem yet.
 
 Some packages include an explicit ``setuptools`` runtime dependency
 (``install_requires``) when using namespaces.  If this is the only
