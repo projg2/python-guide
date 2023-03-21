@@ -159,6 +159,30 @@ to the variable or the default will be overwritten, e.g.::
     "
 
 
+Package with a different name
+=============================
+If the project name used on PyPI differs from the Gentoo package name,
+the ``PYPI_PN`` variable can be used to use another name.  This is
+especially useful for project that use uppercase letters or dots
+in their names.
+
+For example, a package using lowercase package name in Gentoo and title
+case on PyPI could use::
+
+    PYPI_PN=${PN^}
+
+    inherit distutils-r1 pypi
+
+Note that projects whose distfiles do not conform to PEP 625 will also
+need to explicitly disable filename normalization.  For example,
+a package using dot in its filename and setuptools would use::
+
+    PYPI_NO_NORMALIZE=1
+    PYPI_PN=${PN/-/.}
+
+    inherit distutils-r1 pypi
+
+
 Customizing the generated URL
 =============================
 The default value may not be suitable for your package if it uses
@@ -169,7 +193,7 @@ in that case.  Its usage is::
 
     pypi_sdist_url [--no-normalize] [<project> [<version> [<suffix>]]]
 
-with package defaulting to ``${PN}``, version to translated ``${PV}``
+with package defaulting to ``${PYPI_PN}``, version to translated ``${PV}``
 and suffix to ``.tar.gz``.  The generated filename uses `PEP 625`_
 normalization, unless ``--no-normalize`` is provided
 (``PYPI_NO_NORMALIZE`` does not affect explicit function calls).
@@ -204,7 +228,7 @@ function is provided to aid this purpose.  Its usage is::
 
     pypi_wheel_url [--unpack] [<project> [<version> [<python-tag> [<abi-platform-tag>]]]]
 
-with package defaulting to ``${PN}``, version to translated ``${PV}``,
+with package defaulting to ``${PYPI_PN}``, version to translated ``${PV}``,
 python-tag to ``py3`` and abi-platform-tag to ``none-any``
 (i.e. indicating a pure Python package).  For example,
 ``dev-python/ensurepip-setuptools`` does::
