@@ -489,6 +489,9 @@ to tests that are broken themselves rather than indicating real problems
 with the software.  However, in some cases you will even find yourself
 ignoring minor test failures.
 
+The simplest way to skip tests is by defining an array of test names
+to skip in the ``EPYTEST_DESELECT`` `pytest utils`_ variable.
+
 .. Note::
 
    When possible, it is preferable to use pytest along with its
@@ -690,3 +693,4 @@ into it for the purpose of testing.  Note that ``PATH`` is manipulated
 .. _django: https://www.djangoproject.com/
 .. _why tests must not use Internet:
    https://devmanual.gentoo.org/ebuild-writing/functions/src_test/#tests-that-require-network-or-service-access
+.. _pytest utils: https://devmanual.gentoo.org/eclass-reference/python-utils-r1.eclass/
