@@ -341,6 +341,60 @@ of setuptools_scm.  The same approach applies to both of them.
 .. _hatch-vcs: https://pypi.org/project/hatch-vcs/
 
 
+.. index:: DISTUTILS_EXT
+
+Packages installing extensions (C, Rust…)
+=========================================
+Python extensions are compiled (C, Cython, Rust…) loadable modules.
+They can generally be recognized by the presence of ``.so`` files
+in site-packages directory.
+
+The eclass provides a ``DISTUTILS_EXT`` control variable to enable
+additional features related to extensions.  These are:
+
+- ``DEPEND`` class dependency on the Python implementation — needed
+  for cross-compilation (unless ``DISTUTILS_OPTIONAL`` is used,
+  then the ``DEPEND`` needs to be added manually).
+
+- ``IUSE=debug`` flag that is used to control whether the extensions
+  are compiled with assertions enabled (among others, used to verify
+  whether the Python API is used correctly).
+
+- calling ``esetup.py build_ext`` to compile C files using parallel
+  jobs.
+
+The variable needs to be set prior to inheriting the eclass, e.g.:
+
+.. code-block:: bash
+   :emphasize-lines: 6
+
+    # Copyright 2023 Gentoo Authors
+    # Distributed under the terms of the GNU General Public License v2
+
+    EAPI=8
+
+    DISTUTILS_EXT=1
+    DISTUTILS_USE_PEP517=setuptools
+    PYTHON_COMPAT=( python3_{10..11} pypy3 )
+
+    inherit distutils-r1
+
+Note that it should be enabled even if the extensions are only built
+conditionally to USE flags.  Most of the additions need to be done
+in global scope anyway, and making the ``DEPEND`` conditional isn't
+considered worth the added complexity.
+
+In general, you don't need to worry about adding the variable.
+The eclass should automatically print a QA warning if ``DISTUTILS_EXT``
+is missing:
+
+.. code-block:: console
+
+     * Python extension modules (*.so) found installed. Please set:
+     *   DISTUTILS_EXT=1
+     * in the ebuild.
+
+
 .. index:: Cython
 
 Packages using Cython
