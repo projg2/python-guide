@@ -87,6 +87,15 @@ Adding a new Python implementation
 ==================================
 Eclass and profile changes
 --------------------------
+
+.. Note::
+
+   The best time to perform these changes is prior to adding the first
+   beta of new Python version.  This is because ``dev-lang/python``
+   has a conditional dependency on ``dev-lang/python-exec``
+   for non-alpha versions, so adding the target prior to committing it
+   ensures depgraph consistency.
+
 When adding a new Python target, please remember to perform all
 the following tasks:
 
