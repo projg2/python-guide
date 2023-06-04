@@ -262,6 +262,7 @@ meson-python       dev-python/meson-python      mesonpy
 no                 (none)                       (none, see below)
 pbr                dev-python/pbr               pbr
 pdm                dev-python/pdm-pep517        pdm.pep517.api
+pdm-backend        dev-python/pdm-backend       pdm.backend
 poetry             dev-python/poetry-core       poetry.core.masonry.api
 setuptools         dev-python/setuptools        setuptools.build_meta
                                                 setuptools.__legacy__.build_meta
