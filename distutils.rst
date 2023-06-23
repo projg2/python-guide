@@ -264,6 +264,7 @@ pbr                dev-python/pbr               pbr
 pdm                dev-python/pdm-pep517        pdm.pep517.api
 pdm-backend        dev-python/pdm-backend       pdm.backend
 poetry             dev-python/poetry-core       poetry.core.masonry.api
+scikit-build-core  dev-python/scikit-build-core scikit_build_core.build
 setuptools         dev-python/setuptools        setuptools.build_meta
                                                 setuptools.__legacy__.build_meta
 
