@@ -171,8 +171,8 @@ The subsequent sections describe the common causes and the suggested
 fixes.
 
 
-Example or test packages installed by setuptools
-------------------------------------------------
+Example for test packages installed by setuptools
+-------------------------------------------------
 Many packages using the setuptools build system utilize the convenient
 ``find_packages()`` method to locate the Python sources.  In some cases,
 this method also wrongly grabs top-level test directories or other files
