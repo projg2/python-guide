@@ -113,12 +113,17 @@ make options for the job number, e.g.::
     distutils_enable_tests pytest
 
     python_test() {
-       epytest -n "$(makeopts_jobs)"
+       epytest -n "$(makeopts_jobs)" --dist=worksteal
     }
 
 Please note that some upstream use pytest-xdist even if there is no real
 gain from doing so.  If the package's tests take a short time to finish,
 please avoid the dependency and strip it if necessary.
+
+The ``--dist=worksteal`` enables rescheduling tests when some of
+the workers finish early.  It is recommended when some of the package's
+tests are very slow while others are fast.  Otherwise, the lengthy tests
+may end up being executed on the same thread and become a bottleneck.
 
 
 Avoiding dependencies on other pytest plugins
