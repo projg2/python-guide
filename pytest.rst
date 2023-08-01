@@ -218,7 +218,7 @@ sure to depend on ``dev-python/pytest-rerunfailures``::
 
     BDEPEND="
         test? (
-             dev-python/dev-python/pytest-rerunfailures[${PYTHON_USEDEP}]
+             dev-python/pytest-rerunfailures[${PYTHON_USEDEP}]
         )"
 
     python_test() {
