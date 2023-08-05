@@ -373,6 +373,14 @@ necessary to prevent import collisions — e.g. when modules would
 be loaded first from the staging area due to explicit imports
 then again from the current directory due to test discovery.
 
+.. Warning::
+
+   Not all packages fail explicitly like that.  In particular,
+   if the C extensions are optional, the package may either skip tests
+   requiring them or silently fall back to testing the pure Python
+   variant.  Special caution is advised when packaging software using
+   C extensions with top-level source layout.
+
 Unfortunately, this does not work correctly if C extensions are built
 as part of these packages.  Since the package imported relatively
 does not include the necessary extensions, the imports fail, e.g.:
