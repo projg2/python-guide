@@ -412,22 +412,49 @@ does not include the necessary extensions, the imports fail, e.g.:
         from systemd import login
     E   ImportError: cannot import name 'login' from 'systemd' (/tmp/portage/dev-python/python-systemd-234-r2/work/python-systemd-234/systemd/__init__.py)
 
-The preferred solution is to change the working directory before running
-the tests.  If tests are installed as a part of the package, they can
-be discovered through package search e.g. using pytest::
+.. Note::
+
+   Historically, the primary recommendation was to change directory
+   prior to running the test suite.  However, this was change since
+   the ``rm`` approach is easier in PEP 517 mode, and less likely
+   to trigger other issues (e.g. pytest missing its configuration,
+   tests relying on relative paths).
+
+The modern preference is to remove the package directory prior to
+running the test suite.  In PEP 517 mode, the build system is only run
+as part of ``src_compile``, and therefore the original sources are not
+needed afterwards.  For example, when the tests are in a separate
+directory::
 
     python_test() {
-        cd "${T}" || die
-        epytest --pyargs systemd
+        rm -rf frozendict || die
+        epytest
     }
 
-If the tests are in a separate directory, an absolute path can be used
-instead::
+When the tests are installed as a part of the installed package,
+``--pyargs`` option can be used to find them via package lookup::
 
     python_test() {
-        cd "${T}" || die
-        epytest "${S}"/test
+        rm -rf numpy || die
+        epytest --pyargs numpy
     }
+
+The other possible solution is to change the working directory prior
+to running the test suite, either into an arbitrary directory that
+does not feature the collision, or into the install directory.
+The latter could possible be necessary if the tests are installed
+as part of the package, and assume paths relative to the source
+directory::
+
+    python_test() {
+        cd "${BUILD_DIR}/install$(python_get_sitedir)" || die
+        epytest
+    }
+
+However, please note that changing the working directory leads to pytest
+missing its configuration (``pytest.ini``, ``setup.cfg``,
+``pyproject.toml``) which in turn could lead to warnings about missing
+marks or misleading test suite problems.
 
 
 Checklist for dealing with test failures
