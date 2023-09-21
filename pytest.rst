@@ -126,6 +126,32 @@ tests are very slow while others are fast.  Otherwise, the lengthy tests
 may end up being executed on the same thread and become a bottleneck.
 
 
+Dealing with flaky tests
+========================
+A flaky test is a test that sometimes passes, and sometimes fails
+with a false positive result.  Often tests are flaky because of too
+steep timing requirements or race conditions.  While generally it is
+preferable to fix the underlying issue (e.g. by increasing timeouts),
+it is not always easy.
+
+Sometimes upstreams use such packages as ``dev-python/flaky``
+or ``dev-python/pytest-rerunfailures`` to mark tests as flaky and have
+them rerun a few minutes automatically.  If upstream does not do that,
+it is also possible to force a similar behavior locally in the ebuild::
+
+    python_test() {
+        # plugins make tests slower, and more fragile
+        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+        # some tests are very fragile to timing
+        epytest -p rerunfailures --reruns=10 --reruns-delay=2
+    }
+
+Note that the snippet above also disables plugin autoloading to speed
+tests up and therefore reduce their flakiness.  Sometimes forcing
+explicit rerun also makes it possible to use xdist on packages that
+otherwise randomly fail with it.
+
+
 Avoiding dependencies on other pytest plugins
 =============================================
 There is a number of pytest plugins that have little value to Gentoo
