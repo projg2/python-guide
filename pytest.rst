@@ -83,6 +83,61 @@ The recommended method of stripping it is to use sed::
     }
 
 
+.. index:: PYTEST_DISABLE_PLUGIN_AUTOLOAD
+.. index:: PYTEST_PLUGINS
+
+Disabling plugin autoloading
+============================
+Normally, when running a test suite pytest loads all plugins installed
+on the system.  This is often convenient for upstreams, as it makes it
+possible to use the features provided by the plugins (such as ``async``
+test function support, or fixtures) without the necessity to explicitly
+enable them.  However, there are also cases when additional plugins
+could make the test suite fail or become very slow (especially if pytest
+is called recursively).
+
+The modern recommendation for these cases is to disable plugin
+autoloading via setting the ``PYTEST_DISABLE_PLUGIN_AUTOLOAD``
+environment variable, and then explicitly enable specific plugins
+if necessary.
+
+.. Note::
+
+   Previously we used to recommend explicitly disabling problematic
+   plugins via ``-p no:<plugin>``.  However, it is rarely obvious
+   which plugin is causing the problems, and it is entirely possible
+   that another plugin will cause issues in the future, so an opt-in
+   approach is usually faster and more reliable.
+
+The easier approach to enabling plugins is to use the ``-p`` option,
+listing specific plugins.  The option can be passed multiple times,
+and accepts a plugin name as specified in the package's
+``entry_points.txt`` file::
+
+    python_test() {
+        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+        epytest -p asyncio -p tornado
+    }
+
+However, this approach does not work when the test suite calls pytest
+recursively (e.g. you are testing a pytest plugin).  In this case,
+the ``PYTEST_PLUGINS`` environment variable can be used instead.  It
+takes a comma-separated list of plugin *module names*::
+
+    python_test() {
+        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+        local -x PYTEST_PLUGINS=xdist.plugin,xdist.looponfail,pytest_forked
+
+        epytest
+    }
+
+Please note that failing to enable all the required plugins may cause
+some of the tests to be skipped implicitly (especially if the test suite
+is using ``async`` functions and no async plugin is loaded).  Please
+look at skip messages and warnings to make sure everything works
+as intended.
+
+
 Using pytest-xdist to run tests in parallel
 ===========================================
 pytest-xdist_ is a plugin that makes it possible to run multiple tests
@@ -179,53 +234,6 @@ to strip options enabling them from ``pytest.ini`` or ``setup.cfg``.
         sed -i -e 's:--cov=wheel::' setup.cfg || die
         distutils-r1_src_prepare
     }
-
-
-Explicitly disabling automatic pytest plugins
-=============================================
-Besides plugins explicitly used by the package, there are a few pytest
-plugins that enable themselves automatically for all test suites
-when installed.  In some cases, their presence causes tests of packages
-that do not expect them, to fail.
-
-An example of such package used to be ``dev-python/pytest-relaxed``.
-To resolve problems due to the plugin, it was necessary to disable
-it explicitly::
-
-    python_test() {
-        # pytest-relaxed plugin makes our tests fail
-        epytest -p no:relaxed
-    }
-
-
-Expert: disabling plugin autoloading entirely
-=============================================
-If a test suite invokes pytest recursively (this is particularly
-the case when packaging other pytest plugins), the ``-p`` option
-can be insufficient to disable problematic plugins, as it does not
-get passed to the nested pytest invocations.  For these packages,
-the next best thing is to use environment variables.
-
-Unfortunately, environment variables can only be used to disable
-autoloading entirely.  When doing that, you need to explicitly force
-loading plugins that the test suite really needs.
-
-This is done using two envvars: ``PYTEST_DISABLE_PLUGIN_AUTOLOAD``
-to disable autoloading plugins, and ``PYTEST_PLUGINS`` to specify
-plugins to load.  The latter takes a comma-separated list of entry point
-modules.  To find the correct module names, look into
-the ``entry_points.txt`` inside the package's ``.egg-info`` directory.
-
-::
-
-    python_test() {
-        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
-        local -x PYTEST_PLUGINS=xdist.plugin,xdist.looponfail,pytest_forked
-
-        distutils_install_for_testing
-        epytest
-    }
-
 
 
 TypeError: _make_test_flaky() got an unexpected keyword argument 'reruns'
