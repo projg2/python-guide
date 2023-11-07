@@ -138,47 +138,39 @@ look at skip messages and warnings to make sure everything works
 as intended.
 
 
+.. index:: EPYTEST_XDIST
+
 Using pytest-xdist to run tests in parallel
 ===========================================
 pytest-xdist_ is a plugin that makes it possible to run multiple tests
 in parallel.  This is especially useful for programs with large test
 suites that take significant time to run single-threaded.
 
-Not all test suites support pytest-xdist.  Particularly, it requires
-that the tests are written not to collide one with another.  Sometimes,
-xdist may also cause instability of individual tests.
-
-When only a few tests are broken or unstable because of pytest-xdist,
-it is possible to use it and deselect the problematic tests.  It is up
-to the maintainer's discretion to decide whether this is justified.
-
 Using pytest-xdist is recommended if the package in question supports it
 (i.e. it does not cause semi-random test failures) and its test suite
-takes significant time.  When using pytest-xdist, please respect user's
-make options for the job number, e.g.::
+takes significant time.  This is done via setting ``EPYTEST_XDIST``
+to a non-empty value prior to calling ``distutils_enable_tests``.
+It ensures that an appropriate depedency is added, and that ``epytest``
+adds necessary command-line options.
 
-    inherit multiprocessing
+.. code-block::
 
-    BDEPEND="
-        test? (
-            dev-python/pytest-xdist[${PYTHON_USEDEP}]
-        )
-    "
-
+    EPYTEST_XDIST=1
     distutils_enable_tests pytest
-
-    python_test() {
-       epytest -n "$(makeopts_jobs)" --dist=worksteal
-    }
 
 Please note that some upstream use pytest-xdist even if there is no real
 gain from doing so.  If the package's tests take a short time to finish,
 please avoid the dependency and strip it if necessary.
 
-The ``--dist=worksteal`` enables rescheduling tests when some of
-the workers finish early.  It is recommended when some of the package's
-tests are very slow while others are fast.  Otherwise, the lengthy tests
-may end up being executed on the same thread and become a bottleneck.
+Not all test suites support pytest-xdist.  Particularly, it requires
+that the tests are written not to collide one with another.  Sometimes,
+xdist may also cause instability of individual tests.  In some cases,
+it is possible to work around this using the same solution as when
+`dealing with flaky tests`_.
+
+When only a few tests are broken or unstable because of pytest-xdist,
+it is possible to use it and deselect the problematic tests.  It is up
+to the maintainer's discretion to decide whether this is justified.
 
 
 Dealing with flaky tests
