@@ -53,6 +53,76 @@ Behavior after::
 .. _django PR#14349: https://github.com/django/django/pull/14349
 
 
+Python 3.12
+===========
+
+See also: `what's new in Python 3.12`_
+
+.. _what's new in Python 3.12:
+   https://docs.python.org/3.12/whatsnew/3.12.html
+
+
+.called_with (and other invalid assertions) now trigger an error
+----------------------------------------------------------------
+It is not uncommon for test suites to write invalid assertions such as::
+
+    with unittest.mock.patch("...") as foo_mock:
+        ...
+
+    assert foo_mock.called_with(...)
+
+Prior to Python 3.12, such assertions would silently pass.  Since
+the ``.called_with()`` method does not exist, a ``MagicMock`` object
+is returned and it evaluates to ``True`` in boolean context.
+
+Starting with Python 3.12, an exception is raised instead::
+
+    AttributeError: 'called_with' is not a valid assertion. Use a spec for the mock if 'called_with' is meant to be an attribute.
+
+The fix is to use the correct ``.assert_called_with()`` method
+or similar::
+
+    with unittest.mock.patch("...") as foo_mock:
+        ...
+
+    foo_mock.assert_called_with(...)
+
+See the unittest.mock_ documentation for the complete list of available
+assertions.
+
+Please note that since the original code did not actually test anything,
+fixing the test case may reveal failed expectations.
+
+
+.. _unittest.mock: https://docs.python.org/3.12/library/unittest.mock.html
+
+
+Deprecated test method alias removal
+------------------------------------
+Python 3.12 removes multiple deprecated test method aliases, such
+as ``assertEquals()`` and ``assertRegexpMatches()``.  The documentation
+provides `a list of removed aliases and their modern replacements`_.
+
+It should be noted that all of the new methods are available since
+Python 3.2 (and most even earlier), so the calls can be replaced without
+worrying about backwards compatibility.
+
+Most of the time, it should be possible to trivially ``sed`` the methods
+in ebuild without having to carry a patch, e.g.:
+
+.. code-block:: bash
+
+    src_prepare() {
+        # https://github.com/byroot/pysrt/commit/93f52f6d4f70f4e18dc71deeaae0ec1e9100a50f
+        sed -i -e 's:assertEquals:assertEqual:' tests/*.py || die
+        distutils-r1_src_prepare
+    }
+
+
+.. _a list of removed aliases and their modern replacements:
+   https://docs.python.org/3.12/whatsnew/3.12.html#id3
+
+
 Python 3.11
 ===========
 
