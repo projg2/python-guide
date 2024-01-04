@@ -260,7 +260,7 @@ jupyter            dev-python/jupyter_packaging jupyter_packaging.build_api
 maturin            dev-util/maturin             maturin
 meson-python       dev-python/meson-python      mesonpy
 no                 (none)                       (none, see below)
-pbr                dev-python/pbr               pbr
+pbr                dev-python/pbr               pbr.build
 pdm                dev-python/pdm-pep517        pdm.pep517.api
 pdm-backend        dev-python/pdm-backend       pdm.backend
 poetry             dev-python/poetry-core       poetry.core.masonry.api
