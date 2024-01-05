@@ -116,7 +116,7 @@ Note that unlike sdist archives, snapshots are often missing generated
 files.  This has some implications, notably:
 
 1. If the package uses setuptools_scm or a similar package, the version
-   string needs to be provided explicitly,
+   string may need to be provided explicitly,
    cf. `setuptools_scm (flit_scm, hatch-vcs, pdm-backend)
    and snapshots`_.
 
@@ -295,9 +295,7 @@ setuptools_scm (flit_scm, hatch-vcs, pdm-backend) and snapshots
 ===============================================================
 setuptools_scm_ is a package providing additional features for running
 inside a VCS checkout, in particular the ability to determine version
-from VCS tags.  However, this works correctly only when the package
-is built from VCS checkout or an ``sdist`` archive containing
-pregenerated metadata.  It does not work when building from a GitHub
+from VCS tags.  However, this may not work when building from a GitHub
 snapshot::
 
     Traceback (most recent call last):
