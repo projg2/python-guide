@@ -325,6 +325,24 @@ or::
     }
 
 
+Failures due to missing files in temporary directories
+======================================================
+As of 2024-01-05, ``epytest`` overrides the default temporary directory
+retention policy of pytest.  By default, directories from successful
+tests are removed immediately, and the temporary directories
+from the previous test run are replaced by the subsequent test run.
+This frequently reduces disk space requirements from test suites,
+but it can rarely cause tests to fail.
+
+If you notice test failures combined with indications that a file was
+not found, and especially regarding the pytest temporary directories,
+try if overriding the retention policy helps, e.g.::
+
+    python_test() {
+        epytest -o tmp_path_retention_policy=all
+    }
+
+
 fixture '...' not found
 =======================
 Most of the time, a missing fixture indicates that some pytest plugin
