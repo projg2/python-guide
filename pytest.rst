@@ -199,6 +199,50 @@ explicit rerun also makes it possible to use xdist on packages that
 otherwise randomly fail with it.
 
 
+.. index:: EPYTEST_TIMEOUT
+
+Using pytest-timeout to prevent deadlocks (hangs)
+=================================================
+pytest-timeout_ plugin adds an option to terminate the test if its
+runtime exceeds the specified limit.  Some packages decorate specific
+tests with timeouts; however, it is also possible to set a baseline
+timeout for all tests.
+
+A timeout causes the test run to fail, and therefore using it is
+not generally necessary for test suites that are working correctly.
+If individual tests are known to suffer from unfixable hangs, it is
+preferable to deselect them.  However, setting a general timeout is
+recommended when a package is particularly fragile, or has suffered
+deadlocks in the past.  A proactive setting can prevent it from hanging
+and blocking arch testing machines.
+
+The plugin can be enabled via setting ``EPYTEST_TIMEOUT`` to the timeout
+in seconds, prior to calling ``distutils_enable_tests``.  This ensures
+that an appropriate depedency is added, and that ``epytest`` adds
+necessary command-line options.
+
+.. code-block::
+
+    EPYTEST_TIMEOUT=1800
+    distutils_enable_tests pytest
+
+The timeout applies to every test separately, i.e. the above example
+will cause a single test to time out after 30 minutes.  If multiple
+tests hang, the total run time will multiply consequently.
+
+When deciding on a timeout value, please take into the consideration
+that the tests may be run on a low performance hardware, and on a busy
+system, and choose an appropriately high value.
+
+.. Note::
+
+   ``EPYTEST_TIMEOUT`` can also be set by user in ``make.conf``
+   or in the calling environment.  This can be used as a general
+   protection against hanging test suites.  However, please note that
+   this does not control dependencies, and therefore the user may need
+   to install ``dev-python/pytest-timeout`` explicitly.
+
+
 Avoiding dependencies on other pytest plugins
 =============================================
 There is a number of pytest plugins that have little value to Gentoo
@@ -358,6 +402,7 @@ setting ignores ``DeprecationWarning`` in ``test`` directory::
    https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
 .. _pytest-xdist: https://pypi.org/project/pytest-xdist/
+.. _pytest-timeout: https://pypi.org/project/pytest-timeout/
 .. _flaky: https://github.com/box/flaky/
 .. _pytest-rerunfailures:
    https://github.com/pytest-dev/pytest-rerunfailures/
