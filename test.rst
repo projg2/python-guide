@@ -55,7 +55,6 @@ setting ``RDEPEND``, it also copies it to test dependencies.
 
 The valid values include:
 
-- ``nose`` for ``dev-python/nose`` (*deprecated*)
 - ``pytest`` for ``dev-python/pytest``
 - ``setup.py`` to call ``setup.py test`` (*deprecated*)
 - ``unittest`` to use built-in unittest discovery
@@ -277,7 +276,7 @@ need to use ``die`` explicitly for it::
 Choosing the correct test runner
 ================================
 There are a few modules used to run tests in Python packages.  The most
-common include the built-in unittest_ module, pytest_ and nose_.  There
+common include the built-in unittest_ module and pytest_.  There
 are also some rarely used test tools and domain-specific solutions,
 e.g. django_ has its own test runner.  This section will help you
 determining which test runner to use and depend on.
@@ -285,17 +284,16 @@ determining which test runner to use and depend on.
 Firstly, it is a good idea to look at test sources.  Explicit imports
 clearly indicate that a particular test runner needs to be installed,
 and most likely used.  For example, if at least one test file has
-``import pytest``, pytest is the obvious choice.  If it has ``import
-nose``, same goes for nosetests.
+``import pytest``, pytest is the obvious choice.
 
 In some rare cases the tests may use multiple test packages
 simultaneously.  In this case, you need to choose one of the test
 runners (see other suggestions) but depend on all of them.
 
 Secondly, some test suites are relying on *implicit* features of a test
-runner.  For example, pytest and nose have less strict naming
-and structural requirements for test cases.  In some cases, unittest
-runner will simply be unable to find all tests.
+runner.  For example, pytest has less strict naming and structural
+requirements for test cases.  In some cases, unittest runner will simply
+be unable to find all tests.
 
 Thirdly, there are cases when a particular feature of a test runner
 is desired even if it is not strictly necessary to run tests.  This
@@ -312,11 +310,6 @@ built-in unittest module), using it is preferable to avoid unnecessary
 dependencies.  However, you need to make sure that it finds all tests
 correctly (i.e. runs no less tests than the alternative) and that it
 does not spew too much irrelevant output.
-
-If both pytest and nose seem equally good, the former is recommended
-as the latter has ceased development and requires downstream patching.
-If you have some free time, convincing upstream to switch from nose
-to pytest is a worthwhile goal.
 
 
 Undesirable test dependencies
@@ -721,7 +714,6 @@ into it for the purpose of testing.  Note that ``PATH`` is manipulated
 
 .. _unittest: https://docs.python.org/3/library/unittest.html
 .. _pytest: https://docs.pytest.org/en/latest/
-.. _nose: https://github.com/nose-devs/nose
 .. _django: https://www.djangoproject.com/
 .. _why tests must not use Internet:
    https://devmanual.gentoo.org/ebuild-writing/functions/src_test/#tests-that-require-network-or-service-access

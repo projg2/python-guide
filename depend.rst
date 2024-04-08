@@ -101,7 +101,6 @@ SQLite support when running tests:
         test? (
             $(python_gen_impl_dep sqlite)
             dev-python/mock[${PYTHON_USEDEP}]
-            dev-python/nose[${PYTHON_USEDEP}]
         )
     "
 
