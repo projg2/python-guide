@@ -1038,10 +1038,16 @@ the crate licenses in addition to the Python package's license.
 to prevent false positives on ignored ``CFLAGS`` and ``LDFLAGS``
 warnings.  Finally, the ebuild needs to call ``cargo_src_unpack``.
 
+Note that some Rust/Python packages use both Rust-level and Python-level
+tests.  To check for this, it is a good idea to run ``cargo test``
+manually and see if any tests are run.  If they are, ``cargo_src_test``
+should be called in ``python_test_all()`` (or possibly ``python_test()``
+if they specifically use Python linkage).
+
 An example ebuild follows:
 
 .. code-block:: bash
-   :emphasize-lines: 6,10-15,17,23,28,31,35,38
+   :emphasize-lines: 6,10-15,17,23,28,31,35,38,43
 
     # Copyright 2022 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
@@ -1081,6 +1087,11 @@ An example ebuild follows:
 
     src_unpack() {
         cargo_src_unpack
+    }
+
+    python_test_all() {
+        cd src/rust || die
+        cargo_src_test
     }
 
 
