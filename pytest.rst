@@ -223,7 +223,7 @@ necessary command-line options.
 
 .. code-block::
 
-    EPYTEST_TIMEOUT=1800
+    : ${EPYTEST_TIMEOUT:=1800}
     distutils_enable_tests pytest
 
 The timeout applies to every test separately, i.e. the above example
@@ -233,6 +233,10 @@ tests hang, the total run time will multiply consequently.
 When deciding on a timeout value, please take into the consideration
 that the tests may be run on a low performance hardware, and on a busy
 system, and choose an appropriately high value.
+
+It is a good idea to use the default assignment form, as in the snippet
+above, as that permits the user to easily override the timeout
+if necessary.
 
 .. Note::
 
