@@ -55,6 +55,9 @@ setting ``RDEPEND``, it also copies it to test dependencies.
 
 The valid values include:
 
+- ``import-check`` for minimal import checking
+  using ``dev-python/pytest-import-check`` (see: `Import-checking
+  packages with no working tests`_)
 - ``pytest`` for ``dev-python/pytest``
 - ``setup.py`` to call ``setup.py test`` (*deprecated*)
 - ``unittest`` to use built-in unittest discovery
@@ -310,6 +313,29 @@ built-in unittest module), using it is preferable to avoid unnecessary
 dependencies.  However, you need to make sure that it finds all tests
 correctly (i.e. runs no less tests than the alternative) and that it
 does not spew too much irrelevant output.
+
+
+Import-checking packages with no working tests
+==============================================
+If the package has no tests at all (or the tests are completely
+unusable), the ``import-check`` option can be used instead.  This option
+uses a dedicated pytest plugin to verify whether all installed Python
+packages can be imported.  This includes both Python modules
+and compiled extensions, and therefore can e.g. detect undefined
+symbols.
+
+Since the function is based on pytest, ``EPYTEST_IGNORE`` can be used
+to skip files that are intentionally non-importable.
+
+Note that pytest will also run any tests found in the site-packages
+directory.  If this is undesirable, a custom test phase can explicitly
+disable the default ``python`` plugin responsible for that, e.g.::
+
+    distutils_enable_tests import-check
+
+    python_test() {
+        epytest -p no:python --import-check --pyargs foo
+    }
 
 
 Undesirable test dependencies
