@@ -200,6 +200,7 @@ to them can be passed to the function::
 .. index:: python_get_CFLAGS
 .. index:: python_get_LIBS
 .. index:: python_get_PYTHON_CONFIG
+.. index:: python_get_stdlib
 
 Querying the implementation information
 =======================================
@@ -218,6 +219,9 @@ The following generic getters are provided:
 
 - ``python_get_scriptdir`` that outputs the absolute path
   to the python-exec script directory for the implementation.
+
+- ``python_get_stdlib`` that outputs the absolute path to the target's
+  standard library directory (where standard modules can be found).
 
 The following getters are provided only for CPython targets:
 
