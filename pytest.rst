@@ -367,6 +367,56 @@ mocker                              dev-python/pytest-mock
 =================================== ====================================
 
 
+.. index:: filterwarnings
+.. index:: Werror
+.. index:: pytest.warns
+
+Warnings and ``pytest.raises()``
+================================
+Some projects set pytest to raise on warnings, using options such as:
+
+.. code-block:: toml
+
+    filterwarnings = [
+        "error",
+        # ...
+    ]
+
+This may be desirable for upstream CI systems, as it ensures that pull
+requests do not introduce new warnings, and that any deprecations are
+handled promptly.  However, it is undesirable for downstream testing,
+as new deprecations in dependencies can cause the existing versions
+to start failing.
+
+To avoid this problem, ``epytest`` explicitly forces ``-Wdefault``.
+Most of the time, this does not cause any issues, besides causing pytest
+to verbosely report warnings that are normally ignored by the test
+suite.  However, if some packages incorrectly use ``pytest.raises()``
+to check for warnings, their test suites will fail, for example::
+
+    ============================= FAILURES =============================
+    ________________ test_ser_ip_with_unexpected_value _________________
+
+        def test_ser_ip_with_unexpected_value() -> None:
+            ta = TypeAdapter(ipaddress.IPv4Address)
+
+    >       with pytest.raises(UserWarning, match='serialized value may not be as expected.'):
+    E       Failed: DID NOT RAISE <class 'UserWarning'>
+
+    tests/test_types.py:6945: Failed
+    ========================= warnings summary =========================
+    tests/test_types.py::test_ser_ip_with_unexpected_value
+      /tmp/pydantic/pydantic/type_adapter.py:458: UserWarning: Pydantic serializer warnings:
+        PydanticSerializationUnexpectedValue(Expected `<class 'ipaddress.IPv4Address'>` but got `<class 'int'>` with value `'123'` - serialized value may not be as expected.)
+        return self.serializer.to_python(
+
+    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+The solution is to replace ``pytest.raises()`` with more correct
+``pytest.warns()``.  The latter will work correctly, independently
+of ``filterwarnings`` value.
+
+
 .. _custom pytest markers:
    https://docs.pytest.org/en/stable/example/markers.html
 .. _pytest-runner: https://pypi.org/project/pytest-runner/
