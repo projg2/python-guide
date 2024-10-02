@@ -35,7 +35,7 @@ setting ``RDEPEND``, it also copies it to test dependencies.
 
     EAPI=7
 
-    PYTHON_COMPAT=( python2_7 python3_{6,7,8} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
     inherit distutils-r1
 
     DESCRIPTION="An easy whitelist-based HTML-sanitizing tool"
@@ -81,7 +81,7 @@ Please read the section on `undesirable test dependencies`_ too.
 
     EAPI=6
 
-    PYTHON_COMPAT=( python2_7 python3_{6,7,8} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
     inherit distutils-r1
 
     DESCRIPTION="Universal encoding detector"
@@ -138,7 +138,7 @@ it call ``distutils-r1_src_test``:
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit distutils-r1
 
     DESCRIPTION="Extra features for standard library's cmd module"
@@ -184,7 +184,7 @@ of its logic.
 
     EAPI=7
 
-    PYTHON_COMPAT=( python{2_7,3_6,3_7,3_8} pypy3 )
+    PYTHON_COMPAT=( python3_{6..8} pypy3 )
     inherit distutils-r1
 
     DESCRIPTION="Bash tab completion for argparse"
@@ -200,7 +200,7 @@ of its logic.
     RDEPEND="
         $(python_gen_cond_dep '
             <dev-python/importlib_metadata-2[${PYTHON_USEDEP}]
-        ' -2 python3_{5,6,7} pypy3)"
+        ' python3_{6..7} pypy3)"
     # pip is called as an external tool
     BDEPEND="
         dev-python/setuptools[${PYTHON_USEDEP}]

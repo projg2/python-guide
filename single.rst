@@ -174,7 +174,7 @@ USE-conditional:
 
     EAPI=6
 
-    PYTHON_COMPAT=( python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{10..13} )
     PYTHON_REQ_USE="threads(+)"
 
     inherit waf-utils python-single-r1
@@ -222,7 +222,7 @@ applies to build time (tests) while the other to runtime (bindings).
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit cmake python-single-r1
 
     DESCRIPTION="Sound design and signal processing system for composition and performance"
