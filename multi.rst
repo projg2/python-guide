@@ -332,7 +332,7 @@ that it is entirely normal that the same environment will be set inside
 
     EAPI="7"
 
-    PYTHON_COMPAT=( python{3_6,3_7} )
+    PYTHON_COMPAT=( python3_{6..7} )
     PYTHON_REQ_USE="ncurses,readline"
     inherit python-r1
 
