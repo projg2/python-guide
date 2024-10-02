@@ -37,7 +37,7 @@ dependencies to available targets.
 
     EAPI=7
 
-    PYTHON_COMPAT=( python2_7 python3_{6,7,8} pypy{,3} )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
     PYTHON_REQ_USE="threads(+)"
     inherit distutils-r1
 
@@ -101,7 +101,7 @@ list.
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{6..8} )
     PYTHON_REQ_USE="sqlite"
     inherit distutils-r1
 
@@ -158,7 +158,7 @@ targets.
 
     EAPI=6
 
-    PYTHON_COMPAT=( python2_7 python3_{5,6,7} )
+    PYTHON_COMPAT=( python2_7 python3_{5..7} )
 
     inherit python-r1 toolchain-funcs
 

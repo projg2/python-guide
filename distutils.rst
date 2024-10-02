@@ -787,7 +787,7 @@ containing Sphinx documentation:
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{10..13} )
     DISTUTILS_USE_SETUPTOOLS=rdepend
 
     inherit distutils-r1
@@ -829,7 +829,7 @@ to ``distutils_enable_sphinx``.
 
     EAPI=7
 
-    PYTHON_COMPAT=( pypy3 python3_{6,7,8} )
+    PYTHON_COMPAT=( pypy3 python3_{10..13} )
     inherit distutils-r1
 
     DESCRIPTION="Correctly inflect words and numbers"
@@ -868,7 +868,7 @@ packages.
 
     EAPI=7
 
-    PYTHON_COMPAT=( python2_7 python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit distutils-r1
 
     DESCRIPTION="Python Serial Port extension"

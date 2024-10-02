@@ -25,7 +25,7 @@ The valid values are:
 
 Typical use::
 
-    PYTHON_COMPAT=( python3_{6,7,8} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
     inherit python-single-r1
 
 

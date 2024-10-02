@@ -72,7 +72,7 @@ The value needs to be set before inheriting the eclass:
 
     EAPI=7
 
-    PYTHON_COMPAT=( python2_7 python3_{6,7,8} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
     DISTUTILS_USE_SETUPTOOLS=rdepend
 
     inherit distutils-r1
@@ -276,7 +276,7 @@ files are contained within the copy used for the current interpreter.
 
     EAPI=7
     DISTUTILS_USE_SETUPTOOLS=no
-    PYTHON_COMPAT=( python3_{6,7,8} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
     PYTHON_REQ_USE="xml(+)"
 
     inherit distutils-r1

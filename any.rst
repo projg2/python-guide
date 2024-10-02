@@ -90,7 +90,7 @@ This is best explained using an example:
     # Distributed under the terms of the GNU General Public License v2
 
     EAPI=6
-    PYTHON_COMPAT=( python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{10..13} )
 
     inherit meson python-any-r1
 
@@ -163,7 +163,7 @@ need to be wrapped in appropriate USE conditions:
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7} )
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit python-any-r1
 
     DESCRIPTION="Programmable Completion for bash"
@@ -212,7 +212,7 @@ a similar condition in ``python_check_deps()``:
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7} )
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit python-any-r1 cmake
 
     DESCRIPTION="Qt bindings for the Telepathy D-Bus protocol"

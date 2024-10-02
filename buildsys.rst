@@ -50,7 +50,7 @@ to inherit ``python-any-r1``.  The eclass takes care of setting
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7} )
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit python-any-r1 scons-utils toolchain-funcs
 
     COMMIT="6e5e8a57628095d8d0c8bbb38187afb0f3a42112"
@@ -113,7 +113,7 @@ be combined.
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7} )
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit python-any-r1 scons-utils toolchain-funcs
 
     MY_P=${PN}-src-r${PV/_rc/-rc}
@@ -286,7 +286,7 @@ unconditionally.
 
     EAPI=7
 
-    PYTHON_COMPAT=( python3_{6,7,8} )
+    PYTHON_COMPAT=( python3_{10..13} )
 
     FORTRAN_NEEDED=fortran
     FORTRAN_STANDARD=90
