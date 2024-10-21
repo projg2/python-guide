@@ -62,6 +62,24 @@ See also: `what's new in Python 3.13`_
    https://docs.python.org/3.13/whatsnew/3.13.html
 
 
+.. index:: cgi
+
+cgi module removal
+------------------
+Python 3.13 removed the deprecated cgi_ module that provided a number
+of utilities for CGI scripts.  The standard library documentation
+(as of Python 3.12) provides detailed information on replacing
+the deprecated functions.
+
+The said documentation recommends the multipart_ package
+as a replacement for some of the functions.  In its context,
+the multipart vs. python-multipart packages section of :doc:`migration`
+should be consulted as well.
+
+.. _cgi: https://docs.python.org/3.12/library/cgi.html
+.. _multipart: https://pypi.org/project/multipart/
+
+
 Python 3.12
 ===========
 
