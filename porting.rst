@@ -80,6 +80,59 @@ should be consulted as well.
 .. _multipart: https://pypi.org/project/multipart/
 
 
+Docstring dedenting
+-------------------
+Prior to Python 3.13, all whitespace in docstrings would be preserved
+and exposed in the ``__doc__`` attribute.  Starting with 3.13,
+docstrings are instead stripped and dedented.  For example, consider
+the following docstring::
+
+    def frobnicate(thing):
+        """Frobnicate the thing
+
+        Do some magic frobnication on the thing.
+
+        Example::
+
+             frobnicated_thing = frobnicate(thing)
+        """
+
+In Python 3.12, all whitespace is preserved in ``__doc__``, yielding:
+
+.. code-block:: text
+
+    Frobnicate the thing
+
+        Do some magic frobnication on the thing.
+
+        Example::
+
+             frobnicated_thing = frobnicate(thing)
+
+Python 3.13 instead strips leading whitespace from the first line,
+and the common amount of whitespace from the subsequent lines, yielding:
+
+.. code-block:: text
+
+    Frobnicate the thing
+
+    Do some magic frobnication on the thing.
+
+    Example::
+
+         frobnicated_thing = frobnicate(thing)
+
+This can break some tests that rely on specific ``__doc__`` values.
+To ensure consistent results, `inspect.cleandoc()`_ can be used
+to perform the same operation in older Python versions, i.e.::
+
+    assert inspect.cleandoc(frobnicate.__doc__) == expected_doc
+
+
+.. _inspect.cleandoc():
+   https://docs.python.org/3.13/library/inspect.html#inspect.cleandoc
+
+
 Python 3.12
 ===========
 
