@@ -53,6 +53,15 @@ Behavior after::
 .. _django PR#14349: https://github.com/django/django/pull/14349
 
 
+Python 3.13
+===========
+
+See also: `what's new in Python 3.13`_
+
+.. _what's new in Python 3.13:
+   https://docs.python.org/3.13/whatsnew/3.13.html
+
+
 Python 3.12
 ===========
 
