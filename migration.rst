@@ -204,3 +204,67 @@ For simple packages, the migration consists of:
 3. Removing ``distutils_install_for_testing`` and/or ``--install``
    option to ``distutils_enable_tests``.  This should no longer be
    necessary and tests should work out of the box.
+
+
+.. index:: multipart
+.. index:: python-multipart
+
+multipart vs. python-multipart packages
+=======================================
+Prior to November 2024, two PyPI packages claimed the ``multipart``
+import name: multipart_ and python-multipart_.  Originally, Gentoo
+packaged only the latter, as it was necessary to satisfy dependencies.
+However, with the former being listed as the recommended replacement
+for the `deprecated cgi module`_, new packages started depending on it.
+
+At this point, Gentoo decided to package multipart as well,
+and to rename python-multipart in anticipation of upstream rename
+already in progress, in ``>=dev-python/python-multipart-0.0.12-r100``.
+However, it should be noted that the Gentoo rename does not install
+a compatibility loader to permit importing it via ``multipart`` import
+name, as that would work only if ``dev-python/multipart``
+was not installed.  Instead, packages need to be explicitly patched
+to use the new import name of ``python_multipart``.
+
+Therefore, the dependencies on these packages should be handled
+in the following manner:
+
+1. If the package depends on multipart, a dependency
+   on ``dev-python/multipart`` should be added.
+
+2. If the package bundles multipart, the dependency should be
+   unbundled.
+
+3. If the package depends on python-multipart and uses the new import
+   name (i.e. ``import python_multipart``), a dependency
+   on ``>=dev-python/python-multipart-0.0.12-r100`` (or a newer version)
+   should be added.
+
+4. If the package depends on python-multipart and uses the old import
+   name (i.e. ``import multipart``), it should be patched to use
+   the new import name instead, and the dependency should be added
+   as above.
+
+The following snippet provides an example of patching
+the python-multipart import:
+
+.. code-block:: bash
+
+    RDEPEND="
+        >=dev-python/python-multipart-0.0.12-r100[${PYTHON_USEDEP}]
+    "
+
+    src_prepare() {
+        distutils-r1_src_prepare
+
+        # python-multipart package renamed in Gentoo to python_multipart
+        find -name "*.py" -exec sed \
+            -e "s:from multipart:from python_multipart:" \
+            -e "s:import multipart:import python_multipart as multipart:" \
+            -i {} + || die
+    }
+
+
+.. _multipart: https://pypi.org/project/multipart/
+.. _python-multipart: https://pypi.org/project/python-multipart/
+.. _deprecated cgi module: https://docs.python.org/3.12/library/cgi.html
