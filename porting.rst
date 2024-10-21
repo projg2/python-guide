@@ -53,6 +53,54 @@ Behavior after::
 .. _django PR#14349: https://github.com/django/django/pull/14349
 
 
+.. index:: freethreading
+
+Freethreading CPython versions
+==============================
+CPython is used the so-called "global interpreter lock" to prevent
+multiple threads from executing Python code simultaneously.  It was
+designed like this to simplify implementation, but at the cost of
+limiting the possible performance gain from use of multiple threads.
+Historically, only compiled extensions could temporarily disable it
+to take advantage of threading.
+
+Starting with CPython 3.13, a support for an experimental
+"freethreading_" mode has been added.  If CPython is built in this
+variant, it uses more fine-grained locking mechanisms to make it
+possible to run multiple Python threads simultaneously.  Note that this
+mode can only improve performance of multithreaded applications,
+and (at least at this point) penalizes single-threaded applications.
+
+The freethreaded versions of CPython are not ABI-compatible with
+the regular builds.  Therefore, they are slotted as separate versions
+with a ``t`` suffix, e.g. Python 3.13 freethreading can be found
+as ``dev-lang/python:3.13t``.  They also need to be tested and added
+to ``PYTHON_COMPAT`` separately, e.g. as ``python3_13t``.
+
+Note that compiled extensions need to declare support for freethreading
+explicitly (see: `C API Extension Support for Free Threading`_).  While
+extensions without explicit support can be compiled for freethreading
+Python versions, importing them will cause GIL to be reenabled
+and therefore defeat the purpose of freethreading build.  To determine
+whether a C extension supports freethreading mode, grep the code
+for ``Py_MOD_GIL_NOT_USED``.  CPython will also verbosely warn upon
+importing extensions without this support.
+
+In general, do not add ``python3_13t`` to ``PYTHON_COMPAT``
+if the package in question installs extensions that do not support
+freethreading.  This would penalize the setup, prevent proper testing
+and therefore defeat the purpose of separately specifying this target.
+Preferably, wait until they do.  For some common dependencies, adding it
+may be acceptable, provided that the extensions are optional and that
+they are not built for freethreading targets.
+
+
+.. _freethreading:
+   https://docs.python.org/3/howto/free-threading-python.html
+.. _C API Extension Support for Free Threading:
+   https://docs.python.org/3/howto/free-threading-extensions.html
+
+
 Python 3.13
 ===========
 
