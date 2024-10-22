@@ -304,7 +304,7 @@ unconditionally.
 
     REQUIRED_USE="
         ${PYTHON_REQUIRED_USE}
-        "
+    "
 
     RDEPEND="
         python? (
