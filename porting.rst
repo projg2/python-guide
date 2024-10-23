@@ -86,7 +86,13 @@ whether a C extension supports freethreading mode, grep the code
 for ``Py_MOD_GIL_NOT_USED``.  CPython will also verbosely warn upon
 importing extensions without this support.
 
-In general, do not add ``python3_13t`` to ``PYTHON_COMPAT``
+In general, do not add ``python3_13t`` to ``PYTHON_COMPAT`` in leaf
+packages, unless they make use of multithreading and have real gain
+from freethreaded versions — otherwise, it may actually be slower than
+the regular variant.
+
+For dependency packages, add ``python3_13t`` only after explicitly
+testing that the package in question works.  Do not add it
 if the package in question installs extensions that do not support
 freethreading.  This would penalize the setup, prevent proper testing
 and therefore defeat the purpose of separately specifying this target.
