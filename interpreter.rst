@@ -160,8 +160,7 @@ a stand-alone Python interpreter, it supports bidirectional interaction
 between Python and Java libraries.
 
 Jython development is very slow paced, and it is currently bound
-to Python 2.7.  Gentoo does not support building packages for Jython
-anymore.  The interpreter is still provided as ``dev-java/jython``.
+to Python 2.7.  Gentoo does not provide Jython anymore.
 
 IronPython_ is an implementation of Python for the .NET framework.
 Alike Jython, it supports bidirectional interaction between Python
@@ -170,8 +169,7 @@ packaged in Gentoo.
 
 Brython_ is an implementation of Python 3 for client-side web
 programming (in JavaScript).  It provides a subset of Python 3 standard
-library combined with access to DOM objects.  It is packaged in Gentoo
-as ``dev-python/brython``.
+library combined with access to DOM objects.
 
 MicroPython_ is an implementation of Python 3 aimed for microcontrollers
 and embedded environments.  It aims to maintain some compatibility
