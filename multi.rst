@@ -25,31 +25,40 @@ for all enabled implementations.
 For simple use cases, the install command can be inlined:
 
 .. code-block:: bash
-   :emphasize-lines: 6,7,17,19,23
+   :emphasize-lines: 6,8,18,19,28
 
-    # Copyright 1999-2020 Gentoo Foundation
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( python2_7 )
+    PYTHON_COMPAT=( python3_{10..13} )
+
     inherit python-r1
 
-    DESCRIPTION="MySQL abstraction layer for python"
-    HOMEPAGE="http://software.fionet.com/pSQL/"
-    SRC_URI="http://software.fionet.com/pSQL/release/${P}.tar.gz"
+    DESCRIPTION="Enhanced df with colors"
+    HOMEPAGE="http://kassiopeia.juls.savba.sk/~garabik/software/pydf/"
+    SRC_URI="http://kassiopeia.juls.savba.sk/~garabik/software/pydf/${PN}_${PV}.tar.gz"
 
+    LICENSE="public-domain"
     SLOT="0"
-    LICENSE="GPL-2"
-    KEYWORDS="~amd64 ~x86"
-    IUSE=""
-    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
+    KEYWORDS="amd64 arm ~arm64 ppc ppc64 ~riscv x86 ~amd64-linux ~x86-linux"
 
+    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
     RDEPEND="${PYTHON_DEPS}"
-    DEPEND="${RDEPEND}"
+    BDEPEND="${RDEPEND}"
+
+    src_prepare() {
+         default
+         sed -i -e "s#/etc/pydfrc#${EPREFIX}/etc/pydfrc#" "${PN}" || die
+    }
 
     src_install() {
-        python_foreach_impl python_domodule pSQL.py
+         python_foreach_impl python_doscript "${PN}"
+         insinto /etc
+         doins "${PN}rc"
+         doman "${PN}.1"
+         einstalldocs
     }
 
 While ``python_foreach_impl`` can be repeated multiple times, it is
@@ -57,38 +66,55 @@ generally better to declare a function when multiple install commands
 need to be executed:
 
 .. code-block:: bash
-   :emphasize-lines: 22-25,28
+   :emphasize-lines: 35-42,45
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( python2_7 )
+    PYTHON_COMPAT=( python3_{10..13} )
+
     inherit python-r1
 
-    DESCRIPTION="Proxy cache for Gentoo packages"
-    HOMEPAGE="https://sourceforge.net/projects/http-replicator"
-    SRC_URI="mirror://sourceforge/${PN}/${P}.tgz"
+    DESCRIPTION="Check for mapped libs and open files that are marked as deleted"
+    HOMEPAGE="https://github.com/klausman/lib_users"
+    SRC_URI="
+        https://github.com/klausman/${PN}/archive/v${PV}.tar.gz
+            -> ${P}.tar.gz
+    "
 
     LICENSE="GPL-2"
     SLOT="0"
-    KEYWORDS="~alpha amd64 hppa ppc ~sparc x86"
-    IUSE=""
+    KEYWORDS="~alpha amd64 ~arm arm64 ~hppa ppc ppc64 ~sparc x86"
+    IUSE="test"
+    RESTRICT="!test? ( test )"
+
     REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
+    DEPEND="${PYTHON_DEPS}
+        test? (
+            dev-python/nose2[${PYTHON_USEDEP}]
+        )"
     RDEPEND="${PYTHON_DEPS}"
-    DEPEND="${RDEPEND}"
+
+    src_test() {
+        python_foreach_impl nose2 --verbosity=2
+    }
 
     python_install() {
-        python_doscript http-replicator
-        python_domodule *.py
+        python_newscript lib_users.py lib_users
+        python_newscript fd_users.py fd_users
+        # lib_users_util/ contains a test script we don't want, so do things by hand
+        python_moduleinto lib_users_util
+        python_domodule lib_users_util/common.py
+        python_domodule lib_users_util/__init__.py
     }
 
     src_install() {
         python_foreach_impl python_install
+        dodoc README.md TODO
     }
-
 
 .. index:: PYTHON_USEDEP; python-r1
 
@@ -118,14 +144,14 @@ separate directories from a single source directory).
 
 
 .. code-block:: bash
-   :emphasize-lines: 32,36,40,44
+   :emphasize-lines: 34,38,42,50
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2023 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI="6"
-    PYTHON_COMPAT=( python3_6 )
+    EAPI=7
 
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit autotools python-r1
 
     DESCRIPTION="Python wrapper for libcangjie"
@@ -134,14 +160,14 @@ separate directories from a single source directory).
 
     LICENSE="LGPL-3+"
     SLOT="0"
-    KEYWORDS="~amd64 ~x86"
-    IUSE=""
+    KEYWORDS="amd64 x86"
+
     REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
     RDEPEND="${PYTHON_DEPS}
         app-i18n/libcangjie"
-    DEPEND="${RDEPEND}
-        dev-python/cython[${PYTHON_USEDEP}]
+    DEPEND="${RDEPEND}"
+    BDEPEND="dev-python/cython[${PYTHON_USEDEP}]
         virtual/pkgconfig"
 
     src_prepare() {
@@ -150,8 +176,10 @@ separate directories from a single source directory).
     }
 
     src_configure() {
-        local ECONF_SOURCE=${S}
-        python_foreach_impl run_in_build_dir default
+        python_configure() {
+            ECONF_SOURCE="${S}" econf
+        }
+        python_foreach_impl run_in_build_dir python_configure
     }
 
     src_compile() {
@@ -163,8 +191,13 @@ separate directories from a single source directory).
     }
 
     src_install() {
-        python_foreach_impl run_in_build_dir default
+        python_install() {
+            default
+            python_optimize
+        }
+        python_foreach_impl run_in_build_dir python_install
         einstalldocs
+
         find "${D}" -name '*.la' -delete || die
     }
 
@@ -189,14 +222,14 @@ for each implementation.  The same ebuild easily can be changed
 to do that:
 
 .. code-block:: bash
-   :emphasize-lines: 28,32,36,40,44
+   :emphasize-lines: 28,35,39,43,51
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2023 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI="6"
-    PYTHON_COMPAT=( python3_6 )
+    EAPI=7
 
+    PYTHON_COMPAT=( python3_{10..13} )
     inherit autotools python-r1
 
     DESCRIPTION="Python wrapper for libcangjie"
@@ -205,14 +238,14 @@ to do that:
 
     LICENSE="LGPL-3+"
     SLOT="0"
-    KEYWORDS="~amd64 ~x86"
-    IUSE=""
+    KEYWORDS="amd64 x86"
+
     REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
     RDEPEND="${PYTHON_DEPS}
         app-i18n/libcangjie"
-    DEPEND="${RDEPEND}
-        dev-python/cython[${PYTHON_USEDEP}]
+    DEPEND="${RDEPEND}"
+    BDEPEND="dev-python/cython[${PYTHON_USEDEP}]
         virtual/pkgconfig"
 
     src_prepare() {
@@ -222,7 +255,10 @@ to do that:
     }
 
     src_configure() {
-        python_foreach_impl run_in_build_dir default
+        python_configure() {
+            ECONF_SOURCE="${S}" econf
+        }
+        python_foreach_impl run_in_build_dir python_configure
     }
 
     src_compile() {
@@ -234,8 +270,13 @@ to do that:
     }
 
     src_install() {
-        python_foreach_impl run_in_build_dir default
+        python_install() {
+            default
+            python_optimize
+        }
+        python_foreach_impl run_in_build_dir python_install
         einstalldocs
+
         find "${D}" -name '*.la' -delete || die
     }
 
@@ -324,16 +365,16 @@ that it is entirely normal that the same environment will be set inside
 ``python_foreach_impl`` afterwards.
 
 .. code-block:: bash
-   :linenos:
-   :emphasize-lines: 17,18,20,21,24,28-34,38-40
+   :emphasize-lines: 18,19,21,22,25,29-35,39-41
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI="7"
+    EAPI=8
 
     PYTHON_COMPAT=( python3_{10..13} )
     PYTHON_REQ_USE="ncurses,readline"
+
     inherit python-r1
 
     DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
