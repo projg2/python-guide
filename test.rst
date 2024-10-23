@@ -637,6 +637,9 @@ to allow interested users to run tests when possible::
 
 Tests aborting (due to assertions)
 ==================================
+
+.. highlight:: console
+
 There are cases of package's tests terminating with an unclear error
 message and backtrace similar to the following::
 
