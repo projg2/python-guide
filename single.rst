@@ -25,14 +25,15 @@ build system along with unconditional dependency on Python could look
 like the following:
 
 .. code-block:: bash
-   :emphasize-lines: 6,7,17,20
+   :emphasize-lines: 6,8,17,20
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( python2_7 )
+    PYTHON_COMPAT=( python3_{10..13} )
+
     inherit python-single-r1
 
     DESCRIPTION="Scripts to prepare and plot VOACAP propagation predictions"
@@ -42,7 +43,6 @@ like the following:
     LICENSE="GPL-2+"
     SLOT="0"
     KEYWORDS="~amd64 ~x86"
-    IUSE=""
     REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
     RDEPEND="
@@ -116,14 +116,15 @@ conditionals need to be used in metadata variables, and ``pkg_setup``
 needs to be rewritten to call the default implementation conditionally:
 
 .. code-block:: bash
-   :emphasize-lines: 16,17,20,21,23-27,30,35
+   :emphasize-lines: 17,19,24,25,27-31,34,39
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=6
+    EAPI=8
 
-    PYTHON_COMPAT=( python2_7 )
+    PYTHON_COMPAT=( python3_{11..12} )
+
     inherit python-single-r1
 
     DESCRIPTION="Yet more Objects for (High Energy Physics) Data Analysis"
@@ -134,7 +135,10 @@ needs to be rewritten to call the default implementation conditionally:
     SLOT="0/${PV}"
     KEYWORDS="~amd64 ~x86 ~amd64-linux ~x86-linux"
     IUSE="python root"
-    REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
+    REQUIRED_USE="
+        python? ( ${PYTHON_REQUIRED_USE} )
+        root? ( python )
+    "
 
     RDEPEND="
         python? ( ${PYTHON_DEPS} )
@@ -167,12 +171,12 @@ is expressed unconditionally, and the runtime dependency is made
 USE-conditional:
 
 .. code-block:: bash
-   :emphasize-lines: 18,19,23,26,32
+   :emphasize-lines: 18,19,23,30,38
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=6
+    EAPI=8
 
     PYTHON_COMPAT=( python3_{10..13} )
     PYTHON_REQ_USE="threads(+)"
@@ -191,10 +195,16 @@ USE-conditional:
 
     RDEPEND="
         ...
-        python? ( ${PYTHON_DEPS} )"
-    DEPEND="${RDEPEND}
+        python? ( ${PYTHON_DEPS} )
+    "
+    DEPEND="
+        ${RDEPEND}
         ...
-        ${PYTHON_DEPS}"
+    "
+    BDEPEND="
+        ${PYTHON_DEPS}
+        ...
+    "
 
     WAF_BINARY="${S}/buildtools/bin/waf"
 
@@ -215,14 +225,15 @@ for two independent conditions.  To make it more complex, one of them
 applies to build time (tests) while the other to runtime (bindings).
 
 .. code-block:: bash
-   :emphasize-lines: 16,19,20,24,27,31-33,38,39
+   :emphasize-lines: 17,20,21,25,28,32-34,39,40
 
     # Copyright 1999-2020 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
     PYTHON_COMPAT=( python3_{10..13} )
+
     inherit cmake python-single-r1
 
     DESCRIPTION="Sound design and signal processing system for composition and performance"
@@ -278,9 +289,10 @@ can be installed via one of the installation helpers.
     # Copyright 1999-2020 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=6
+    EAPI=8
 
-    PYTHON_COMPAT=( python2_7 )
+    PYTHON_COMPAT=( python3_{10..13} )
+
     inherit python-single-r1
 
     DESCRIPTION="Arabic dictionary based on the DICT protocol"
@@ -290,7 +302,6 @@ can be installed via one of the installation helpers.
     LICENSE="BSD"
     SLOT="0"
     KEYWORDS="~alpha amd64 ~hppa ~ia64 ~mips ~ppc ~sparc x86"
-    IUSE=""
     REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
     DEPEND="${PYTHON_DEPS}"
