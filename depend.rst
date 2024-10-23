@@ -22,13 +22,14 @@ the eclass to generate appropriate dependency string in ``PYTHON_DEPS``.
 .. code-block:: bash
    :emphasize-lines: 7
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( python3_6 )
+    PYTHON_COMPAT=( python3_12 )
     PYTHON_REQ_USE="sqlite"
+
     inherit python-r1 gnome2-utils meson xdg-utils
 
     DESCRIPTION="Modern music player for GNOME"
@@ -38,7 +39,7 @@ the eclass to generate appropriate dependency string in ``PYTHON_DEPS``.
 
     LICENSE="GPL-3"
     SLOT="0"
-    REQUIRED_USE=${PYTHON_REQUIRED_USE}
+    REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
     DEPEND="${PYTHON_DEPS}
         ..."
@@ -47,20 +48,25 @@ Full USE dependency syntax is permitted.  For example, you can make
 the dependency conditional to a flag on the package:
 
 .. code-block:: bash
-   :emphasize-lines: 7,17
+   :emphasize-lines: 8,22
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=6
+    EAPI=8
 
-    PYTHON_COMPAT=( python3_6 )
+    DISTUTILS_USE_PEP517=setuptools
+    PYTHON_COMPAT=( python3_12 )
     PYTHON_REQ_USE="sqlite?"
+
     inherit distutils-r1
 
     DESCRIPTION="A lightweight password-manager with multiple database backends"
     HOMEPAGE="https://pwman3.github.io/pwman3/"
-    SRC_URI="https://github.com/pwman3/pwman3/archive/v${PV}.tar.gz -> ${P}.tar.gz"
+    SRC_URI="
+        https://github.com/pwman3/pwman3/archive/v${PV}.tar.gz
+            -> ${P}.tar.gz
+    "
 
     LICENSE="GPL-3"
     SLOT="0"
@@ -74,33 +80,34 @@ helper then.  For example, the following ebuild requires Python with
 SQLite support when running tests:
 
 .. code-block:: bash
-   :emphasize-lines: 24
+   :emphasize-lines: 26
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
+
+    DISTUTILS_USE_PEP517=setuptools
     PYTHON_COMPAT=( python3_{10..13} pypy3 )
 
-    inherit distutils-r1
+    inherit distutils-r1 pypi
 
     DESCRIPTION="Let your Python tests travel through time"
-    HOMEPAGE="https://github.com/spulec/freezegun"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    HOMEPAGE="
+        https://github.com/spulec/freezegun
+        https://pypi.org/project/freezegun/
+    "
 
     LICENSE="Apache-2.0"
     SLOT="0"
     KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos"
 
     RDEPEND="
-        >dev-python/python-dateutil-2.0[${PYTHON_USEDEP}]
-        dev-python/six[${PYTHON_USEDEP}]
+        >dev-python/python-dateutil-2.7[${PYTHON_USEDEP}]
     "
-    DEPEND="${RDEPEND}
-        dev-python/setuptools[${PYTHON_USEDEP}]
+    BDEPEND="
         test? (
             $(python_gen_impl_dep sqlite)
-            dev-python/mock[${PYTHON_USEDEP}]
         )
     "
 
