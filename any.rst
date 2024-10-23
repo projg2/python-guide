@@ -22,14 +22,15 @@ build system that needs Python at build time could look like
 the following:
 
 .. code-block:: bash
-   :emphasize-lines: 6,7,21
+   :emphasize-lines: 6,8,21
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( python3_{6..8} )
+    PYTHON_COMPAT=( python3_{10..13} )
+
     inherit python-any-r1
 
     DESCRIPTION="A repository of data files describing media player capabilities"
@@ -39,7 +40,6 @@ the following:
     LICENSE="BSD"
     SLOT="0"
     KEYWORDS="~alpha amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ppc ppc64 ~sh ~sparc x86"
-    IUSE=""
 
     RDEPEND=">=virtual/udev-208"
     DEPEND="${RDEPEND}"
@@ -86,10 +86,11 @@ This is best explained using an example:
 .. code-block:: bash
    :emphasize-lines: 19-22,25-28
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=6
+    EAPI=8
+
     PYTHON_COMPAT=( python3_{10..13} )
 
     inherit meson python-any-r1
@@ -101,7 +102,6 @@ This is best explained using an example:
     LICENSE="GPL-2+ LGPL-2+ FDL-1.1"
     SLOT="0"
     KEYWORDS="amd64 x86"
-    IUSE=""
 
     DEPEND="
         $(python_gen_any_dep '
@@ -156,14 +156,15 @@ the test suite.  In that case, the dependencies and ``pkg_setup`` call
 need to be wrapped in appropriate USE conditions:
 
 .. code-block:: bash
-   :emphasize-lines: 16,17,21-27,35
+   :emphasize-lines: 17,18,22-28,36
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
     PYTHON_COMPAT=( python3_{10..13} )
+
     inherit python-any-r1
 
     DESCRIPTION="Programmable Completion for bash"
@@ -177,7 +178,7 @@ need to be wrapped in appropriate USE conditions:
     RESTRICT="!test? ( test )"
 
     RDEPEND=">=app-shells/bash-4.3_p30-r1:0"
-    DEPEND="
+    BDEPEND="
         test? (
             ${RDEPEND}
             $(python_gen_any_dep '
@@ -205,14 +206,15 @@ and ``python_gen_any_dep`` in USE-conditional block, then express
 a similar condition in ``python_check_deps()``:
 
 .. code-block:: bash
-   :emphasize-lines: 16,19-24,27-30
+   :emphasize-lines: 17,21-26,29-32
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
     PYTHON_COMPAT=( python3_{10..13} )
+
     inherit python-any-r1 cmake
 
     DESCRIPTION="Qt bindings for the Telepathy D-Bus protocol"
@@ -225,7 +227,8 @@ a similar condition in ``python_check_deps()``:
     IUSE="test"
     RESTRICT="!test? ( test )"
 
-    BDEPEND="${PYTHON_DEPS}
+    BDEPEND="
+        ${PYTHON_DEPS}
         test? (
             $(python_gen_any_dep '
                 dev-python/dbus-python[${PYTHON_USEDEP}]
@@ -247,13 +250,14 @@ multiple possible ways of doing that, the least error-prone is to move
 USE conditional blocks inside ``python_gen_any_dep``:
 
 .. code-block:: bash
-   :emphasize-lines: 15,21-27,30-36,39
+   :emphasize-lines: 16,22-28,31-37,40
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=6
-    PYTHON_COMPAT=( python3_6 )
+    EAPI=8
+
+    PYTHON_COMPAT=( python3_{10..13} )
 
     inherit gnome2 python-any-r1
 
@@ -268,7 +272,7 @@ USE conditional blocks inside ``python_gen_any_dep``:
     # Tests fail with USE=-introspection, https://bugs.gentoo.org/655482
     REQUIRED_USE="test? ( introspection )"
 
-    DEPEND="
+    BDEPEND="
         test? (
             $(python_gen_any_dep '
                 dev-python/mock[${PYTHON_USEDEP}]
