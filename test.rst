@@ -28,27 +28,31 @@ dependencies and ``test`` USE flag if necessary.  If called after
 setting ``RDEPEND``, it also copies it to test dependencies.
 
 .. code-block:: bash
-   :emphasize-lines: 22
+   :emphasize-lines: 26
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
+    DISTUTILS_USE_PEP517=setuptools
     PYTHON_COMPAT=( python3_{10..13} pypy3 )
-    inherit distutils-r1
+
+    inherit distutils-r1 pypi
 
     DESCRIPTION="An easy whitelist-based HTML-sanitizing tool"
-    HOMEPAGE="https://github.com/mozilla/bleach https://pypi.org/project/bleach/"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    HOMEPAGE="
+        https://github.com/mozilla/bleach/
+        https://pypi.org/project/bleach/
+    "
 
     LICENSE="Apache-2.0"
     SLOT="0"
     KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86"
 
     RDEPEND="
-        dev-python/six[${PYTHON_USEDEP}]
-        dev-python/webencodings[${PYTHON_USEDEP}]
+        dev-python/packaging[${PYTHON_USEDEP}]
+        >=dev-python/html5lib-1.0.1-r1[${PYTHON_USEDEP}]
     "
 
     distutils_enable_tests pytest
@@ -74,26 +78,32 @@ as ``distutils_enable_tests`` does that in the majority of cases.
 Please read the section on `undesirable test dependencies`_ too.
 
 .. code-block:: bash
-   :emphasize-lines: 18,21
+   :emphasize-lines: 22-24,27
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 2023-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=6
+    EAPI=8
 
-    PYTHON_COMPAT=( python3_{10..13} pypy3 )
-    inherit distutils-r1
+    DISTUTILS_USE_PEP517=hatchling
+    PYTHON_COMPAT=( python3_{10..13} )
 
-    DESCRIPTION="Universal encoding detector"
-    HOMEPAGE="https://github.com/chardet/chardet https://pypi.org/project/chardet/"
-    SRC_URI="https://github.com/chardet/chardet/archive/${PV}.tar.gz -> ${P}.tar.gz"
+    inherit distutils-r1 pypi
 
-    LICENSE="LGPL-2.1"
+    DESCRIPTION="Reusable constraint types to use with typing.Annotated"
+    HOMEPAGE="
+        https://github.com/annotated-types/annotated-types/
+        https://pypi.org/project/annotated-types/
+    "
+
+    LICENSE="MIT"
     SLOT="0"
-    KEYWORDS="~alpha amd64 arm arm64 hppa ia64 ~m68k ~mips ppc ppc64 s390 ~sh sparc x86 ~x64-cygwin ~amd64-linux ~x86-linux ~x64-macos ~x86-macos ~x64-solaris"
+    KEYWORDS="amd64 arm arm64 ~loong ~mips ppc ppc64 ~riscv ~s390 sparc x86"
 
-    DEPEND="
-        test? ( dev-python/hypothesis[${PYTHON_USEDEP}] )
+    BDEPEND="
+        test? (
+            dev-python/pytest-mock[${PYTHON_USEDEP}]
+        )
     "
 
     distutils_enable_tests pytest
@@ -108,8 +118,10 @@ can be rewritten as:
 
     distutils_enable_tests pytest
 
-    DEPEND+="
-        test? ( dev-python/hypothesis[${PYTHON_USEDEP}] )
+    BDEPEND+="
+        test? (
+            dev-python/pytest-mock[${PYTHON_USEDEP}]
+        )
     "
 
 
@@ -131,19 +143,23 @@ they can be easily injected via overriding ``src_test()`` and making
 it call ``distutils-r1_src_test``:
 
 .. code-block:: bash
-   :emphasize-lines: 30-34
+   :emphasize-lines: 34-38
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
+    DISTUTILS_USE_PEP517=setuptools
     PYTHON_COMPAT=( python3_{10..13} )
-    inherit distutils-r1
+
+    inherit distutils-r1 virtualx pypi
 
     DESCRIPTION="Extra features for standard library's cmd module"
-    HOMEPAGE="https://github.com/python-cmd2/cmd2"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    HOMEPAGE="
+        https://github.com/python-cmd2/cmd2/
+        https://pypi.org/project/cmd2/
+    "
 
     LICENSE="MIT"
     SLOT="0"
@@ -177,39 +193,40 @@ the former function simply defines a ``python_test()`` function as part
 of its logic.
 
 .. code-block:: bash
-   :emphasize-lines: 16,17,26-31,33-35
+   :emphasize-lines: 20,21,25-31,34-36
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( python3_{6..8} pypy3 )
-    inherit distutils-r1
+    DISTUTILS_USE_PEP517=setuptools
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
+
+    inherit distutils-r1 pypi
 
     DESCRIPTION="Bash tab completion for argparse"
-    HOMEPAGE="https://pypi.org/project/argcomplete/"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    HOMEPAGE="
+        https://github.com/kislyuk/argcomplete/
+        https://pypi.org/project/argcomplete/
+    "
 
     LICENSE="Apache-2.0"
     SLOT="0"
-    KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~x86 ~amd64-linux ~x86-linux ~x64-macos"
+    KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~loong ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux ~x64-macos"
     IUSE="test"
     RESTRICT="!test? ( test )"
 
-    RDEPEND="
-        $(python_gen_cond_dep '
-            <dev-python/importlib_metadata-2[${PYTHON_USEDEP}]
-        ' python3_{6..7} pypy3)"
     # pip is called as an external tool
     BDEPEND="
-        dev-python/setuptools[${PYTHON_USEDEP}]
         test? (
             app-shells/fish
             app-shells/tcsh
+            app-shells/zsh
             dev-python/pexpect[${PYTHON_USEDEP}]
-            dev-python/pip
-        )"
+            >=dev-python/pip-19
+        )
+    "
 
     python_test() {
         "${EPYTHON}" test/test.py -v || die
