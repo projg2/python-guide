@@ -58,25 +58,28 @@ for the build system.
 The simplest case of ebuild is:
 
 .. code-block:: bash
-   :emphasize-lines: 6-8
+   :emphasize-lines: 6-7,9
 
-    # Copyright 1999-2022 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
     EAPI=8
 
     DISTUTILS_USE_PEP517=setuptools
-    PYTHON_COMPAT=( python3_{8..10} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
+
     inherit distutils-r1
 
-    DESCRIPTION="Makes working with XML feel like you are working with JSON"
-    HOMEPAGE="https://github.com/martinblech/xmltodict/ https://pypi.org/project/xmltodict/"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    DESCRIPTION="A pure-Python memory-efficient packed representation for bit arrays"
+    HOMEPAGE="
+        https://engineering.purdue.edu/kak/dist/
+        https://pypi.org/project/BitVector/
+    "
+    SRC_URI="https://engineering.purdue.edu/kak/dist/${P}.tar.gz"
 
-    LICENSE="MIT"
+    LICENSE="PSF-2"
     SLOT="0"
-    KEYWORDS="~amd64 ~arm ~arm64 ~x86"
-
+    KEYWORDS="amd64 x86"
 
 .. _source archives:
 
@@ -191,39 +194,29 @@ the underlying eclass are not compatible — e.g. the dependencies need
 to be rewritten.
 
 .. code-block:: bash
-   :emphasize-lines: 9
+   :emphasize-lines: 6
 
-    # Copyright 1999-2022 Gentoo Authors
+    # Copyright 2023-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( python3_{8..10} )
-    PYTHON_REQ_USE="readline"
-    DISTUTILS_USE_PEP517=setuptools
     DISTUTILS_SINGLE_IMPL=1
+    DISTUTILS_USE_PEP517=setuptools
+    PYTHON_COMPAT=( python3_{9..12} )
 
     inherit distutils-r1
 
-    DESCRIPTION="Pythonic layer on top of the ROOT framework's PyROOT bindings"
-    HOMEPAGE="http://rootpy.org"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    DESCRIPTION="A utility to report core memory usage per program"
+    HOMEPAGE="https://github.com/pixelb/ps_mem"
+    SRC_URI="
+        https://github.com/pixelb/${PN}/archive/refs/tags/v${PV}.tar.gz
+            -> ${P}.tar.gz
+    "
 
-    LICENSE="BSD"
+    LICENSE="LGPL-2.1"
     SLOT="0"
-    KEYWORDS="~amd64 ~x86 ~amd64-linux ~x86-linux"
-
-    RDEPEND="
-        sci-physics/root:=[${PYTHON_SINGLE_USEDEP}]
-        dev-python/root_numpy[${PYTHON_SINGLE_USEDEP}]
-        $(python_gen_cond_dep '
-            dev-python/matplotlib[${PYTHON_USEDEP}]
-            dev-python/pytables[${PYTHON_USEDEP}]
-            dev-python/termcolor[${PYTHON_USEDEP}]
-        ')"
-
-    DEPEND="
-        sci-physics/root[${PYTHON_SINGLE_USEDEP}]"
+    KEYWORDS="amd64 ~arm64 ppc64 sparc x86"
 
 
 .. index:: DISTUTILS_USE_PEP517
@@ -782,22 +775,22 @@ containing Sphinx documentation:
 .. code-block:: bash
    :emphasize-lines: 24
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
     PYTHON_COMPAT=( python3_{10..13} )
-    DISTUTILS_USE_SETUPTOOLS=rdepend
+    DISTUTILS_USE_PEP517=setuptools
 
-    inherit distutils-r1
+    inherit distutils-r1 pypi
 
     DESCRIPTION="Colored stream handler for the logging module"
     HOMEPAGE="
         https://pypi.org/project/coloredlogs/
         https://github.com/xolox/python-coloredlogs
-        https://coloredlogs.readthedocs.io/en/latest/"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+        https://coloredlogs.readthedocs.io/en/latest/
+    "
 
     LICENSE="MIT"
     SLOT="0"
@@ -822,28 +815,40 @@ dependencies on the additional packages, pass them as extra arguments
 to ``distutils_enable_sphinx``.
 
 .. code-block:: bash
-   :emphasize-lines: 17-20
+   :emphasize-lines: 26-31
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
-    PYTHON_COMPAT=( pypy3 python3_{10..13} )
+    DISTUTILS_USE_PEP517=setuptools
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
+
     inherit distutils-r1
 
-    DESCRIPTION="Correctly inflect words and numbers"
-    HOMEPAGE="https://github.com/jazzband/inflect"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    DESCRIPTION="A Python package for creating beautiful command line interfaces"
+    HOMEPAGE="
+        https://palletsprojects.com/p/click/
+        https://github.com/pallets/click/
+        https://pypi.org/project/click/
+    "
+    SRC_URI="
+        https://github.com/pallets/${PN}/archive/${PV}.tar.gz
+            -> ${P}.gh.tar.gz
+    "
 
-    LICENSE="MIT"
+    LICENSE="BSD"
     SLOT="0"
-    KEYWORDS="~amd64 ~arm64 ~ia64 ~ppc ~ppc64 ~x86"
+    KEYWORDS="~alpha amd64 arm arm64 hppa ~loong ~m68k ~mips ppc ppc64 ~riscv ~s390 sparc x86 ~x64-macos"
 
     distutils_enable_sphinx docs \
-        '>=dev-python/jaraco-packaging-3.2' \
-        '>=dev-python/rst-linker-1.9' \
-        dev-python/alabaster
+        '>=dev-python/docutils-0.14' \
+        dev-python/pallets-sphinx-themes \
+        dev-python/sphinxcontrib-log-cabinet \
+        dev-python/sphinx-issues \
+        dev-python/sphinx-tabs
+    distutils_enable_tests pytest
 
 In this case, the function uses the any-r1 API to request one
 of the supported implementations to be enabled on *all* of those
@@ -861,19 +866,22 @@ the ``--no-autodoc`` option can be specified instead of additional
 packages.
 
 .. code-block:: bash
-   :emphasize-lines: 17
+   :emphasize-lines: 20
 
-    # Copyright 1999-2020 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
-    EAPI=7
+    EAPI=8
 
     PYTHON_COMPAT=( python3_{10..13} )
-    inherit distutils-r1
+
+    inherit distutils-r1 pypi
 
     DESCRIPTION="Python Serial Port extension"
-    HOMEPAGE="https://github.com/pyserial/pyserial https://pypi.org/project/pyserial/"
-    SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz"
+    HOMEPAGE="
+        https://github.com/pyserial/pyserial
+        https://pypi.org/project/pyserial/
+    "
 
     LICENSE="PSF-2"
     SLOT="0"
@@ -952,14 +960,14 @@ follows:
 .. code-block:: bash
    :emphasize-lines: 6-10,13-15,21-24,26-33,37,42,45-47,51,56
 
-    # Copyright 1999-2022 Gentoo Authors
+    # Copyright 1999-2024 Gentoo Authors
     # Distributed under the terms of the GNU General Public License v2
 
     EAPI=8
 
     DISTUTILS_USE_PEP517=flit
     DISTUTILS_OPTIONAL=1
-    PYTHON_COMPAT=( python3_{8..10} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
 
     inherit distutils-r1
 
@@ -1162,10 +1170,10 @@ and PyPI wheel (for generated .dist-info) follows:
 .. code-block:: bash
    :emphasize-lines: 3,19,22
 
-    EAPI=7
+    EAPI=8
 
     DISTUTILS_USE_PEP517=no
-    PYTHON_COMPAT=( python3_{8..11} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 )
 
     inherit distutils-r1
 
@@ -1202,10 +1210,10 @@ An example ebuild follows:
 .. code-block:: bash
    :emphasize-lines: 3,8,11-17
 
-    EAPI=7
+    EAPI=8
 
     DISTUTILS_USE_PEP517=no
-    PYTHON_COMPAT=( pypy3 python3_{8..11} )
+    PYTHON_COMPAT=( pypy3 python3_{10..13} )
 
     inherit distutils-r1
 
@@ -1237,7 +1245,7 @@ ebuild fragment demonstrates using it with Meson:
     EAPI=8
 
     DISTUTILS_USE_PEP517=no
-    PYTHON_COMPAT=( python3_{8..10} )
+    PYTHON_COMPAT=( python3_{10..13} )
 
     inherit meson distutils-r1
 
