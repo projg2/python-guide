@@ -53,10 +53,42 @@ Behavior after::
 .. _django PR#14349: https://github.com/django/django/pull/14349
 
 
+Experimental Python implementations
+===================================
+
+PyPy
+----
+PyPy is using JIT to run Python code which can result in significant
+performance improvements in some workflows, but it could also penalize
+other programs.
+
+In particular, calls to compiled extensions can penalize PyPy severely.
+For this reason, it is generally recommended to skip building "speedup"
+extensions for PyPy — in fact, upstream build systems frequently do that
+automatically.  A common approach is to combine checks for PyPy with
+``native-extensions`` USE flag:
+
+.. code-block:: bash
+
+    python_compile() {
+        if ! use native-extensions || [[ ${EPYTHON} == pypy3 ]]; then
+            local -x MULTIDICT_NO_EXTENSIONS=1
+        fi
+
+        distutils-r1_python_compile
+    }
+
+However, this does not imply that Python packages largely based
+on C extensions should not be marked for PyPy3 compatibility.
+For example, while packages such as Pandas can be less performant
+under PyPy, they could be used as a part of larger program that overall
+benefits from running under PyPy.
+
+
 .. index:: freethreading
 
 Freethreading CPython versions
-==============================
+------------------------------
 CPython is used the so-called "global interpreter lock" to prevent
 multiple threads from executing Python code simultaneously.  It was
 designed like this to simplify implementation, but at the cost of
