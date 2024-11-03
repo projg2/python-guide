@@ -64,18 +64,11 @@ an empty package to reserve the name.
 
 Support for Python 2
 ====================
-Since Python 2.7 reached EOL, Gentoo is currently phasing out support
-for Python 2.  Unless your package or its reverse dependencies really
-need it, you should omit it from ``PYTHON_COMPAT``.  If you're adding
-a new package and it does not support Python 3, do not add it.
-
-Many upstreams are removing Python 2 support from new releases of their
-software.  We remove it proactively whenever reverse dependencies permit
-in order to anticipate this and avoid having to deal with lots
-of reverse dependencies afterwards.
-
-Packages that do not support Python 3 and are unlikely to start
-supporting it soon are being slowly removed.
+Gentoo does not support building Python packages for Python 2 anymore.
+We are keeping PyPy2.7 (built stripped down, by default) to facilitate
+building PyPy3, and CPython 2.7 for PyPy2.7 bootstrap.  Technically,
+they could still be used to run Python 2 code standalone, but this
+is discouraged and poses security risk.
 
 
 Which implementations to test new packages for?
