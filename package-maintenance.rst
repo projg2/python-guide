@@ -2,6 +2,8 @@
 Python package maintenance
 ==========================
 
+.. highlight:: bash
+
 Package name policy
 ===================
 All packages in ``dev-python/*`` that are published on PyPI_, must be
@@ -175,6 +177,74 @@ positives, please use the 'Report' option to request a correction.
 Please also note that Repology is unable to handle the less common
 version numbers that do not have a clear mapping to Gentoo version
 syntax (e.g. ``.post`` releases).
+
+
+Stabilization recommendations
+=============================
+
+Policy
+------
+The Python landscape is changing dynamically, and therefore the test
+suites in packages — if not whole packages — often start failing early.
+For this reason, we recommend lowering the baseline stabilization delay
+to 14 days.
+
+In addition to that:
+
+1. When stabilizing across a major version bump (e.g. from 1.1.x
+   to 1.2.x), prefer waiting until the newest minor version becomes
+   the stable candidate (i.e. do not stabilize from 1.1.4 to 1.2.0
+   if 1.2.1 is available).  When stabilizing over a minor version bump
+   (e.g. from 1.1.4 to 1.1.5), feel free to proceed immediately.
+
+2. If reverse dependencies block upgrade of a package (e.g. through
+   ``<`` dependencies), consider stabilizing the newest versions
+   matching the restriction as well.  The same is worth considering
+   if upstream maintains multiple versions simultaneously with major
+   API changes, even if there are no explicit ``<`` dependencies
+   (e.g. ``dev-python/django``).
+
+3. If a new release is likely to cause major compatibility issues
+   (e.g. major releases of ``dev-python/sphinx``), consider delaying
+   the stabilization and/or explicitly testing its reverse dependencies,
+   in order to ensure that necessary ``<`` dependencies are added first.
+
+4. Avoid stabilizing prereleases (alpha, beta and RC versions), unless
+   it is necessary and upstream does not provide a final release
+   for a significant time.
+
+5. Ideally, aim for tests to pass on all relevant architectures.  Add
+   deselects if necessary, as this will ensure that future
+   stabilizations will be handled faster.
+
+
+Tooling
+-------
+The recommended way of filing stabilization requests is to use
+``stablereq-*`` tools from ``app-portage/mgorny-dev-scripts`` package,
+combined with ``pkgdev`` from ``dev-util/pkgdev``.
+
+To prepare the initial stabilization list and open it in an editor::
+
+    export PKGCHECK_ARGS="--stabletime 14"
+    git grep -l python@ '**/metadata.xml' |
+        cut -d/ -f1-2 |
+        grep -v dev-python/ |
+        xargs stablereq-make-list 'dev-python/*'
+
+Simultaneously, the following call can be used to run ``eshowkw``
+to display current keywords on all stabilization candidates::
+
+    export PKGCHECK_ARGS="--stabletime 14"
+    git grep -l python@ '**/metadata.xml' |
+        cut -d/ -f1-2 |
+        grep -v dev-python/ |
+        xargs stablereq-eshowkw 'dev-python/*'
+
+Edit the list as desirable, save into a file and then feed the file
+into pkgdev::
+
+    pkgdev bugs --auto-cc-arches=* $(<"${file_path}")
 
 
 Routine checks on installed Python packages
