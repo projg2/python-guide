@@ -7,17 +7,11 @@ Python package maintenance
 Package name policy
 ===================
 All packages in ``dev-python/*`` that are published on PyPI_, must be
-named to match their respective PyPI names.  The package names must
-match after `normalization specified in PEP 503`_, i.e. after replacing
-all runs of dot, hyphen and underscore characters (``[-_.]``) with
-a single hyphen (``-``) and matching case-insensitively.
-
-Notably, prefixes and suffixes such as ``python-`` must not be removed.
-To follow Gentoo package naming rules, all dots must be replaced
-by hyphens.  There is no preference of whether uppercase letters
-in package names should be preserved or turned lowercase, or whether
-underscores should be replaced by hyphens.  However, preserving
-consistency within groups of related packages is recommended.
+named to match their respective PyPI names, after performing
+`normalization specified in PEP 503`_, i.e. after replacing all runs
+of dot, hyphen and underscore characters (``[-_.]+``) with a single
+hyphen (``-``), and all uppercase letters with lowercase.  Notably,
+prefixes and suffixes such as ``python-`` must not be removed or added.
 
 Since it is not uncommon for multiple packages to be published with very
 similar names, it is crucial that all packages conform to this policy.
@@ -33,20 +27,22 @@ package names.
   ================= ===================================================
   PyPI package name Correct Gentoo package name
   ================= ===================================================
-  Flask             ``dev-python/Flask`` or ``/flask``
+  ConfigArgParse    ``dev-python/configargparse``
+  Flask             ``dev-python/flask``
   flask-babel       ``dev-python/flask-babel``
   github3.py        ``dev-python/github3-py``
   python-bugzilla   ``dev-python/python-bugzilla``
-  sphinx_pytest     ``dev-python/sphinx_pytest`` or ``/sphinx-pytest``
+  sphinx_pytest     ``dev-python/sphinx-pytest``
   sphinx-tabs       ``dev-python/sphinx-tabs``
+  txAMQP            ``dev-python/txamqp``
   zope.interface    ``dev-python/zope-interface``
+  zstd              ``dev-python/zstd``
   ================= ===================================================
 
-Note that the presented table provides multiple options for some
-packages.  This is particularly a problem when upstreams use
-inconsistent naming rules.  For example, ``Flask`` itself uses title
+Note that the presented table already presents some inconsistency
+in upstream package names.  For example, ``Flask`` itself uses title
 case name, while ``flask-babel`` has recently switched to lowercase.
-Using lowercase for all packages can avoid the inconsistency within
+Using normalized names for all packages avoids this inconsistency within
 Gentoo.  It may also be a good idea to point upstream to `PEP 423`_
 that specifies package naming recommendations.
 
