@@ -210,6 +210,31 @@ nor ``python3`` but e.g. ``python3.7``), and all other executables must
 also be modified to call specific version of Python directly.
 
 
+Implementation support policy
+=============================
+Gentoo gives the following guarantees with regards to Python support:
+
+1. We aim to provide support for new CPython targets as soon as that
+   becomes possible, and switch the default to the new slot as soon
+   as porting is considered reasonably complete.  This usually happens
+   around June, the next year after the first stable release on a given
+   branch.
+
+2. We will continue providing support for the previous CPython branch
+   for at least one year after the next branch becomes stable.  However,
+   in reality this will probably extend until PyPy switches to the newer
+   slot, as we aim to support parallel versions of PyPy and CPython.
+
+3. We will continue providing interpreters (possibly without package
+   target support) for as long as they are maintained upstream, i.e.
+   until their end-of-life date.  Afterwards, we may continue providing
+   EOL interpreters for as long as patching them continues being
+   feasible.
+
+4. Experimental targets (e.g. freethreading CPython, PyPy) are provided
+   on best-effort basis, with no support guarantees.
+
+
 Backports
 =========
 A common method of improving compatibility with older versions of Python
