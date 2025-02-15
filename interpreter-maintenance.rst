@@ -51,36 +51,34 @@ PyPy
 ----
 Due to high resource requirements and long build time, PyPy on Gentoo
 is provided both in source and precompiled form.  This creates a bit
-unusual ebuild structure:
+unusual ebuild structure (the package names given here are for
+the newest approach, used with PyPy3.11):
 
-- ``dev-python/pypy-exe`` provides the PyPy executable and generated
+- ``dev-lang/pypy3-exe`` provides the PyPy executable and generated
   files built from source,
-- ``dev-python/pypy-exe-bin`` does the same in precompiled binary form,
-- ``dev-python/pypy`` combines the above with the common files.  This
-  is the package that runs tests and satisfies the PyPy target.
+- ``dev-lang/pypy3-exe-bin`` does the same in precompiled binary form,
+- ``dev-lang/pypy`` combines the above with the common files.  This
+  is the package that satisfies the PyPy targets.
 
-Matching ``dev-python/pypy3*`` exist for PyPy3.
-
-When bumping PyPy, ``pypy-exe`` needs to be updated first.  Then it
-should be used to build a binary package and bump ``pypy-exe-bin``.
-Technically, ``pypy`` can be bumped after ``pypy-exe`` and used to test
-it but it should not be pushed before ``pypy-exe-bin`` is ready, as it
+When bumping PyPy, ``pypy3-exe`` needs to be updated first.  Then it
+should be used to build a binary package and bump ``pypy3-exe-bin``.
+Technically, ``pypy`` can be bumped after ``pypy3-exe`` and used to test
+it but it should not be pushed before ``pypy3-exe-bin`` is ready, as it
 would force all users to switch to source form implicitly.
 
 The binary packages are built using Docker_ nowadays, using
 binpkg-docker_ scripts.  To produce them, create a ``local.diff``
-containing changes related to PyPy bump and run ``amd64-pypy``
-(and/or ``amd64-pypy3``) and ``x86-pypy`` (and/or ``x86-pypy3``) make
-targets::
+containing changes related to PyPy bump and run ``${arch}-pypy${ver}``.
+For example::
 
     git clone https://github.com/mgorny/binpkg-docker
     cd binpkg-docker
     (cd ~/git/gentoo && git diff origin) > local.diff
-    make amd64-pypy amd64-pypy3 x86-pypy x86-pypy3
+    make {amd64,arm64,ppc64le,x86}{,-musl}-pypy{,3_10,3_11}
 
 The resulting binary packages will be placed in your home directory,
 in ``~/binpkg/${arch}/pypy``.  Upload them and use them to bump
-``pypy-exe-bin``.
+``pypy*-exe-bin``.
 
 
 Adding a new Python implementation

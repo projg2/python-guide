@@ -133,9 +133,7 @@ at the moment.
 PyPy does not hold specific ABI stability guarantees.  Gentoo packages
 use subslots to declare the current ABI version, and the eclasses use
 slot operators in dependencies to enforce rebuilds whenever the ABI
-version changes.  Fortunately, lately this has only occurred whenever
-Gentoo switched to the next PyPy branch (i.e. the one corresponding
-to the next Python language version).
+version changes.  Fortunately, this has not happened recently.
 
 
 Alternative Python implementations
@@ -151,9 +149,10 @@ It maintains quite good compatibility with CPython, except when programs
 rely on its implementation details or GC behavior.
 
 PyPy upstream provides PyPy variants compatible with Python 2.7
-and one version of Python 3.  Gentoo supports building packages against
-PyPy3.  PyPy2.7 is provided as ``dev-python/pypy``, while PyPy3 is
-provided as ``dev-python/pypy3``.
+and at least one version of Python 3.  Gentoo supports building packages
+against the current version of PyPy3 (and the previous version during
+transition periods).  The different versions are available as slots
+of ``dev-lang/pypy``.
 
 Jython_ is an implementation of Python written in Java.  Besides being
 a stand-alone Python interpreter, it supports bidirectional interaction

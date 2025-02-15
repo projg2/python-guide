@@ -174,8 +174,9 @@ The implementation arguments can be:
            ' 3.8)
        "
 
-   The advantage of this form is that the dependencies automatically
-   adjust as we switch PyPy3 to a newer stdlib version.
+   The advantage of this form is that it matches all the Python
+   implementations (currently CPython and PyPy) using a specific stdlib
+   version.
 
 An important feature of ``python_gen_cond_dep`` is that it handles
 removal of old implementations gracefully.  When one of the listed

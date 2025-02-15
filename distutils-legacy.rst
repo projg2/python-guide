@@ -174,8 +174,7 @@ the following logic:
 3. Otherwise, fall back to ``pkg_resources``.  It is provided
    by ``dev-python/setuptools``.
 
-Since Python 3.7 is no longer present in Gentoo (we are not considering
-PyPy3.7 correctness important for the time being), new ebuilds do not
+Since Python 3.7 is no longer present in Gentoo, new ebuilds do not
 need any additional dependencies for entry points and should use
 the default value (i.e. remove ``DISTUTILS_USE_SETUPTOOLS``).
 

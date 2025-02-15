@@ -79,8 +79,8 @@ dependencies to available targets.
     "
 
     python_test() {
-        # tests hang with pypy & pypy3
-        [[ ${EPYTHON} == pypy* ]] && continue
+        # tests hang with PyPy
+        [[ ${EPYTHON} == pypy3* ]] && continue
 
         epytest
     }

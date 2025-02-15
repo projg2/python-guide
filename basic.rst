@@ -21,11 +21,13 @@ the list of Python implementations supported by the package.
 The valid values are:
 
 - ``pythonX_Y`` for CPython X.Y
-- ``pypy3`` for PyPy3.
+- ``pythonX_Yt`` for CPython X.Y freethreading
+- ``pypy3`` for PyPy3.10
+- ``pypy3_Y`` for PyPy3.Y (used with PyPy 3.11 and newer)
 
 Typical use::
 
-    PYTHON_COMPAT=( python3_{10..13} pypy3 )
+    PYTHON_COMPAT=( python3_{10..13} pypy3 pypy3_11 )
     inherit python-single-r1
 
 

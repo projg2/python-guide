@@ -71,7 +71,7 @@ automatically.  A common approach is to combine checks for PyPy with
 .. code-block:: bash
 
     python_compile() {
-        if ! use native-extensions || [[ ${EPYTHON} == pypy3 ]]; then
+        if ! use native-extensions || [[ ${EPYTHON} == pypy3* ]]; then
             local -x MULTIDICT_NO_EXTENSIONS=1
         fi
 
