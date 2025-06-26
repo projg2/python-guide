@@ -222,11 +222,12 @@ or ``dev-python/pytest-rerunfailures`` to mark tests as flaky and have
 them rerun a few minutes automatically.  If upstream does not do that,
 it is also possible to force a similar behavior locally in the ebuild::
 
+    EPYTEST_PLUGINS=( pytest-rerunfailures )
+    distutils_enable_tests pytest
+
     python_test() {
-        # plugins make tests slower, and more fragile
-        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
         # some tests are very fragile to timing
-        epytest -p rerunfailures --reruns=10 --reruns-delay=2
+        epytest --reruns=10 --reruns-delay=2
     }
 
 Note that the snippet above also disables plugin autoloading to speed
@@ -298,7 +299,7 @@ and more.  Generally, packages should avoid using those plugins.
    even if they have the relevant plugins installed.
 
    If your package *really* needs to use the specific plugin, you need
-   to pass ``-p <plugin>`` explicitly to reenable it.
+   to explicitly enable it via ``PYTEST_PLUGINS``.
 
 In some cases, upstream packages only list them as dependencies
 but do not use them automatically.  In other cases, you will need
@@ -323,17 +324,11 @@ the package in question expects pytest-rerunfailures_.  This is
 because both plugins utilize the same ``@pytest.mark.flaky`` marker
 but support different set of arguments.
 
-To resolve the problem, explicitly disable the ``flaky`` plugin and make
-sure to depend on ``dev-python/pytest-rerunfailures``::
+To resolve the problem, explicitly use
+``dev-python/pytest-rerunfailures``::
 
-    BDEPEND="
-        test? (
-             dev-python/pytest-rerunfailures[${PYTHON_USEDEP}]
-        )"
-
-    python_test() {
-        epytest -p no:flaky
-    }
+    EPYTEST_PLUGINS=( pytest-rerunfailures )
+    distutils_enable_tests pytest
 
 
 ImportPathMismatchError
