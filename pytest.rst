@@ -85,57 +85,93 @@ The recommended method of stripping it is to use sed::
 
 .. index:: PYTEST_DISABLE_PLUGIN_AUTOLOAD
 .. index:: PYTEST_PLUGINS
+.. index:: EPYTEST_PLUGINS
+.. index:: EPYTEST_PLUGIN_AUTOLOAD
 
-Disabling plugin autoloading
-============================
-Normally, when running a test suite pytest loads all plugins installed
-on the system.  This is often convenient for upstreams, as it makes it
-possible to use the features provided by the plugins (such as ``async``
-test function support, or fixtures) without the necessity to explicitly
-enable them.  However, there are also cases when additional plugins
-could make the test suite fail or become very slow (especially if pytest
-is called recursively).
+Controlling pytest plugins used
+===============================
+pytest supports plugins that can extend the functionality of test
+suites.  Plugin packages range from defining reusable fixtures
+to severely altering pytest behavior.  By default, pytest automatically
+loads all plugins found in the environment.  This is a good default
+for isolated test environments where the available plugins are strictly
+controlled.  However, in Gentoo test suites are run against the system
+Python install which can feature a large number of different pytest
+plugins installed.  These unexpected plugins can lead to results ranging
+from the test run becoming unnecessarily slow to failing in confusing
+ways.
 
-The modern recommendation for these cases is to disable plugin
-autoloading via setting the ``PYTEST_DISABLE_PLUGIN_AUTOLOAD``
-environment variable, and then explicitly enable specific plugins
-if necessary.
+For this reason, it is recommended to explicitly control pytest plugins
+used.  To achieve this, ``EPYTEST_PLUGINS`` array can be specified.
+Specifying the variable always disables plugin autoloading.  When one
+or more package names (without category) are specified,
+``distutils_enable_tests`` adds dependencies on these packages
+and ``epytest`` adds appropriate ``-p`` arguments to load their entry
+points.  Conversely, if the variable is set to an empty array,
+no plugins are loaded.
+
+::
+
+    # disable plugin autoloading
+    EPYTEST_PLUGINS=()
+    distutils_enable_tests pytest
+
+    # add dependencies and load plugins
+    EPYTEST_PLUGINS=( pytest-asyncio pytest-mock )
+    distutils_enable_tests pytest
 
 .. Note::
 
-   Previously we used to recommend explicitly disabling problematic
-   plugins via ``-p no:<plugin>``.  However, it is rarely obvious
-   which plugin is causing the problems, and it is entirely possible
-   that another plugin will cause issues in the future, so an opt-in
-   approach is usually faster and more reliable.
+   Historically, we used to specify ``PYTEST_DISABLE_PLUGIN_AUTOLOAD``
+   explicitly in ebuilds.  This is done automatically
+   by ``EPYTEST_PLUGINS``, and therefore explicit exports can be removed
+   after transitioning to it.
 
-The easier approach to enabling plugins is to use the ``-p`` option,
-listing specific plugins.  The option can be passed multiple times,
-and accepts a plugin name as specified in the package's
-``entry_points.txt`` file::
+Some plugins require additional arguments to actually become effective.
+If these arguments are not specified in the upstream configuration file,
+you may need to override ``python_test()`` and specify them explicitly,
+e.g.::
+
+    EPYTEST_PLUGINS=( pytest-{asyncio,forked,mock} )
+    distutils_enable_tests pytest
 
     python_test() {
-        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
-        epytest -p asyncio -p tornado
+        # --forked to workaround protobuf segfaults
+        # https://github.com/protocolbuffers/protobuf/issues/22067
+        epytest --forked
     }
 
-However, this approach does not work when the test suite calls pytest
-recursively (e.g. you are testing a pytest plugin).  In this case,
-the ``PYTEST_PLUGINS`` environment variable can be used instead.  It
-takes a comma-separated list of plugin *module names*::
+Plugins that are enabled via other ``EPYTEST_*`` variables do not need
+to be repeated in ``EPYTEST_PLUGINS``.
+
+While ``EPYTEST_PLUGINS`` aims to support the most common use cases,
+it is not sufficient for all test suites.  In particular, test suites
+for pytest plugins often rely on the plugins being loaded implicitly
+in a subprocess.  In these cases, ``PYTEST_PLUGINS`` environment
+variable may help.  Note that it takes a comma-separated list of Python
+module paths rather than plugin names::
+
+    EPYTEST_PLUGINS=( pytest-rerunfailures )
+    EPYTEST_XDIST=1
+    distutils_enable_tests pytest
 
     python_test() {
-        local -x PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
-        local -x PYTEST_PLUGINS=xdist.plugin,xdist.looponfail,pytest_forked
+        # xdist is used both to run the test suite, and in subtests
+        local -x PYTEST_PLUGINS=xdist.plugin,_hypothesis_pytestplugin
+        local -x HYPOTHESIS_NO_PLUGINS=1
 
         epytest
     }
 
-Please note that failing to enable all the required plugins may cause
-some of the tests to be skipped implicitly (especially if the test suite
-is using ``async`` functions and no async plugin is loaded).  Please
-look at skip messages and warnings to make sure everything works
-as intended.
+In some cases, it is very hard to get the test suite working correctly
+with plugin autoloading.  In these cases, ``EPYTEST_PLUGIN_AUTOLOAD``
+variable can be used to explicitly specify that autoloading is
+desirable.  This variable can be combined with ``EPYTEST_PLUGINS``,
+in which case the eclass will still automatically add the dependencies::
+
+    EPYTEST_PLUGINS=( pytest-asyncio )
+    EPYTEST_PLUGIN_AUTOLOAD=1
+    distutils_enable_tests pytest
 
 
 .. index:: EPYTEST_XDIST
