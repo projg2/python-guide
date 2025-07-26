@@ -15,6 +15,9 @@ disable whole test groups, e.g.::
     }
 
 
+.. index:: EPYTEST_DESELECT
+.. index:: EPYTEST_IGNORE
+
 Skipping tests based on paths/names
 ===================================
 There are two primary methods of skipping tests based on path (and name)
@@ -172,6 +175,7 @@ in which case the eclass will still automatically add the dependencies::
 
 
 .. index:: EPYTEST_XDIST
+.. index:: pytest-xdist
 
 Using pytest-xdist to run tests in parallel
 ===========================================
@@ -206,6 +210,9 @@ it is possible to use it and deselect the problematic tests.  It is up
 to the maintainer's discretion to decide whether this is justified.
 
 
+.. index:: flaky
+.. index:: pytest-rerunfailures
+
 Dealing with flaky tests
 ========================
 A flaky test is a test that sometimes passes, and sometimes fails
@@ -234,6 +241,7 @@ otherwise randomly fail with it.
 
 
 .. index:: EPYTEST_TIMEOUT
+.. index:: pytest-timeout
 
 Using pytest-timeout to prevent deadlocks (hangs)
 =================================================
