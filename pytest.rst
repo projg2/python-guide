@@ -395,7 +395,7 @@ plugins.
 =================================== ====================================
 Fixture name                        Package
 =================================== ====================================
-event_loop                          dev-python/pytest-asyncio
+event_loop                          dev-python/pytest-asyncio (<2)
 freezer                             dev-python/pytest-freezegun
 httpbin                             dev-python/pytest-httpbin
 loop                                dev-python/pytest-aiohttp
