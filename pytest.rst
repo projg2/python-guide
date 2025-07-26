@@ -87,6 +87,7 @@ The recommended method of stripping it is to use sed::
 .. index:: PYTEST_PLUGINS
 .. index:: EPYTEST_PLUGINS
 .. index:: EPYTEST_PLUGIN_AUTOLOAD
+.. index:: EPYTEST_PLUGIN_LOAD_VIA_ENV
 
 Controlling pytest plugins used
 ===============================
@@ -147,21 +148,17 @@ to be repeated in ``EPYTEST_PLUGINS``.
 While ``EPYTEST_PLUGINS`` aims to support the most common use cases,
 it is not sufficient for all test suites.  In particular, test suites
 for pytest plugins often rely on the plugins being loaded implicitly
-in a subprocess.  In these cases, ``PYTEST_PLUGINS`` environment
-variable may help.  Note that it takes a comma-separated list of Python
-module paths rather than plugin names::
+in a subprocess.  In these cases, ``EPYTEST_PLUGIN_LOAD_VIA_ENV``
+can be used.  It tells the eclass to set the ``PYTEST_PLUGINS``
+environment variable which is respected by subprocesses.  Note that
+it is permitted to use ``${PN}`` in ``EPYTEST_PLUGINS`` — the eclass
+will not add a self-dependency in that case::
 
-    EPYTEST_PLUGINS=( pytest-rerunfailures )
+    # xdist is also used in subtests
+    EPYTEST_PLUGINS=( "${PN}" pytest-{rerunfailures,xdist} )
+    EPYTEST_PLUGIN_LOAD_VIA_ENV=1
     EPYTEST_XDIST=1
     distutils_enable_tests pytest
-
-    python_test() {
-        # xdist is used both to run the test suite, and in subtests
-        local -x PYTEST_PLUGINS=xdist.plugin,_hypothesis_pytestplugin
-        local -x HYPOTHESIS_NO_PLUGINS=1
-
-        epytest
-    }
 
 In some cases, it is very hard to get the test suite working correctly
 with plugin autoloading.  In these cases, ``EPYTEST_PLUGIN_AUTOLOAD``
