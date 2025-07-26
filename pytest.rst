@@ -210,6 +210,7 @@ it is possible to use it and deselect the problematic tests.  It is up
 to the maintainer's discretion to decide whether this is justified.
 
 
+.. index:: EPYTEST_RERUNS
 .. index:: flaky
 .. index:: pytest-rerunfailures
 
@@ -224,20 +225,15 @@ it is not always easy.
 Sometimes upstreams use such packages as ``dev-python/flaky``
 or ``dev-python/pytest-rerunfailures`` to mark tests as flaky and have
 them rerun a few minutes automatically.  If upstream does not do that,
-it is also possible to force a similar behavior locally in the ebuild::
+it is also possible to force a similar behavior locally in the ebuild
+using the ``EPYTEST_RERUNS`` variable::
 
-    EPYTEST_PLUGINS=( pytest-rerunfailures )
+    EPYTEST_RERUNS=5
     distutils_enable_tests pytest
 
-    python_test() {
-        # some tests are very fragile to timing
-        epytest --reruns=10 --reruns-delay=2
-    }
-
-Note that the snippet above also disables plugin autoloading to speed
-tests up and therefore reduce their flakiness.  Sometimes forcing
-explicit rerun also makes it possible to use xdist on packages that
-otherwise randomly fail with it.
+Note that disabling plugin autoloading also tends to reduce test
+flakiness.  Sometimes forcing explicit rerun also makes it possible
+to use xdist on packages that otherwise randomly fail with it.
 
 
 .. index:: EPYTEST_TIMEOUT
