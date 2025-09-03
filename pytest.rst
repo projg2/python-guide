@@ -199,6 +199,12 @@ Please note that some upstream use pytest-xdist even if there is no real
 gain from doing so.  If the package's tests take a short time to finish,
 please avoid the dependency and strip it if necessary.
 
+.. Note::
+
+   If you tried adding pytest-xdist to a package and it didn't work,
+   or if you removed it later because it caused issues you couldn't
+   solve, please leave a comment for others.
+
 Not all test suites support pytest-xdist.  Particularly, it requires
 that the tests are written not to collide one with another.  Sometimes,
 xdist may also cause instability of individual tests.  In some cases,
